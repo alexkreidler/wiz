@@ -24,3 +24,10 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+
+      # Docker build + push
+      - setup_remote_docker:
+          version: 17.06.0-ce
+      - run: docker build . -t wizproject:wiz
+      - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run: docker push wizproject:wiz
