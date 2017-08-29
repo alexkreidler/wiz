@@ -24,15 +24,17 @@ jobs:
       - GOARCH: "amd64"
     steps:
       - checkout
-      - run: uname -a
-      - run: cat /etc/os-release
-      - run: cat /proc/cpuinfo
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+      - run: pwd && ls
 
       - run: go build -o build/wiz ./...
+
+      - run: uname -a
+      - run: cat /etc/os-release
+      - run: cat /proc/cpuinfo
 
       # Docker build + push
       - setup_remote_docker:
