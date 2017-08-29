@@ -27,6 +27,7 @@ jobs:
       - checkout
 
       - run: cd build && ./matrix.sh
+      - run: ls
 
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory
@@ -55,6 +56,6 @@ workflows:
   build_and_test:
     jobs:
       - build
+      # - build_docker:
+      #     requires: build
       - test
-      - build_docker:
-          requires: build
