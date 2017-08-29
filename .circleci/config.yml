@@ -39,4 +39,4 @@ jobs:
       # Docker build + push
       - setup_remote_docker:
           version: 17.06.0-ce
-      - run: cd build && matrix.sh
+      - run: cd build && ./matrix.sh
