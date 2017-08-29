@@ -18,6 +18,7 @@ jobs:
       - run: go get -v -t -d ./...
       - run: go test -v ./...
   build:
+    # Builds wiz for each architecture
     docker:
       # specify the version
       - image: circleci/golang:1.8
@@ -35,6 +36,7 @@ jobs:
           paths:
             - out
   build_docker:
+    # Builds and pushes docker images for each arch built.
     # parallelism: 2
     docker:
       # specify the version
@@ -55,6 +57,7 @@ workflows:
   build_and_test:
     jobs:
       - build
+      # TODO: build docker
       # - build_docker:
       #     requires: build
       - test
