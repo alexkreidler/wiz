@@ -4,6 +4,9 @@
 version: 2
 jobs:
   test:
+    environment: # TODO: add matrix builds for mac, windows, etc
+      - GOOS: "linux"
+      - GOARCH: "amd64"
     docker:
       # specify the version
       - image: circleci/golang:1.8
@@ -15,28 +18,44 @@ jobs:
       - run: go get -v -t -d ./...
       - run: go test -v ./...
   build:
-    # parallelism: 2
     docker:
       # specify the version
       - image: circleci/golang:1.8
 
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/tim15/wiz
-    environment: # TODO: add matrix builds for mac, windows, etc
-      - GOOS: "linux"
-      - GOARCH: "amd64"
     steps:
       - checkout
 
+      - run: cd build && ./matrix.sh
+
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory
+          root: build
+          # Must be relative path from root
+          paths:
+            - out
+  build_docker:
+    # parallelism: 2
+    docker:
+      # specify the version
+      - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/tim15/wiz
+    steps:
+      - checkout
+      - attach_workspace:
+        # Must be absolute path or relative path from working_directory
+        at: build/out
       # Docker build + push
       - setup_remote_docker:
           version: 17.06.0-ce
+      - run: export BUILD_TYPE="docker"
       - run: cd build && ./matrix.sh
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - build_docker:
+          requires: build
+      - test
