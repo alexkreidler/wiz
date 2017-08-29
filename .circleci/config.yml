@@ -55,6 +55,6 @@ workflows:
   build_and_test:
     jobs:
       - build
-      # - build_docker:
-      #     requires: build
       - test
+      - build_docker:
+          requires: build
