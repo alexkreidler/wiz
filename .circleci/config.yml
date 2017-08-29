@@ -41,6 +41,6 @@ jobs:
       # Docker build + push
       - setup_remote_docker:
           version: 17.06.0-ce
-      - run: docker build ./build -f ./build/Dockerfile.ci -t wizproject:wiz
+      - run: docker build ./build -f ./build/Dockerfile.ci -t wizproject/wiz
       - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
-      - run: docker push wizproject:wiz
+      - run: docker push wizproject/wiz
