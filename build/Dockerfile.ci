@@ -1,5 +1,5 @@
 FROM scratch
 
-COPY build/wiz /
+COPY wiz /
 
 CMD ["/wiz"]
