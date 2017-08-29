@@ -3,6 +3,17 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
+  test:
+    docker:
+      # specify the version
+      - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/tim15/wiz
+    steps:
+      - checkout
+
+      # specify any bash command here prefixed with `run: `
+      - run: go get -v -t -d ./...
+      - run: go test -v ./...
   build:
     # parallelism: 2
     docker:
@@ -25,22 +36,7 @@ jobs:
     steps:
       - checkout
 
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
-      - run: pwd && ls
-
-      - run: go build -o build/wiz ./...
-      - run: pwd && ls
-      - run: ls build
-
-      - run: uname -a
-      - run: cat /etc/os-release
-      - run: cat /proc/cpuinfo
-
       # Docker build + push
       - setup_remote_docker:
           version: 17.06.0-ce
-      - run: docker build ./build -f ./build/Dockerfile.ci -t wizproject/wiz
-      - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
-      - run: docker push wizproject/wiz
+      - run: ./build/matrix.sh
