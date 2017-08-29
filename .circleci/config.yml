@@ -31,6 +31,8 @@ jobs:
       - run: pwd && ls
 
       - run: go build -o build/wiz ./...
+      - run: pwd && ls
+      - run: ls build
 
       - run: uname -a
       - run: cat /etc/os-release
