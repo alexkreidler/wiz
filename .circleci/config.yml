@@ -13,6 +13,7 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
 
+      - parallelism: 2
     #### TEMPLATE_NOTE: go expects specific checkout path representing url
     #### expecting it in the form of
     ####   /go/src/github.com/circleci/go-tool
@@ -20,6 +21,9 @@ jobs:
     working_directory: /go/src/github.com/tim15/wiz
     steps:
       - checkout
+      - run: uname -a
+      - run: cat /etc/os-release
+      - run: cat /proc/cpuinfo
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
@@ -28,6 +32,6 @@ jobs:
       # Docker build + push
       - setup_remote_docker:
           version: 17.06.0-ce
-      - run: docker build . -t wizproject:wiz
+      - run: docker build ./build -f ./build/Dockerfile.ci -t wizproject:wiz
       - run: docker login -u $DOCKER_USER -p $DOCKER_PASS
       - run: docker push wizproject:wiz

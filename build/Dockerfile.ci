@@ -1,0 +1,5 @@
+FROM scratch
+
+COPY build/wiz /
+
+CMD ["/wiz"]

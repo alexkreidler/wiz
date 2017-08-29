@@ -1,9 +1,9 @@
 FROM golang:1.9-alpine
 
-WORKDIR /go/src/wiz
+WORKDIR ${CIRCLE_WORKING_DIRECTORY:-"/go/src/github.com/tim15/wiz/"}
 COPY . .
 
-RUN go-wrapper download   # "go get -d -v ./..."
-RUN go-wrapper install    # "go install -v ./..."
+RUN go get -d -v ./...
+RUN go install -v ./...
 
-CMD ["bash"]
+CMD sh
