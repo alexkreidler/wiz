@@ -1,6 +1,9 @@
+echo "Starting Matrix Generator"
 if [[ "$BUILD_TYPE" == "docker" ]]; then
+  echo "Build type is docker"
   script="./docker_build.sh"
 else
+  echo "Build type is regular"
   script="./build.sh"
 fi
 
@@ -23,3 +26,6 @@ for arch in ${arches[*]}; do
     $script "linux" $arch
   fi
 done
+
+echo "All finished. Output:"
+echo $(ls ./out)

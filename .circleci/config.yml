@@ -26,8 +26,7 @@ jobs:
     steps:
       - checkout
 
-      - run: cd build && ./matrix.sh
-      - run: ls
+      - run: cd build && ./matrix.sh && ls
 
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory
