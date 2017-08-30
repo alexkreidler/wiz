@@ -1,0 +1,21 @@
+syntax = "proto3";
+package pkg;
+
+message Package {
+  string name = 1;
+  string version = 2;
+
+  enum PackageType {
+    PROGRAM = 0;
+    RUNTIME = 1;
+    MODEL = 2;
+    FRAMEWORK = 3;
+  }
+  PackageType type = 3;
+
+  message Dependency {
+    string name = 1;
+    string version = 2;
+  }
+  repeated Dependency dependencies = 4;
+}
