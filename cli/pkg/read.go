@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 )
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
+// func check(e error) {
+// 	if e != nil {
+// 		panic(e)
+// 	}
+// }
 
 //CONST is a global var
 var CONST = "Hello"

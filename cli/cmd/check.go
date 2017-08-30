@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	pb "github.com/tim15/wiz/api/proto"
 	"github.com/tim15/wiz/cli/pkg"
 )
 
@@ -35,8 +36,15 @@ var checkCmd = &cobra.Command{
 		// pkg.ReadSpecFile(args[0])
 		fmt.Println(args)
 		if len(args) > 0 {
-			fmt.Println("args")
-			pkg.ReadSpecFile(args[0])
+			// fmt.Println("args")
+			// pkg.ReadSpecFile(args[0])
+			pb := &pb.Package{
+				Name:    "Test",
+				Version: "2.0",
+			}
+			pkg.ProtoWrite(args[0], pb)
+			dat := pkg.ProtoRead(args[0])
+			fmt.Println("data:", dat)
 		}
 	},
 }
