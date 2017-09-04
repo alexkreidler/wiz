@@ -1,0 +1,15 @@
+language: go
+
+env:
+  - GOOS=linux GOARCH=amd64
+  - GOOS=linux GOARCH=386
+  - GOOS=linux GOARCH=arm
+  - GOOS=linux GOARCH=arm64
+  - GOOS=windows GOARCH=amd64
+  - GOOS=windows GOARCH=386
+
+go:
+  - 1.6
+  - 1.7.x
+  - 1.8.x
+  - 1.9.x
