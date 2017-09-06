@@ -1,3 +1,11 @@
+matrix:
+  GOOS:
+    - linux
+    - windows
+  GOARCH:
+    - amd64
+    - arm
+
 workspace:
   base: /go
   path: src/github.com/tim15/wiz
