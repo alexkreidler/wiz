@@ -1,12 +1,13 @@
-#!/usr/bin/env bash
-: ${PROJECT_PATH="/go/src/github.com/tim15/wiz"}
+#!/usr/bin/env sh
+: ${PROJECT_PATH="$GOPATH/src/github.com/tim15/wiz"}
+: ${CONTAINER_PROJECT_PATH="/go/src/github.com/tim15/wiz"}
 : ${CONTAINER_NAME="wizdev"}
 
 function start_container() {
   # Start dev/builder container
-  if [ ! "$(docker ps -a | grep "wizdev")" ]; then
+  if [ ! "$(docker ps -a | grep "$CONTAINER_NAME")" ]; then
     cd "$PROJECT_PATH"
-    docker create -it -v $(pwd):"$PROJECT_PATH" --name $CONTAINER_NAME tim15/goproto
+    docker create -it -v $(pwd):"$CONTAINER_PROJECT_PATH" --name $CONTAINER_NAME tim15/goproto
   fi;
 
   docker start $CONTAINER_NAME > /dev/null
@@ -17,7 +18,7 @@ function dev() {
 }
 
 function genproto() {
-  docker exec $CONTAINER_NAME "$PROJECT_PATH/scripts/genproto.sh $PROJECT_PATH"
+  docker exec "$CONTAINER_NAME" $CONTAINER_PROJECT_PATH/scripts/genproto.sh $CONTAINER_PROJECT_PATH
 }
 
 function usage() {
@@ -36,7 +37,7 @@ fi
 
 for i in $@; do
   case "$i" in
-    dev) start_container; dev;;
+    dev) echo "Wiz Project dev container"; start_container; dev;;
     genproto) start_container; genproto;;
     *) usage
   esac
