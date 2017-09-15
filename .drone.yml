@@ -1,10 +1,12 @@
 matrix:
   GOOS:
     - linux
-    - windows
   GOARCH:
     - amd64
     - arm
+  include:
+    - GOOS: windows
+      GOARCH: amd64
 
 workspace:
   base: /go

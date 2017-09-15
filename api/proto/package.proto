@@ -2,7 +2,7 @@ syntax = "proto3";
 package pkg;
 
 message Package {
-  string name = 1;
+  string name = 1; // Must be unique
   string version = 2;
 
   enum PackageType {
