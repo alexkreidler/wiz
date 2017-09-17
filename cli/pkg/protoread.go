@@ -2,7 +2,7 @@ package pkg
 
 import (
 	proto "github.com/golang/protobuf/proto"
-	pb "github.com/tim15/wiz/api/proto"
+	pb "github.com/tim15/wiz/api/package"
 	"io/ioutil"
 	"os"
 )

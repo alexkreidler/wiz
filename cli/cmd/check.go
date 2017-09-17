@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	pb "github.com/tim15/wiz/api/proto"
+	pkgapi "github.com/tim15/wiz/api/package"
 	"github.com/tim15/wiz/cli/pkg"
 )
 
@@ -38,7 +38,7 @@ var checkCmd = &cobra.Command{
 		if len(args) > 0 {
 			// fmt.Println("args")
 			// pkg.ReadSpecFile(args[0])
-			pb := &pb.Package{
+			pb := &pkgapi.Package{
 				Name:    "Test",
 				Version: "2.0",
 			}

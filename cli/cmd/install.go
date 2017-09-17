@@ -27,7 +27,7 @@ var installCmd = &cobra.Command{
 	Long: `Examples:
   wiz install deepmind/dnc
   wiz install tensorflow googlenet sklearn
-	wiz install
+  wiz install johnny
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("install called")
