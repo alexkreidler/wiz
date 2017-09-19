@@ -16,7 +16,7 @@ for rawSpec in $PROJECT_PATH/api/proto/*; do
   spec=${spec%".proto"}
   echo "Generating protobuf code for: $spec"
   mkdir -p "$PROJECT_PATH/api/$spec"
-  protoc -I "$PROJECT_PATH/api/proto" --go_out="$PROJECT_PATH/api/$spec" $rawSpec
+  protoc -I "$PROJECT_PATH/api/proto" --go_out=plugins=grpc:"$PROJECT_PATH/api/$spec" $rawSpec
 done
 
 echo "All done!"

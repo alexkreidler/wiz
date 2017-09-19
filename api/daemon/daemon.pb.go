@@ -17,6 +17,11 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 
+import (
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -55,6 +60,78 @@ func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 func init() {
 	proto.RegisterType((*Version)(nil), "daemon.Version")
 	proto.RegisterType((*Empty)(nil), "daemon.Empty")
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// Client API for Daemon service
+
+type DaemonClient interface {
+	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
+}
+
+type daemonClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewDaemonClient(cc *grpc.ClientConn) DaemonClient {
+	return &daemonClient{cc}
+}
+
+func (c *daemonClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error) {
+	out := new(Version)
+	err := grpc.Invoke(ctx, "/daemon.Daemon/GetVersion", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for Daemon service
+
+type DaemonServer interface {
+	GetVersion(context.Context, *Empty) (*Version, error)
+}
+
+func RegisterDaemonServer(s *grpc.Server, srv DaemonServer) {
+	s.RegisterService(&_Daemon_serviceDesc, srv)
+}
+
+func _Daemon_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).GetVersion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daemon.Daemon/GetVersion",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).GetVersion(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Daemon_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "daemon.Daemon",
+	HandlerType: (*DaemonServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetVersion",
+			Handler:    _Daemon_GetVersion_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "daemon.proto",
 }
 
 func init() { proto.RegisterFile("daemon.proto", fileDescriptor0) }
