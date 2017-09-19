@@ -19,6 +19,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tim15/wiz/api/daemon"
+	"github.com/tim15/wiz/cli"
 	"github.com/tim15/wiz/cli/client"
 	"golang.org/x/net/context"
 )
@@ -33,18 +34,11 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("good")
-		fmt.Println(c.GetVersion(context.Background(), &daemon.Empty{}))
-		// Contact the server and print out its response.
-		// name := defaultName
-		// if len(os.Args) > 1 {
-		//   name = os.Args[1]
-		// }
-		// r, err := c.SayHello(context.Background(), &pb.HelloRequest{Name: name})
-		// if err != nil {
-		//   log.Fatalf("could not greet: %v", err)
-		// }
-		// log.Printf("Greeting: %s", r.Message)
+		version, err := c.GetVersion(context.Background(), &daemon.Empty{})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Daemon (wizd) Version: %s\nCLI (wiz) Version: %s\n", version.Version, cli.Version)
 	},
 }
 
