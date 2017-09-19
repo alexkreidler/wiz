@@ -2,8 +2,8 @@ syntax = "proto3";
 package pkg;
 
 message Package {
-  required string name = 1; // Must be unique
-  required string version = 2;
+  string name = 1; // Must be unique
+  string version = 2;
 
   enum PackageType {
     PROGRAM = 0;
@@ -11,11 +11,20 @@ message Package {
     MODEL = 2;
     FRAMEWORK = 3;
   }
-  required PackageType type = 3;
+  PackageType type = 3;
 
   message Dependency {
     string name = 1;
     string version = 2;
   }
   repeated Dependency dependencies = 4;
+
+  message MetaInfo {
+    string author = 1;
+    string repository = 2;
+    string url = 3;
+    string description = 4;
+    repeated string keywords = 5;
+  }
+  MetaInfo info = 5;
 }

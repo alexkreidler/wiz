@@ -1,0 +1,14 @@
+syntax = "proto3";
+package daemon;
+
+service Daemon {
+  rpc GetVersion (Empty) returns (Version) {}
+}
+
+message Version {
+  string version = 1;
+}
+
+message Empty {
+  
+}
