@@ -9,6 +9,8 @@ It is generated from these files:
 
 It has these top-level messages:
 	Version
+	PackageList
+	Status
 	Empty
 */
 package daemon
@@ -16,6 +18,7 @@ package daemon
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import pkg "."
 
 import (
 	context "golang.org/x/net/context"
@@ -49,16 +52,50 @@ func (m *Version) GetVersion() string {
 	return ""
 }
 
+type PackageList struct {
+	Packages []*pkg.Package `protobuf:"bytes,1,rep,name=packages" json:"packages,omitempty"`
+}
+
+func (m *PackageList) Reset()                    { *m = PackageList{} }
+func (m *PackageList) String() string            { return proto.CompactTextString(m) }
+func (*PackageList) ProtoMessage()               {}
+func (*PackageList) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *PackageList) GetPackages() []*pkg.Package {
+	if m != nil {
+		return m.Packages
+	}
+	return nil
+}
+
+type Status struct {
+	Status bool `protobuf:"varint,1,opt,name=status" json:"status,omitempty"`
+}
+
+func (m *Status) Reset()                    { *m = Status{} }
+func (m *Status) String() string            { return proto.CompactTextString(m) }
+func (*Status) ProtoMessage()               {}
+func (*Status) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *Status) GetStatus() bool {
+	if m != nil {
+		return m.Status
+	}
+	return false
+}
+
 type Empty struct {
 }
 
 func (m *Empty) Reset()                    { *m = Empty{} }
 func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
-func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func init() {
 	proto.RegisterType((*Version)(nil), "daemon.Version")
+	proto.RegisterType((*PackageList)(nil), "daemon.PackageList")
+	proto.RegisterType((*Status)(nil), "daemon.Status")
 	proto.RegisterType((*Empty)(nil), "daemon.Empty")
 }
 
@@ -74,6 +111,8 @@ const _ = grpc.SupportPackageIsVersion4
 
 type DaemonClient interface {
 	GetVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Version, error)
+	InstallPackages(ctx context.Context, in *PackageList, opts ...grpc.CallOption) (*Status, error)
+	GetPackages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PackageList, error)
 }
 
 type daemonClient struct {
@@ -93,10 +132,30 @@ func (c *daemonClient) GetVersion(ctx context.Context, in *Empty, opts ...grpc.C
 	return out, nil
 }
 
+func (c *daemonClient) InstallPackages(ctx context.Context, in *PackageList, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := grpc.Invoke(ctx, "/daemon.Daemon/InstallPackages", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *daemonClient) GetPackages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PackageList, error) {
+	out := new(PackageList)
+	err := grpc.Invoke(ctx, "/daemon.Daemon/GetPackages", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Daemon service
 
 type DaemonServer interface {
 	GetVersion(context.Context, *Empty) (*Version, error)
+	InstallPackages(context.Context, *PackageList) (*Status, error)
+	GetPackages(context.Context, *Empty) (*PackageList, error)
 }
 
 func RegisterDaemonServer(s *grpc.Server, srv DaemonServer) {
@@ -121,6 +180,42 @@ func _Daemon_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Daemon_InstallPackages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PackageList)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).InstallPackages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daemon.Daemon/InstallPackages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).InstallPackages(ctx, req.(*PackageList))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Daemon_GetPackages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DaemonServer).GetPackages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daemon.Daemon/GetPackages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DaemonServer).GetPackages(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Daemon_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "daemon.Daemon",
 	HandlerType: (*DaemonServer)(nil),
@@ -128,6 +223,14 @@ var _Daemon_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVersion",
 			Handler:    _Daemon_GetVersion_Handler,
+		},
+		{
+			MethodName: "InstallPackages",
+			Handler:    _Daemon_InstallPackages_Handler,
+		},
+		{
+			MethodName: "GetPackages",
+			Handler:    _Daemon_GetPackages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -137,12 +240,20 @@ var _Daemon_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("daemon.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 112 bytes of a gzipped FileDescriptorProto
+	// 228 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x49, 0x49, 0x4c, 0xcd,
-	0xcd, 0xcf, 0xd3, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x83, 0xf0, 0x94, 0x94, 0xb9, 0xd8,
-	0xc3, 0x52, 0x8b, 0x8a, 0x33, 0xf3, 0xf3, 0x84, 0x24, 0xb8, 0xd8, 0xcb, 0x20, 0x4c, 0x09, 0x46,
-	0x05, 0x46, 0x0d, 0xce, 0x20, 0x18, 0x57, 0x89, 0x9d, 0x8b, 0xd5, 0x35, 0xb7, 0xa0, 0xa4, 0xd2,
-	0xc8, 0x82, 0x8b, 0xcd, 0x05, 0xac, 0x4f, 0x48, 0x8f, 0x8b, 0xcb, 0x3d, 0xb5, 0x04, 0xa6, 0x95,
-	0x57, 0x0f, 0x6a, 0x38, 0x58, 0x99, 0x14, 0x3f, 0x8c, 0x0b, 0x95, 0x57, 0x62, 0x48, 0x62, 0x03,
-	0x5b, 0x6b, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x69, 0xb4, 0x12, 0x73, 0x86, 0x00, 0x00, 0x00,
+	0xcd, 0xcf, 0xd3, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x83, 0xf0, 0xa4, 0x78, 0x0b, 0x12,
+	0x93, 0xb3, 0x13, 0xd3, 0x53, 0x21, 0xc2, 0x4a, 0xca, 0x5c, 0xec, 0x61, 0xa9, 0x45, 0xc5, 0x99,
+	0xf9, 0x79, 0x42, 0x12, 0x5c, 0xec, 0x65, 0x10, 0xa6, 0x04, 0xa3, 0x02, 0xa3, 0x06, 0x67, 0x10,
+	0x8c, 0xab, 0x64, 0xce, 0xc5, 0x1d, 0x00, 0xd1, 0xe5, 0x93, 0x59, 0x5c, 0x22, 0xa4, 0xc1, 0xc5,
+	0x01, 0x35, 0xa4, 0x58, 0x82, 0x51, 0x81, 0x59, 0x83, 0xdb, 0x88, 0x47, 0xaf, 0x20, 0x3b, 0x5d,
+	0x0f, 0xaa, 0x26, 0x08, 0x2e, 0xab, 0xa4, 0xc0, 0xc5, 0x16, 0x5c, 0x92, 0x58, 0x52, 0x5a, 0x2c,
+	0x24, 0xc6, 0xc5, 0x56, 0x0c, 0x66, 0x81, 0xcd, 0xe6, 0x08, 0x82, 0xf2, 0x94, 0xd8, 0xb9, 0x58,
+	0x5d, 0x73, 0x0b, 0x4a, 0x2a, 0x8d, 0x96, 0x33, 0x72, 0xb1, 0xb9, 0x80, 0x9d, 0x28, 0xa4, 0xc7,
+	0xc5, 0xe5, 0x9e, 0x5a, 0x02, 0x73, 0x16, 0xaf, 0x1e, 0xd4, 0x1f, 0x60, 0x75, 0x52, 0xfc, 0x30,
+	0x2e, 0x54, 0x5e, 0x89, 0x41, 0xc8, 0x82, 0x8b, 0xdf, 0x33, 0xaf, 0xb8, 0x24, 0x31, 0x27, 0x07,
+	0xea, 0x82, 0x62, 0x21, 0x61, 0x98, 0x2a, 0x24, 0x77, 0x4b, 0xf1, 0xc1, 0x04, 0x21, 0x6e, 0x52,
+	0x62, 0x10, 0x32, 0xe6, 0xe2, 0x76, 0x4f, 0x2d, 0x81, 0xeb, 0x42, 0xb3, 0x0a, 0x9b, 0x21, 0x4a,
+	0x0c, 0x49, 0x6c, 0xe0, 0x90, 0x33, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0xfc, 0xd7, 0xab, 0xad,
+	0x60, 0x01, 0x00, 0x00,
 }

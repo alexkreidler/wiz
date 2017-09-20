@@ -18,10 +18,11 @@ const (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-// SayHello implements helloworld.GreeterServer
 func (s *server) GetVersion(ctx context.Context, in *pb.Empty) (*pb.Version, error) {
 	return &pb.Version{Version: "0.0.1"}, nil
 }
+
+func (s *server) InstallPackages(ctx context.Context, in *pb.PackageList)
 
 func Start() {
 	lis, err := net.Listen("tcp", port)

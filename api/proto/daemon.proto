@@ -1,14 +1,26 @@
 syntax = "proto3";
 package daemon;
 
+import "api/proto/package.proto";
+
 service Daemon {
   rpc GetVersion (Empty) returns (Version) {}
+  rpc InstallPackages (PackageList) returns (Status) {}
+  rpc GetPackages (Empty) returns (PackageList) {}
 }
 
 message Version {
   string version = 1;
 }
 
+message PackageList {
+  repeated pkg.Package packages = 1;
+}
+
+message Status {
+  bool status = 1;
+}
+
 message Empty {
-  
+
 }

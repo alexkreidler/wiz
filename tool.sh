@@ -25,6 +25,10 @@ watch() {
   ./scripts/build_watcher.sh
 }
 
+stop() {
+  docker stop -t 1 "$CONTAINER_NAME"
+}
+
 usage() {
   echo "
 Usage: tool.sh [COMMAND]
@@ -32,6 +36,7 @@ Commands:
   dev - start a development container
   genproto - generate protobuf code from the api
   watch - watch for changes and rebuild code
+  stop - stop the container used by this tool
   "
   exit 1
 }
@@ -45,6 +50,7 @@ for i in $@; do
     dev) echo "Wiz Project dev container"; start_container; dev;;
     genproto) start_container; genproto;;
     watch) watch;;
+    stop) stop;;
     *) usage
   esac
 done
