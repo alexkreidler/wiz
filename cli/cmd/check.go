@@ -17,14 +17,21 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/spf13/cobra"
-	pkgapi "github.com/tim15/wiz/api/package"
-	"github.com/tim15/wiz/cli/pkg"
+	"github.com/tim15/wiz/api/pkg"
+	"os"
 )
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 
 // checkCmd represents the check command
 var checkCmd = &cobra.Command{
-	Use:   "check []",
+	Use:   "check [FILES ...]",
 	Short: "Validate a spec file",
 	Long: `Examples:
   wiz check ./wiz.json
@@ -32,19 +39,22 @@ var checkCmd = &cobra.Command{
   `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("check called")
-		fmt.Println(pkg.CONST)
-		// pkg.ReadSpecFile(args[0])
 		fmt.Println(args)
 		if len(args) > 0 {
-			// fmt.Println("args")
-			// pkg.ReadSpecFile(args[0])
-			pb := &pkgapi.Package{
-				Name:    "Test",
-				Version: "2.0",
+			f, err := os.Open(args[0])
+			defer f.Close()
+			check(err)
+			pb := &pkg.Package{}
+			err = jsonpb.Unmarshal(f, pb)
+			check(err)
+			marshaller := jsonpb.Marshaler{}
+			str, err := marshaller.MarshalToString(pb)
+			fmt.Printf("Package spec: %+v\n", pb)
+			fmt.Println("Hello", pb.Type)
+			for key, value := range pb.Dependencies {
+				fmt.Println("Key:", key, "Value:", value)
 			}
-			pkg.ProtoWrite(args[0], pb)
-			dat := pkg.ProtoRead(args[0])
-			fmt.Println("data:", dat)
+			fmt.Printf("Output: %s\n", str)
 		}
 	},
 }

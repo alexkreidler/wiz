@@ -4,6 +4,6 @@ import (
 	"github.com/tim15/wiz/api/daemon"
 )
 
-func (s *server) InstallPackages(daemon.PackageList) daemon.Status {
-
+func InstallPackages(daemon.PackageList) *daemon.Status {
+	return &daemon.Status{Status: true}
 }

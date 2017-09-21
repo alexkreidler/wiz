@@ -4,11 +4,10 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/tim15/wiz/api/daemon"
-	"golang.org/x/net/context"
+	"context"
+	"github.com/tim15/wiz/api/daemon"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
 )
 
 const (
@@ -18,17 +17,26 @@ const (
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
 
-func (s *server) GetVersion(ctx context.Context, in *pb.Empty) (*pb.Version, error) {
-	return &pb.Version{Version: "0.0.1"}, nil
+func (s *server) GetVersion(ctx context.Context, in *daemon.Empty) (*daemon.Version, error) {
+	return &daemon.Version{Version: "0.0.1"}, nil
 }
 
-func (s *server) InstallPackages(ctx context.Context, in *pb.PackageList) {
+func (s *server) InstallPackages(ctx context.Context, in *daemon.PackageList) (*daemon.Status, error) {
 	log.Printf("Installing packages %+v\n", in)
+	return InstallPackages(*in), nil
 }
 
-func (s *server) GetPackages(ctx context.Context, in *pb.Empty) {
+func (s *server) GetPackages(ctx context.Context, in *daemon.Empty) (*daemon.PackageList, error) {
 	log.Println("Getting packages")
-	return pb.PackageList{}
+	return &daemon.PackageList{}, nil
+}
+
+func (s *server) GetConfig(ctx context.Context, in *daemon.Empty) (*daemon.Config, error) {
+	return &daemon.Config{PackageLocation: "/tmp/wiz/packages", UseComputeDevices: "all", RunBackend: daemon.Config_LOCAL}, nil
+}
+
+func (s *server) SetConfig(context.Context, *daemon.Config) (*daemon.Status, error) {
+	return &daemon.Status{Status: true}, nil
 }
 
 func Start() {
@@ -37,7 +45,7 @@ func Start() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterDaemonServer(s, &server{})
+	daemon.RegisterDaemonServer(s, &server{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
