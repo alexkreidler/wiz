@@ -11,12 +11,12 @@ else
     echo "WARNING: Not in container. It is recommended to use the tim15/goproto image for development"
 fi
 
-for rawSpec in $PROJECT_PATH/api/proto/*; do
-  spec=$(basename $rawSpec)
-  spec=${spec%".proto"}
-  echo "Generating protobuf code for: $spec"
-  mkdir -p "$PROJECT_PATH/api/$spec"
-  protoc -I "$PROJECT_PATH/api/proto" --go_out=plugins=grpc:"$PROJECT_PATH/api/$spec" $rawSpec
+set -o xtrace
+# protoc -I "$GOPATH/src" --go_out=plugins=grpc:$GOPATH/src $rawSpec $PROJECT_PATH/api/proto/*.proto
+
+for rawSpec in $PROJECT_PATH/api/proto/*.proto; do
+  # uses `option go_package` to specify absolute location from $GOPATH/bin
+  protoc -I "$GOPATH/src" --go_out=plugins=grpc:$GOPATH/src $rawSpec
 done
 
 echo "All done!"

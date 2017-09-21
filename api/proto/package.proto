@@ -1,5 +1,6 @@
 syntax = "proto3";
 package pkg;
+option go_package = "github.com/tim15/wiz/api/pkg";
 
 message Package {
   string name = 1; // Must be unique

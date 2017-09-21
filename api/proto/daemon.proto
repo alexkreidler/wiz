@@ -1,7 +1,8 @@
 syntax = "proto3";
 package daemon;
+option go_package = "github.com/tim15/wiz/api/daemon";
 
-import "api/proto/package.proto";
+import "github.com/tim15/wiz/api/proto/package.proto";
 
 service Daemon {
   rpc GetVersion (Empty) returns (Version) {}

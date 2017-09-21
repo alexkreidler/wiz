@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	// "os/exec"
+	"log"
 )
 
 const (
@@ -22,7 +22,14 @@ func (s *server) GetVersion(ctx context.Context, in *pb.Empty) (*pb.Version, err
 	return &pb.Version{Version: "0.0.1"}, nil
 }
 
-func (s *server) InstallPackages(ctx context.Context, in *pb.PackageList)
+func (s *server) InstallPackages(ctx context.Context, in *pb.PackageList) {
+	log.Printf("Installing packages %+v\n", in)
+}
+
+func (s *server) GetPackages(ctx context.Context, in *pb.Empty) {
+	log.Println("Getting packages")
+	return pb.PackageList{}
+}
 
 func Start() {
 	lis, err := net.Listen("tcp", port)
