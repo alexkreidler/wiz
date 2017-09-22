@@ -7,9 +7,9 @@ A package is a
 - runtime
 - framework/toolkit/library
 - driver
-- or ML model
+- or ML model (with or without training)
 
-A package defines it's type in it's config file.
+A package defines its type in its config file.
 
 ## Component
 A component is a piece of the final ML system that will be deployed. This can be a program or a package

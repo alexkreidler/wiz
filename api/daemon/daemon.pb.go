@@ -95,7 +95,7 @@ type Config struct {
 	// Represents the directory used to store packages
 	PackageLocation string            `protobuf:"bytes,1,opt,name=package_location,json=packageLocation" json:"package_location,omitempty"`
 	RunBackend      Config_RunBackend `protobuf:"varint,2,opt,name=run_backend,json=runBackend,enum=daemon.Config_RunBackend" json:"run_backend,omitempty"`
-	// Determines which compute devices to use. Can be `all` or a list of devices
+	// Determines which compute devices to use. Can be `all` or a list of devices. Defaults to all.
 	UseComputeDevices string `protobuf:"bytes,3,opt,name=use_compute_devices,json=useComputeDevices" json:"use_compute_devices,omitempty"`
 }
 

@@ -17,16 +17,37 @@ package cmd
 import (
 	"fmt"
 
+	"errors"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
+	"io"
+
+	"bufio"
 	"github.com/tim15/wiz/api/pkg"
+	"github.com/tim15/wiz/cli/backends/config"
 	"os"
+	"strings"
 )
 
-func check(e error) {
+func check(e error, reason string) {
 	if e != nil {
-		panic(e)
+		fmt.Println(reason + e.Error())
 	}
+}
+
+func backend(filename string) (string, error) {
+	for _, backend := range config.GetBackends() {
+		if strings.HasSuffix(filename, "."+backend.FileSuffix) {
+			fmt.Println("Config backend: " + backend.Name)
+			return backend.Name, nil
+		}
+	}
+	return "", errors.New("No backends configured")
+}
+
+func e(err string) {
+	fmt.Println("Error: " + err)
 }
 
 // checkCmd represents the check command
@@ -40,21 +61,48 @@ var checkCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("check called")
 		fmt.Println(args)
+
 		if len(args) > 0 {
-			f, err := os.Open(args[0])
-			defer f.Close()
-			check(err)
-			pb := &pkg.Package{}
-			err = jsonpb.Unmarshal(f, pb)
-			check(err)
-			marshaller := jsonpb.Marshaler{}
-			str, err := marshaller.MarshalToString(pb)
-			fmt.Printf("Package spec: %+v\n", pb)
-			fmt.Println("Hello", pb.Type)
-			for key, value := range pb.Dependencies {
-				fmt.Println("Key:", key, "Value:", value)
+			for _, filename := range args {
+				// filename := args[0]
+
+				if _, err := os.Stat(filename); os.IsNotExist(err) {
+					e(filename + " does not exist")
+					continue
+				}
+
+				// Wiz supports multiple config backends, and multiple spec file types.
+				// Determine the backend to use based on filename
+				b, err := backend(filename)
+				if err != nil {
+					e("No config backend available for " + filename)
+					continue
+				}
+				fmt.Println(b)
+
+				f, err := os.Open(args[0])
+				defer f.Close()
+				check(err, "")
+				pb := pkg.Package{Name: "default"}
+				// fmt.Printf("%+v\n", pb)
+				fmt.Printf("package: %+v\n", pb)
+				err = jsonpb.Unmarshal(f, &pb)
+				check(err, "Invalid spec file: ")
+				marshaller := jsonpb.Marshaler{}
+				str, err := marshaller.MarshalToString(&pb)
+				fmt.Printf("Package spec: %+v\n", pb)
+				fmt.Println("Hello", pb.Type)
+				for key, value := range pb.Dependencies {
+					fmt.Println("Key:", key, "Value:", value)
+				}
+				fmt.Printf("Output: %s\n", str)
+				fmt.Printf("package: %+v\n", pb)
+				str = proto.MarshalTextString(&pb)
+				fmt.Println(str)
+				npb := &pkg.Package{}
+				proto.UnmarshalText(str, npb)
+				fmt.Printf("package: %+v\n", pb)
 			}
-			fmt.Printf("Output: %s\n", str)
 		}
 	},
 }
