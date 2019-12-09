@@ -4,7 +4,7 @@ Wiz is a package manager for AI and ML projects and a set of associated librarie
 
 This is an ambitious project, so I've outlined a set of goals for v0.1.0:
 
-* [x] build out the core Wiz Pipelines API
+* [x] build out the core Wiz Pipelines API (see [here](../tasks/tasks.go))
 * [ ] build the Wiz Processor API and implement the following basic builtin processors:
 * [ ] HTTP File + crawl download
 * [ ] Git download/checkout
