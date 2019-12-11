@@ -25,12 +25,12 @@ type Manager interface {
 	ReadPipeline(name string) (tasks.Pipeline, error)
 
 	// DeletePipeline deletes the pipeline with a given name, returning an error if not found
-	DeletePipeline(name string) tasks.Pipeline
+	DeletePipeline(name string) (tasks.Pipeline, error)
 
 	// CreateEnvironment adds the given already configured, VALID environment to the Manager. IsValidEnvironment should be called immediately and an error returned if it is not valid
 	// In the future, for multi-user mode, in the use case that the Wiz Manager server has a service account e.g with the proper permissions and that all user
 	// connections should use that configuration, then we may expose the configuration of the Environment through the Manager so that the user can choose from the CLI the env configs to use from the Manager's perspective
-	CreateEnvironment(environment executor.Environment) error
+	CreateEnvironment(env executor.SerializableEnv) error // environment executor.Environment) error
 	//	How environments (an interface are serialized across the CLI-manager connection (An HTTP API) will be complicated
 	//	Some custom environments will only be registered with the manager?
 	// ReadEnvironment returns the environment configuration for a given env name

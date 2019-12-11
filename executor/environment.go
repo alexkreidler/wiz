@@ -16,3 +16,14 @@ type Environment interface {
 	// For now as we're only implementing the local executor this can be anything
 	StartExecutor(node string) error
 }
+
+type SerializableEnv struct {
+	// Name is the canonical name of the Environment, hardcoded in each implementation
+	Name string
+	// Description is a human readable description that may include dynamic information from the configuration:
+	// e.g. local hostname or k8s namespace
+	Description string
+
+	// Configuration contains the current state of the environment's configuration
+	Configuration interface{}
+}

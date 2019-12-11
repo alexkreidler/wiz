@@ -1,10 +1,15 @@
-
 name: test pipeline
+# this data is passed to the first pipeline
+data:
+  url: https://download.bls.gov/pub/time.series/la/
+  files:
+    - la.seasonal
+    - la.period
 spec:
   sequential:
     - name: dl
       processor:
-        type: http
+        name: http
         version: 1.0
         configuration:
           url: http://google.com
@@ -12,18 +17,18 @@ spec:
         sequential:
           - name: decompress
             processor:
-              type: extract
+              name: extract
               version: 1.0
           - name: t
             processor:
-              type: test
+              name: test
               version: 1.0
         parallel:
           - name: test
             processor:
-              type: test
+              name: test
               version: 1.0
           - name: test2
             processor:
-              type: test
+              name: test
               version: 1.0

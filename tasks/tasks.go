@@ -1,16 +1,18 @@
 package tasks
 
 import (
+	"fmt"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
 // Pipeline represents one Wiz Tasks Framework pipeline
 type Pipeline struct {
-	Name string
-	g graph.DirectedBuilder
+	Name     string
+	g        graph.DirectedBuilder
 	rootNode graph.Node
-	Spec PipelineSpec
+	Data     interface{}
+	Spec     PipelineSpec
 }
 
 // PipelineSpec defines how a pipeline should be structured/serialized
@@ -25,8 +27,10 @@ type Children struct {
 	Parallel
 }
 
+// ProcessorNode represents a single ETL processor in the pipeline
+// TODO: deal with data merging
 type ProcessorNode struct {
-	id int64
+	id   int64
 	Name string
 	Processor
 	Children
@@ -94,4 +98,37 @@ func (p *Pipeline) UpdateFromSpec() {
 	for _, proc := range p.Spec.Parallel {
 		processorParallel(p.g, p.rootNode, proc)
 	}
+}
+
+func (p Pipeline) Iterate(f func(p ProcessorNode)) {
+	for _, proc := range p.Spec.Sequential {
+		f(proc)
+	}
+	for _, proc := range p.Spec.Parallel {
+		f(proc)
+	}
+}
+
+func hasOneTypeOf(p Pipeline, t string) bool {
+	p.Iterate(func(p ProcessorNode) {
+		if p.Type == t {
+			return
+		}
+	})
+	return false
+}
+
+// CheckValidity ensures that the pipeline has 1. an input 2. input data and 3. an output and returns an error if it doesn't. Returns nil if OK
+func (p Pipeline) CheckValidity() error {
+	if !hasOneTypeOf(p, "input") {
+		return fmt.Errorf("pipeline %s does not have an input node", p.Name)
+	}
+	if !hasOneTypeOf(p, "output") {
+		return fmt.Errorf("pipeline %s does not have an output node", p.Name)
+	}
+
+	if p.Data == nil {
+		return fmt.Errorf("pipeline %s does not have any input data", p.Name)
+	}
+	return nil
 }

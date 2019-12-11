@@ -1,0 +1,42 @@
+swagger: "2.0"
+info:
+description: "handles all interaction between Wiz Executor and Wiz Manager"
+version: "1.0.0"
+title: "Wiz Executor API"
+license:
+name: "Apache 2.0"
+url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:9003"
+basePath: "/v1"
+# tags:
+# - name: "pet"
+#   description: "Everything about your Pets"
+#   externalDocs:
+#     description: "Find out more"
+#     url: "http://swagger.io"
+# - name: "store"
+#   description: "Access to Petstore orders"
+# - name: "user"
+#   description: "Operations about user"
+#   externalDocs:
+#     description: "Find out more about our store"
+#     url: "http://swagger.io"
+schemes:
+# - "https"
+- "http"
+paths:
+/processors:
+get:
+summary: "Lists the available processots"
+responses:
+200:
+description: "Got processors"
+/processors/{processorName}:
+get:
+summary: "Lists the available processots"
+responses:
+200:
+description: "Got processors"
+parameters:
+processorName:
+description: the name of the processor to request

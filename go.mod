@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/alexkreidler/ratchet v2.0.4+incompatible
 	github.com/aws/aws-sdk-go v1.25.48
+	github.com/cavaliercoder/grab v2.0.0+incompatible // indirect
 	github.com/dailyburn/bigquery v0.0.0-20171116202005-b6f18972580e
 	github.com/dailyburn/ratchet v2.0.4+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1

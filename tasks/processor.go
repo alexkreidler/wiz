@@ -2,7 +2,8 @@ package tasks
 
 // Processor represents a Wiz Tasks node which can process data. This is how it is serialized
 type Processor struct {
-	Type string // the unique name for the processor
+	Name string // the unique name for the processor
+	Type string // the category of the processor: either input, output, or transformation - nil means transform
 	Version string // the semantic version of the processor if required
 	Configuration interface{}
 	State string // one of Idle, Running, Succeeded, Failed
