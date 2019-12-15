@@ -2,7 +2,9 @@ package httpjson
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/alexkreidler/wiz/taguk"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -29,6 +31,16 @@ func createPrimitiveObjects(t reflect.Type) reflect.Value {
 	return reflect.Zero(t)
 }
 
+var specializedIndividualMethods = map[string]string{
+	"GET": "Get",
+	"POST": "Update",
+	"DELETE": "Delete",
+}
+var specializedResourceMethods = map[string]string{
+	"GET": "GetAll",
+	"POST": "Create",
+}
+
 func (s *Server) Configure(rm taguk.ResourceMap) {
 	s.Resources = rm
 
@@ -43,30 +55,94 @@ func (s *Server) Configure(rm taguk.ResourceMap) {
 
 			a, ok := res.Actions[action]
 			if !ok {
-				writer.WriteHeader(400)
-				_, _ = writer.Write([]byte(`{"error":"provided action is invalid"}`))
+				http.Error(writer, `{"error":"provided action is invalid"}`, 400)
+				return
 			}
 
 
 			if n, err := strconv.ParseInt(id, 10, 64); err == nil {
 				vs := a.Func.Call([]reflect.Value{createPrimitiveObjects(a.Base), reflect.ValueOf(n)})
-				//vs
-				//spew.Dump(vs[0])
-				//json.M
+
 				ret := vs[0]
 				b, err := json.Marshal(ret.Interface())
 				if err != nil {
-					writer.WriteHeader(400)
-					_, _ = writer.Write([]byte(err.Error()))
+					http.Error(writer, `{"error":"failed to marshal response"}`, 400)
+					return
 				}
 
-				_, _ = writer.Write(b)
+				_, err = writer.Write(b)
+				if err != nil {
+					log.Println(err.Error())
+				}
 			} else {
-				writer.WriteHeader(400)
-				_, _ = writer.Write([]byte(`{"error":"provided id is invalid"}`))
-			}
 
+				http.Error(writer, `{"error":"provided id is invalid"}`, 400)
+				return
+			}
 		})
+		for method, action := range specializedIndividualMethods {
+			sr.NewRoute().Methods(method).Path("/{id:[0-9]+}").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				vars := mux.Vars(request)
+				id := vars["id"]
+				//fmt.Println(method, action)
+
+				a, ok := res.Actions[taguk.FunctionNameToActionMap(action)]
+
+				if !ok {
+					http.Error(writer, `{"error":"provided action is invalid"}`, 400)
+					return
+				}
+				spew.Dump(a)
+
+				if n, err := strconv.ParseInt(id, 10, 64); err == nil {
+					vs := a.Func.Call([]reflect.Value{createPrimitiveObjects(a.Base), reflect.ValueOf(n)})
+
+					ret := vs[0]
+					b, err := json.Marshal(ret.Interface())
+					if err != nil {
+						http.Error(writer, `{"error":"failed to marshal response"}`, 400)
+						return
+					}
+
+					_, err = writer.Write(b)
+					if err != nil {
+						log.Println(err.Error())
+					}
+				} else {
+					http.Error(writer, `{"error":"provided id is invalid"}`, 400)
+					return
+				}
+			})
+		}
+		for method, action := range specializedResourceMethods {
+			sr.NewRoute().Methods(method).Path("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				fmt.Println(method, action)
+				fmt.Println("SUP")
+
+				a, ok := res.Actions[taguk.FunctionNameToActionMap(action)]
+
+				if !ok {
+					http.Error(writer, `{"error":"provided action is invalid"}`, 400)
+					return
+				}
+				spew.Dump(a)
+
+				vs := a.Func.Call([]reflect.Value{createPrimitiveObjects(a.Base)})
+
+				ret := vs[0]
+				b, err := json.Marshal(ret.Interface())
+				if err != nil {
+					http.Error(writer, `{"error":"failed to marshal response"}`, 400)
+					return
+				}
+
+				_, err = writer.Write(b)
+				if err != nil {
+					log.Println(err.Error())
+				}
+			})
+		}
+
 		//sr.HandleFunc("/{action}")
 		//for _, a := range res.Actions {
 		//	prefix := "/"

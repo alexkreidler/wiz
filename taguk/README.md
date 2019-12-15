@@ -1,5 +1,7 @@
 # taguk
 
+> Notice: Although Taguk will remain in development and likely become the system for developing future Wiz APIs, it is too hacky as of right now, so the 0.1.0 Processor API will just be built using an API IDL.
+
 Taguk is a simple Golang library for building and exposing generic APIs, regardless of the transport/API layer.
 
 It follows a code-first API design model due to Golang's strong and powerful type system with reflection. 
@@ -22,9 +24,9 @@ Once you generate your API definitions, if you want to remove yourself from the 
 
 Thus you can customize your app more effectively to the transport protocol you've picked.
 
-<!-- The library works like the test -->
+The core of the library is entirely implemented in the taguk.go file, but extensions like JSON schema and protobuf generation are in other packages, along with each transport server.
 
-The core of the library is entirely implemented in the taguk.go file, but extensions like JSON schema and protobuf generation are in other packages.
+Examples: If you want to see examples of how to use taguk, just look at the tests in /test and /httpjson.
 
 ## Data model
 
@@ -36,12 +38,14 @@ This provides for a very simple and intuitive mapping to HTTP REST APIs, and it 
 
 **Note: IDs** in Taguk the default ID type is int64, but in the future we may change this to a string e.g. UUIDs.
 
-You can define any method on the structs, and these will be called into by the RPCs/HTTP requests. However, there are a few builtin methods that have special functionality for HTTP. These are:
+You can define any method on the structs, and these will be called into by the RPCs/HTTP requests. However, there are a few builtin **Specialized methods** that have special functionality for HTTP. These are:
+
+## Specialized Methods
 
 
 | CRUD Role | Method Signature                                   | HTTP Path                             |
 | --------- | -------------------------------------------------- | ------------------------------------- |
-| Create    | Create(item Type)                                  | `POST /resource_name/create`          |
+| Create    | Create(item Type)                                  | `POST /resource_name` or `POST /resource_name/create`          |
 | Read      | GetAll()                                           | `GET /resource_name`                  |
 | Read      | Get(id int64)                                      | `GET /resource_name/:id`              |
 | Update    | Update(id int64, newItem Type)                     | `POST /resource_name/:id`             |
@@ -112,3 +116,9 @@ type MainResource struct {
     ReferencedSubresource2 Resource2 `"api_embed:false"`
 }
 ```
+
+## Meaning
+
+You may be wondering what taguk means. Well its: Tachyon API Generator Unified Kryptonite.
+
+Just kidding, it doesn't mean anything.

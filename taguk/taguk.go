@@ -11,9 +11,12 @@ type Server struct {
 	Resources ResourceMap
 }
 
+// ResourceMap is a map of resources
 type ResourceMap map[string]Resource
+// ActionMap is a map of actions
 type ActionMap map[string]Action
 
+// CustomServer defines the methods required to implement a custom server using a different transport protocol
 type CustomServer interface {
 	// TODO: add options here
 	Configure(r ResourceMap)
@@ -21,18 +24,19 @@ type CustomServer interface {
 	Serve()
 	//Serve(listener string)
 }
-
+// Resource is a logical object/resource in the API
 type Resource struct {
 	Name string
 	Version string
 	r interface{}
 	Actions ActionMap
 }
-
+// Item is an instance of a resource
 type Item struct {
 	ID int64
 	i interface{}
 }
+// Action is some method that can be performed on either a resource or an item
 type Action struct {
 	Name string
 
@@ -60,8 +64,8 @@ func (s Server) AddResources(res ...interface{}) {
 	}
 }
 
-// hasIdArgument returns true if the function provided has a second (after receiver) argument that is an int64
-func hasIdArgument(f reflect.Type) bool {
+// hasIDArgument returns true if the function provided has a second (after receiver) argument that is an int64
+func hasIDArgument(f reflect.Type) bool {
 	// The function needs at least 2 arguments, 1 for the struct receiver, another for the id
 	if f.NumIn() > 1 {
 		return f.In(1).Kind() == reflect.Int64
@@ -74,6 +78,10 @@ func getBaseValue(f reflect.Type) reflect.Type {
 		return f.In(0)
 	}
 	return nil
+}
+
+func FunctionNameToActionMap(n string) string {
+	return strings.ToLower(n)
 }
 
 // AddResource adds the resource to the server, registering all actions for it as well
@@ -96,7 +104,7 @@ func (s *Server) AddResource(r interface{}) {
 			Name:   m.Name,
 			Method: m,
 			Base: getBaseValue(m.Func.Type()),
-			Individual: hasIdArgument(m.Func.Type()),
+			Individual: hasIDArgument(m.Func.Type()),
 		}
 		if res.Actions == nil {
 			res.Actions = make(ActionMap)
@@ -105,7 +113,7 @@ func (s *Server) AddResource(r interface{}) {
 	}
 	//TODO: don't hack this, actually use the json struct field name to json key decoding code
     //https://golang.org/src/encoding/json/encode.go?s=6471:6514#L148
-	s.Resources[strings.ToLower(rName)] = res
+	s.Resources[FunctionNameToActionMap(rName)] = res
 }
 
 //type optionsFunc func()
