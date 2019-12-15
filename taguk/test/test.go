@@ -1,8 +1,6 @@
-package main
-
-import (
-	"github.com/alexkreidler/wiz/taguk"
-)
+// Test exports various example structs and methods that define a sample API
+// They are used by Taguk testing packages to test Taguk
+package test
 
 // Bank represents a bank
 type Bank struct {
@@ -16,6 +14,34 @@ type Bank struct {
 type Branch struct {
 	Name     string
 	Location string
+}
+
+func (b Branch) GetAll() []Branch {
+	return []Branch{
+		Branch{
+			Name:     "test",
+			Location: "Chevy Chase",
+		},
+		Branch{
+			Name:     "test2",
+			Location: "California",
+		},
+	}
+}
+
+func (b Branch) Get(id int64) Branch {
+	return Branch{
+		Name:     "test",
+		Location: "Chevy Chase",
+	}
+}
+
+
+func (b Branch) NoArgs() Branch {
+	return Branch{
+		Name:     "test",
+		Location: "Chevy Chase",
+	}
 }
 
 // User represents a single bank customer
@@ -50,15 +76,4 @@ type Transaction struct {
 	NewBalance      float32
 	Date            string
 	Name            string
-}
-
-func main() {
-	s := taguk.NewServer()
-	s.AddResources(Bank{}, Branch{}, User{}, Account{})
-
-	// Serves an HTTP API on port, options allow serving a schema
-	s.ServeHTTP(taguk.JSONSchema)
-
-	// Serves gRPC API
-	s.ServeGRPC()
 }

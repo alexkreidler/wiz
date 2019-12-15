@@ -26,7 +26,15 @@ Thus you can customize your app more effectively to the transport protocol you'v
 
 The core of the library is entirely implemented in the taguk.go file, but extensions like JSON schema and protobuf generation are in other packages.
 
-In general, the main design pattern is that all resources are represented by Structs that then get added to the server.
+## Data model
+
+The core Taguk data model is a set of **Resources**, implemented as Structs with Receiver methods, that are added by the user to the **Server**.
+
+Each resource has a collection of **Items**, which are instances of that Resource. **Actions** can be taken on either the resource itself (e.g. like a service) or on an individual item.
+
+This provides for a very simple and intuitive mapping to HTTP REST APIs, and it can also be mapped well to RPC based APIs by simply exposing all actions and returning data.
+
+**Note: IDs** in Taguk the default ID type is int64, but in the future we may change this to a string e.g. UUIDs.
 
 You can define any method on the structs, and these will be called into by the RPCs/HTTP requests. However, there are a few builtin methods that have special functionality for HTTP. These are:
 
@@ -42,6 +50,8 @@ You can define any method on the structs, and these will be called into by the R
 | N/A       | CustomIndividualAction(id int64, data interface{}) | `POST /resource_name/:id/action_name` |
 | N/A       | CustomResourceAction()                             | `GET /resource_name/action_name`      |
 | N/A       | CustomResourceAction(data interface{})             | `POST /resource_name/action_name`     |
+
+As shown above, any function that takes an int64 as the first argument is assumed to be operating on an individual Item.
 
 TODO: work on the above custom actions to ensure following of HTTP/REST best practices such as idempotency, etc.
 This could require each action to provide additional information about itself.
