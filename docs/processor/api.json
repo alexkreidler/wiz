@@ -1,0 +1,33 @@
+{
+    "definitions": {},
+    "$schema": "https://json-schema.org/draft/2019-09/hyper-schema",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "Configure endpoint",
+    "default": null,
+    "required": [
+      "configuration",
+      "loadBalance"
+    ],
+    "properties": {
+      "configuration": {
+        "$id": "#/properties/configuration",
+        "type": "object",
+        "title": "The Configuration Schema",
+        "description": "A generic configuration object for use by the processor",
+        "default": null
+      },
+      "loadBalance": {
+        "$id": "#/properties/loadBalance",
+        "type": "boolean",
+        "title": "The Loadbalance Schema",
+        "description": "Specifies whether to load balance across processors on multiple nodes",
+        "default": true,
+        "examples": [
+          false
+        ]
+      }
+    },
+    ""
+  }
+  

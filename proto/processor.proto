@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+message ProcessorID {
+    string name = 1;
+
+    int64 id = 2;
+}
+
+service ProcessorAPI {
+    // returns a streaming view of the state of the processor
+    rpc ViewState (ProcessorID) returns (stream StateUpdate);
+
+    // Configure accepts configuration serialized to a []byte
+    // It runs synchronously and returns an error if the configuration is rejected
+    rpc Configure (google.protobuf.Any) returns (google.protobuf.Empty);
+
+    // ProvideData takes in any data serialized to a []byte and returns nothing on success. It returns an error if the Processor is not yet in a valid source state.
+    // Depending on the type of data, this will transition from a Configured to either a Running or back to a Configured state, if the data is rejected. A warning will be sent to  This will transition to the validating state, and to a running state
+    // It runs async
+    // Transitions
+    // 1. Validating -> running
+    // 2. Determining -> determined -> validating
+    rpc ProvideData (Data) returns (google.protobuf.Empty);
+
+    // GetCacheState returns the cache state which specifies how an external resource is fetched
+    rpc GetCacheState (google.protobuf.Empty) returns (CacheState);
+}
+
+// CacheState is internal to the processor
+message CacheState {
+    google.protobuf.Any data = 1;
+}
+
+message StateUpdate {
+    ProcessorState oldState = 1;
+    ProcessorState newState = 2;
+}
+
+enum ProcessorState {
+    UNINITIALIZED = 0;
+    CONFIGURED = 1;
+    DETERMINING = 2;
+    DETERMINED = 3;
+    VALIDATING = 4;
+    RUNNING = 5;
+    SUCCESS = 6;
+    FAILURE = 7;
+}
+
+message Data {
+    DataType type = 1;
+    google.protobuf.Any data = 2;
+}
+
+// Data is either raw data, in JSON, or a reference external or internal in the JSON spec
+enum DataType {
+    RAW_JSON = 0;
+
+    // we shouldn't use multiple over the wire formats for data. 
+    // RAW_YAML = 0;
+
+    INTERNAL_REFERENCE = 1;
+    EXTERNAL_REFERENCE = 2;
+}
