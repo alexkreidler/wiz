@@ -16,7 +16,7 @@ This provides information about all the available processors registered at a giv
 
 Metadata: this is information about how the processor identifies itself to the Manager
 
-### Retrieve All Processors [GET]
+### GetAllProcessors [GET]
 + Relation: self
 + Response 200 (application/json)
     + Attributes (array[ProcessorObject])
@@ -27,7 +27,7 @@ Provides details on a specific processor
 + Parameters
     + id (string) - The processor ID
 
-### Retrieve One Processor [GET]
+### GetProcessor [GET]
 + Relation: self
 + Response 200 (application/json)
     + Attributes (ProcessorObject)
@@ -35,36 +35,36 @@ Provides details on a specific processor
 
 
 
-## Runs [/processors/{id}/runs]
+## Runs [/processor/{id}/runs]
 Provdes information about all the Runs on a given processor. This will include the Run ID, current state, and configuration.
 
 + Parameters
     + id (string) - The processor ID
 
-### Retrieve All Runs [GET]
+### GetAllRuns [GET]
 + Response 200 (application/json)
     + Attributes (array[Run])
 
-## Run/Generic State Information [/processors/{id}/runs/{runID}]
+## Run/Generic State Information [/processor/{id}/run/{runID}]
 Provdes information about the state of one specific run
 
 + Parameters
     + id (string) - The processor ID
     + runID (string) - The run ID
 
-### Retrieve One Run [GET]
+### GetRun [GET]
 In the future this may contain info about which chunks/streams have been 1. sent, 2. received, and 3. processed
 + Response 200 (application/json)
     + Attributes (Run)
 
-## Configuration [/processors/{id}/runs/{runID}/configuration]
+## Configuration [/processor/{id}/run/{runID}/configuration]
 Manage the processor's configuration for a certain run
 
 + Parameters
     + id (string) - The processor ID
     + runID (string) - The run ID
 
-### Get Current Configuration [GET]
+### GetConfig [GET]
 Returns the current configuration or an error if is uninitialized. This is to distinguish between a properly configured but null-valued configuration and an uninitialized config.
 
 + Response 200 (application/json)
@@ -78,7 +78,7 @@ Returns the current configuration or an error if is uninitialized. This is to di
 
 
 
-### Create/Update Configuration [POST]
+### UpdateConfig [POST]
 Configure configures the given processor runID, and returns an error if the configuration is invalid. It returns the applied configuration on sucess.
 
 TODO: how to handle old versions of configuration and updates: pull a GM-Control and require a hash? or just a simple version number?
@@ -101,7 +101,7 @@ TODO: how to handle old versions of configuration and updates: pull a GM-Control
 + Response 400 (application/json)
     + Attributes (Error)
 
-## Data [/processors/{id}/runs/{runID}/data]
+## Data [/processor/{id}/run/{runID}/data]
 
 The endpoint for manipulating data sources/streams/chunks for the processor
 
@@ -117,7 +117,7 @@ Keep in mind, all chunk information can be wiped as soon as the run is done.
     + id (string) - The processor ID
     + runID (string) - The run ID
 
-### Get data chunks [GET]
+### GetData [GET]
 Returns all the data chunks which the processor has recieved, and all that it has written
 
 TODO: figure out if each chunk should report state: yes
@@ -127,7 +127,7 @@ TODO: figure out if each chunk should report state: yes
         + in (array[Chunk])
         + out (array[Chunk])
 
-## Data Chunk Input [/processors/{id}/runs/{runID}/data/input/{chunkID}]
+## Data Chunk Input [/processor/{id}/run/{runID}/data/input/{chunkID}]
 A data chunk represents a logical division of the data. This is usually by file or by record. However, it could be a large file, so we need to consider the Syncing state where the chunk takes a long time to arrive.
 
 We should think about whether the processor should be required to record the actual Data that was sent with the chunk and send it back when requested. Most likely not as this is kind of a temporary API and we'll add support for streams.
@@ -138,7 +138,7 @@ We should think about whether the processor should be required to record the act
     + runID (string) - The run ID
     + chunkID (string) - the input chunk ID
 
-### Add data chunk [POST]
+### AddData [POST]
 TODO: add example data to values for this request, also:
 figure out if we need to specifically distinguish between raw and file data at API level: yes
 
@@ -167,7 +167,7 @@ figure out if we need to specifically distinguish between raw and file data at A
 + Response 200 (application/json)
     + Attributes (Chunk)
 
-### Get specific chunk [GET]
+### GetInputChunk [GET]
 This is not likely to be used, as we might as well get all chunks, but it needs to be here.
 
 + Response 200 (application/json)
@@ -175,7 +175,7 @@ This is not likely to be used, as we might as well get all chunks, but it needs 
         + output_chunk_id: `a3a3a1c6-826f-5fc0-8dee-9d015e1fff30` (string) - the output chunk ID association
 
 
-## Data Chunk Output [/processors/{id}/runs/{runID}/data/output/{chunkID}]
+## Data Chunk Output [/processor/{id}/run/{runID}/data/output/{chunkID}]
 
 Retrieves the output of the given output data chunk. This is either raw data or a filesystem reference
 
@@ -184,7 +184,7 @@ Retrieves the output of the given output data chunk. This is either raw data or 
     + runID (string) - The run ID
     + chunkID (string) - The output chunk ID to retrieve
 
-### Get specific chunk [GET]
+### GetOutputChunk [GET]
 + Response 200 (application/json)
     + Attributes (Chunk)
         + data (Data)

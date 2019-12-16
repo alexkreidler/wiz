@@ -31,7 +31,8 @@
                         }
                     }
                 },
-                "summary": "Retrieve All Processors",
+                "summary": "GetAllProcessors",
+                "operationId": "GetAllProcessors",
                 "description": "",
                 "tags": [
                     "Processors"
@@ -85,7 +86,8 @@
                         }
                     }
                 },
-                "summary": "Retrieve One Processor",
+                "summary": "GetProcessor",
+                "operationId": "GetProcessor",
                 "description": "",
                 "tags": [
                     "Processors"
@@ -104,7 +106,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs": {
+        "/processor/{id}/runs": {
             "get": {
                 "responses": {
                     "200": {
@@ -125,7 +127,8 @@
                         }
                     }
                 },
-                "summary": "Retrieve All Runs",
+                "summary": "GetAllRuns",
+                "operationId": "GetAllRuns",
                 "description": "",
                 "tags": [
                     "Processors"
@@ -144,7 +147,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs/{runID}": {
+        "/processor/{id}/run/{runID}": {
             "get": {
                 "responses": {
                     "200": {
@@ -190,7 +193,8 @@
                         }
                     }
                 },
-                "summary": "Retrieve One Run",
+                "summary": "GetRun",
+                "operationId": "GetRun",
                 "description": "In the future this may contain info about which chunks/streams have been 1. sent, 2. received, and 3. processed",
                 "tags": [
                     "Processors"
@@ -216,7 +220,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs/{runID}/configuration": {
+        "/processor/{id}/run/{runID}/configuration": {
             "get": {
                 "responses": {
                     "200": {
@@ -255,7 +259,8 @@
                         }
                     }
                 },
-                "summary": "Get Current Configuration",
+                "summary": "GetConfig",
+                "operationId": "GetConfig",
                 "description": "Returns the current configuration or an error if is uninitialized. This is to distinguish between a properly configured but null-valued configuration and an uninitialized config.",
                 "tags": [
                     "Processors"
@@ -319,7 +324,8 @@
                         }
                     }
                 },
-                "summary": "Create/Update Configuration",
+                "summary": "UpdateConfig",
+                "operationId": "UpdateConfig",
                 "description": "Configure configures the given processor runID, and returns an error if the configuration is invalid. It returns the applied configuration on sucess.\n\nTODO: how to handle old versions of configuration and updates: pull a GM-Control and require a hash? or just a simple version number?",
                 "tags": [
                     "Processors"
@@ -364,7 +370,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs/{runID}/data": {
+        "/processor/{id}/run/{runID}/data": {
             "get": {
                 "responses": {
                     "200": {
@@ -409,7 +415,8 @@
                         }
                     }
                 },
-                "summary": "Get data chunks",
+                "summary": "GetData",
+                "operationId": "GetData",
                 "description": "Returns all the data chunks which the processor has recieved, and all that it has written\n\nTODO: figure out if each chunk should report state: yes",
                 "tags": [
                     "Processors"
@@ -435,7 +442,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs/{runID}/data/input/{chunkID}": {
+        "/processor/{id}/run/{runID}/data/input/{chunkID}": {
             "post": {
                 "responses": {
                     "200": {
@@ -494,7 +501,8 @@
                         }
                     }
                 },
-                "summary": "Add data chunk",
+                "summary": "AddData",
+                "operationId": "AddData",
                 "description": "TODO: add example data to values for this request, also:\nfigure out if we need to specifically distinguish between raw and file data at API level: yes",
                 "tags": [
                     "Processors"
@@ -656,7 +664,8 @@
                         }
                     }
                 },
-                "summary": "Get specific chunk",
+                "summary": "GetInputChunk",
+                "operationId": "GetInputChunk",
                 "description": "This is not likely to be used, as we might as well get all chunks, but it needs to be here.",
                 "tags": [
                     "Processors"
@@ -689,7 +698,7 @@
                 ]
             }
         },
-        "/processors/{id}/runs/{runID}/data/output/{chunkID}": {
+        "/processor/{id}/run/{runID}/data/output/{chunkID}": {
             "get": {
                 "responses": {
                     "200": {
@@ -753,7 +762,8 @@
                         }
                     }
                 },
-                "summary": "Get specific chunk",
+                "summary": "GetOutputChunk",
+                "operationId": "GetOutputChunk",
                 "description": "",
                 "tags": [
                     "Processors"
