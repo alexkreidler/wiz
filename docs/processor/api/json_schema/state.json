@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/output/hyper-schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "readOnly": true
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "thing/{id}"
+    }
+  ]
+}

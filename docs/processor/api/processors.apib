@@ -1,0 +1,207 @@
+FORMAT: 1A
+
+# Wiz Processor API
+
+This document defines the Wiz Processor API as implemented using JSON over HTTP.
+
+# Group Processors
+All of the processor API is designed here.
+
+## Processors Collection [/processors]
+This provides information about all the available processors registered at a given endpoint.
+
+### Retrieve All Processors [GET]
++ Relation: self
++ Response 200 (application/json)
+    + Attributes (array[ProcessorObject])
+
+## Processor [/processor/{id}]
+Provides details on a specific processor
+
++ Parameters
+    + id (string) - The processor ID
+
+### Retrieve One Processor [GET]
++ Relation: self
++ Response 200 (application/json)
+    + Attributes (ProcessorObject)
+
+
+
+
+## Runs Collection [/processors/{id}/runs]
+Provdes information about all the Runs on a given processor.
+
++ Parameters
+    + id (string) - The processor ID
+
+### Retrieve All Runs [GET]
++ Response 200 (application/json)
+    + Attributes (array[Run])
+
+## Run/Generic State Information [/processors/{id}/runs/{runID}]
+Provdes information about the state of one specific run
+
++ Parameters
+    + id (string) - The processor ID
+    + runID (string) - The run ID
+
+### Retrieve One Run [GET]
+In the future this may contain info about which chunks/streams have been 1. sent, 2. received, and 3. processed
++ Response 200 (application/json)
+    + Attributes (Run)
+
+## Configuration [/processors/{id}/runs/{runID}/configuration]
+Manage the processor's configuration for a certain run
+
++ Parameters
+    + id (string) - The processor ID
+    + runID (string) - The run ID
+
+### Get Current Configuration [GET]
+Returns the current configuration or an error if is uninitialized. This is to distinguish between a properly configured but null-valued configuration and an uninitialized config.
+
++ Response 200 (application/json)
+    + Attributes (Configuration)
++ Response 500 (application/json)
+    + Attributes (Error)
+    // todo: make this example actually show
+    + Body
+
+            { "value": "uninitialized" }
+
+
+
+### Create/Update Configuration [POST]
+Configure configures the given processor runID, and returns an error if the configuration is invalid. It returns the applied configuration on sucess.
+
+TODO: how to handle old versions of configuration and updates: pull a GM-Control and require a hash? or just a simple version number?
+
++ Request Configure Git Download (application/json)
+
+    + Body
+
+            { "repo": "http://ifa.tg/basioc/repo.git", "commit": "d90f73b1-02ca-56a8-89b8-b27f8bda751b" }
+
++ Response 200 (application/json)
+    + Attributes (Configuration)
+
++ Request Invalid Configuration (application/json)
+
+    + Body
+
+            { "some": "invalid", "keys": "and stuff" }
+
++ Response 400 (application/json)
+    + Attributes (Error)
+
+## Data [/processors/{id}/runs/{runID}/data]
+The endpoint for manipulating data sources/streams/chunks for the processor
+
+You can either add:
+ 1. a data source/stream, which then needs to be fetched by either the processor or executor. This can be an external pubsub source like Kafka, etc or
+ 2. add a chunk to the default HTTP source.
+
+However, this is complicated to implement, thus we're saving it for later. For now, we only allow the user to specify two types of data: inline and file data simply over HTTP.
+
+Keep in mind, all chunk information can be wiped as soon as the run is done.
+
+### Get data chunks [GET]
+Returns all the data chunks which the processor has recieved.
+
+TODO: figure out if each chunk should report state: yes
+
++ Response 200 (application/json)
+    + Attributes (array[Chunk])
+
+## Data Chunk [/processors/{id}/runs/{runID}/data/{chunkID}]
+A data chunk represents a logical division of the data. This is usually by file or by record. However, it could be a large file, so we need to consider the Syncing state where the chunk takes a long time to arrive.
+
+We should think about whether the processor should be required to record the actual Data that was sent with the chunk and send it back when requested. Most likely not as this is kind of a temporary API and we'll add support for streams.
+
+### Add data chunk [POST]
+TODO: add example data to values for this request, also:
+figure out if we need to specifically distinguish between raw and file data at API level: yes
+
+
++ Request Provide Inline Data (application/json)
+    + Attributes (Chunk)
+        + data (Data)
+    + Body
+
+            {
+                "chunk_id": "e916d66c-6491-59a0-b555-ee02a08e1028",
+                "state": "Syncing",
+                "data": {
+                    "type": "file",
+                    "value": {
+                        "fs_data": {
+                            "driver": "local",
+                            "location": "/bls/series.file"
+                        }
+                    }
+                }
+            }
+
++ Response 200 (application/json)
+    + Attributes (Chunk)
+
+### Get specific chunk [GET]
+This is not likely to be used, as we might as well get all chunks, but it needs to be here.
+
++ Response 200 (application/json)
+    + Attributes (Chunk)
+
+
+
+
+
+# Data Structures
+
+## ProcessorObject (object)
++ id: ftp (string, required) - the machine readable processor ID
++ name: FTP Downloader (string, required) - a human readable name for the processor
++ version: 0.1.0 (string)
++ tags: fetcher, ftp (array[string])
+
+## Run (ProcessorState)
++ runID: `27c2e6a3-6dc5-57e5-bc0e-f6e91ed27db3` (string, required) - the globally unique ID of the run
++ configuration (Configuration) - the current configuration
+
+## Error (object)
++ value: example error (string, required)
++ trace: example_stack_trace (string) - The full trace of the error. This may only be available in a debug mode
+
+## Configuration (object)
+A generic configuration object, used by the processor itself.
+
+## ChunkState (object)
++ state: Syncing, Determining, Validating, Running, Failed, Succeeded (enum, required) - the state of the data chunk.
+
+## Chunk (ChunkState)
++ chunk_id: `a72eda4e-8db4-5692-b40c-eacc6c755d64` (string, required) - the ID of the chunk
++ error (Error) - the error which caused the chunk to fail if it is in the Failed state
+
+## ProcessorState (object)
++ state: Uninitialized, Configured, Idle, Processing, Failed, Succeeded, CompletedWithErrors (enum, required) - the state of the processor
+
+
+## Source (object)
+TODO: add these, e.g. generic sources and sinks
++ id: default_http_source (string, required) - the source stream identifier
++ name: `Default HTTP Source (Wiz Processor API)` (string, required) - a human readable name for the source
+
+## Sink (object)
++ id: default_http_sink (string, required) - the sink stream identifier
++ name: `Default HTTP Sink (Wiz Processor API)` (string, required) - a human readable name for the sink
+
+## Filesystem (object)
++ driver: local (string, required)
++ location: /bls/example.file (string, required)
+
+## Data (object)
++ type: raw, file (enum, required)
++ value
+    + One Of
+        + raw_data (object)
+        + fs_data (Filesystem)

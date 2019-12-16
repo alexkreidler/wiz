@@ -1,0 +1,141 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Wiz Processor API",
+        "version": "0.1.0",
+        "description": "This document defines the Wiz Processor API as implemented using JSON over HTTP."
+    },
+    "paths": {
+        "/processors": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": [
+                                {
+                                    "id": "ftp",
+                                    "name": "FTP Downloader",
+                                    "version": "0.1.0",
+                                    "tags": [
+                                        "fetcher",
+                                        "ftp"
+                                    ],
+                                    "author": "Alex Kreidler"
+                                }
+                            ]
+                        },
+                        "schema": {
+                            "type": "array",
+                            "items": {}
+                        }
+                    }
+                },
+                "summary": "Retrieve All Processors",
+                "description": "",
+                "tags": [],
+                "parameters": [],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "id": "ftp",
+                                "name": "FTP Downloader",
+                                "version": "0.1.0",
+                                "tags": [
+                                    "fetcher",
+                                    "ftp"
+                                ],
+                                "author": "Alex Kreidler"
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "description": "the machine readable processor ID"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "description": "a human readable name for the processor"
+                                },
+                                "version": {
+                                    "type": "string"
+                                },
+                                "tags": {
+                                    "type": "array",
+                                    "items": {}
+                                },
+                                "author": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Retrieve One Processor",
+                "description": "",
+                "tags": [],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "Processor": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "the machine readable processor ID"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "a human readable name for the processor"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {}
+                },
+                "author": {
+                    "type": "string"
+                }
+            }
+        },
+        "Processors": {}
+    },
+    "securityDefinitions": {},
+    "tags": []
+}

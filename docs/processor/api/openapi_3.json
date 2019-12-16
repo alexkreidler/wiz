@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Wiz Processor API",
+    "description": "A system for interfacing with Wiz Processors",
+    "version": "1.0"
+  },
+  "servers": [{ "url": "https://localhost/processors/v1" }],
+  "components": {
+    "examples": {
+      "metadata": {
+        "value": {
+          "name": "processor_name",
+          "version": "0.1.0",
+          "tags": ["tag1", "tag2"],
+          "author": "etc"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Returns metadata about the processor, which identifies it to the Manager",
+        "responses": {
+          "200": {
+            "description": "Metadata fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./json_schema/processor.json"
+                },
+                "examples": {
+                  "metadata": {
+                    "$ref": "./raw_json/processor.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

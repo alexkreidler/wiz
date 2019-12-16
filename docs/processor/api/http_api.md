@@ -22,7 +22,7 @@ Metadata: this is information about how the processor identifies itself to the M
     "author": "etc"
 }
 ```
-
+<!-- //"#/components/schemas/processor_metadata" -->
 
 `GET /runs` - this is used for determining the number of runs on one processor, but keep in mind processors can be terminated after all runs have stopped
 ```json
@@ -153,3 +153,12 @@ we'll really just return the state of each chunk
 This returns all data chunks a given run has processed. Keep in mind after the run is GCed these will go away.
 
 Should return list of chunk IDs and their states
+
+
+## API IDLs and design choices
+
+In the future, we want to build all of our APIs with JSON Schema and JSON HyperSchema. We may reevaluate Hydra as well (uses JSON-LD).
+
+However the ecosystem for these tools is so far behind Swagger that it is pointless to use them effectively now.
+
+**Notes for VSCode**: VSCode supports JSON Schema and Hyper-Schema version `draft-07`, as long as they are referenced using `$schema` over an `http://` not `https://` URI.
