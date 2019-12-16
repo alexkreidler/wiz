@@ -1,5 +1,7 @@
 # Wiz Processor HTTP API
 
+> **Warning**: This document is superdeded by our API Blueprint document
+
 This document defines the Wiz Processor API as implemented using JSON over HTTP.
 
 ## Basics
