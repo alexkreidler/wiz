@@ -1,0 +1,47 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "$id": "#/properties/name",
+      "type": "string",
+      "title": "Processor Name",
+      "default": "",
+      "examples": ["processor_name"],
+      "pattern": "^(.*)$"
+    },
+    "version": {
+      "$id": "#/properties/version",
+      "type": "string",
+      "title": "Semantic Version",
+      "default": "",
+      "examples": ["0.1.0"],
+      "pattern": "^(.*)$"
+    },
+    "tags": {
+      "$id": "#/properties/tags",
+      "type": "array",
+      "title": "Tags (user-defined)",
+      "items": {
+        "$id": "#/properties/tags/items",
+        "type": "string",
+        "title": "The Items Schema",
+        "default": "",
+        "examples": ["tag1", "tag2"],
+        "pattern": "^(.*)$"
+      }
+    },
+    "author": {
+      "$id": "#/properties/author",
+      "type": "string",
+      "title": "Author, optinoal",
+      "default": "",
+      "examples": ["etc"],
+      "pattern": "^(.*)$"
+    }
+  }
+}

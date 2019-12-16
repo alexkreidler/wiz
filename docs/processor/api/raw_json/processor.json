@@ -1,0 +1,8 @@
+
+{
+    "$schema": "../json_schema/processor.json",
+    "name": "processor_name",
+    "version": "0.1.0",
+    "tags": ["tag1", "tag2"],
+    "author": "etc"
+}
