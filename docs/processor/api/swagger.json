@@ -21,8 +21,7 @@
                                     "tags": [
                                         "fetcher",
                                         "ftp"
-                                    ],
-                                    "author": "Alex Kreidler"
+                                    ]
                                 }
                             ]
                         },
@@ -34,14 +33,16 @@
                 },
                 "summary": "Retrieve All Processors",
                 "description": "",
-                "tags": [],
+                "tags": [
+                    "Processors"
+                ],
                 "parameters": [],
                 "produces": [
                     "application/json"
                 ]
             }
         },
-        "/processors/{id}": {
+        "/processor/{id}": {
             "get": {
                 "responses": {
                     "200": {
@@ -55,8 +56,7 @@
                                 "tags": [
                                     "fetcher",
                                     "ftp"
-                                ],
-                                "author": "Alex Kreidler"
+                                ]
                             }
                         },
                         "schema": {
@@ -76,9 +76,6 @@
                                 "tags": {
                                     "type": "array",
                                     "items": {}
-                                },
-                                "author": {
-                                    "type": "string"
                                 }
                             },
                             "required": [
@@ -90,7 +87,9 @@
                 },
                 "summary": "Retrieve One Processor",
                 "description": "",
-                "tags": [],
+                "tags": [
+                    "Processors"
+                ],
                 "parameters": [
                     {
                         "name": "id",
@@ -104,10 +103,706 @@
                     "application/json"
                 ]
             }
+        },
+        "/processors/{id}/runs": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": [
+                                {
+                                    "state": "Uninitialized",
+                                    "runID": "27c2e6a3-6dc5-57e5-bc0e-f6e91ed27db3",
+                                    "configuration": {}
+                                }
+                            ]
+                        },
+                        "schema": {
+                            "type": "array",
+                            "items": {}
+                        }
+                    }
+                },
+                "summary": "Retrieve All Runs",
+                "description": "",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}/runs/{runID}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "state": "Uninitialized",
+                                "runID": "27c2e6a3-6dc5-57e5-bc0e-f6e91ed27db3",
+                                "configuration": {}
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "state": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Uninitialized",
+                                        "Configured",
+                                        "Idle",
+                                        "Processing",
+                                        "Failed",
+                                        "Succeeded",
+                                        "CompletedWithErrors"
+                                    ],
+                                    "description": "the state of the processor"
+                                },
+                                "runID": {
+                                    "type": "string",
+                                    "description": "the globally unique ID of the run"
+                                },
+                                "configuration": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": "the current configuration"
+                                }
+                            },
+                            "required": [
+                                "state",
+                                "runID"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Retrieve One Run",
+                "description": "In the future this may contain info about which chunks/streams have been 1. sent, 2. received, and 3. processed",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}/runs/{runID}/configuration": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {}
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "value": "uninitialized"
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "trace": {
+                                    "type": "string",
+                                    "description": "The full trace of the error. This may only be available in a debug mode"
+                                }
+                            },
+                            "required": [
+                                "value"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Get Current Configuration",
+                "description": "Returns the current configuration or an error if is uninitialized. This is to distinguish between a properly configured but null-valued configuration and an uninitialized config.",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            },
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {}
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "value": "example error",
+                                "trace": "example_stack_trace"
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "trace": {
+                                    "type": "string",
+                                    "description": "The full trace of the error. This may only be available in a debug mode"
+                                }
+                            },
+                            "required": [
+                                "value"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Create/Update Configuration",
+                "description": "Configure configures the given processor runID, and returns an error if the configuration is invalid. It returns the applied configuration on sucess.\n\nTODO: how to handle old versions of configuration and updates: pull a GM-Control and require a hash? or just a simple version number?",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "repo": {
+                                    "type": "string"
+                                },
+                                "commit": {
+                                    "type": "string"
+                                }
+                            },
+                            "example": {
+                                "repo": "http://ifa.tg/basioc/repo.git",
+                                "commit": "d90f73b1-02ca-56a8-89b8-b27f8bda751b"
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}/runs/{runID}/data": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "in": [
+                                    {
+                                        "state": "Syncing",
+                                        "chunk_id": "a72eda4e-8db4-5692-b40c-eacc6c755d64",
+                                        "error": {
+                                            "value": "example error",
+                                            "trace": "example_stack_trace"
+                                        }
+                                    }
+                                ],
+                                "out": [
+                                    {
+                                        "state": "Syncing",
+                                        "chunk_id": "a72eda4e-8db4-5692-b40c-eacc6c755d64",
+                                        "error": {
+                                            "value": "example error",
+                                            "trace": "example_stack_trace"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "in": {
+                                    "type": "array",
+                                    "items": {}
+                                },
+                                "out": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get data chunks",
+                "description": "Returns all the data chunks which the processor has recieved, and all that it has written\n\nTODO: figure out if each chunk should report state: yes",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}/runs/{runID}/data/input/{chunkID}": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "state": "Syncing",
+                                "chunk_id": "a72eda4e-8db4-5692-b40c-eacc6c755d64",
+                                "error": {
+                                    "value": "example error",
+                                    "trace": "example_stack_trace"
+                                }
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "state": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Syncing",
+                                        "Determining",
+                                        "Validating",
+                                        "Running",
+                                        "Failed",
+                                        "Succeeded"
+                                    ],
+                                    "description": "the state of the data chunk."
+                                },
+                                "chunk_id": {
+                                    "type": "string",
+                                    "description": "the ID of the chunk"
+                                },
+                                "error": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "trace": {
+                                            "type": "string",
+                                            "description": "The full trace of the error. This may only be available in a debug mode"
+                                        }
+                                    },
+                                    "required": [
+                                        "value"
+                                    ],
+                                    "description": "the error which caused the chunk to fail if it is in the Failed state"
+                                }
+                            },
+                            "required": [
+                                "state",
+                                "chunk_id"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Add data chunk",
+                "description": "TODO: add example data to values for this request, also:\nfigure out if we need to specifically distinguish between raw and file data at API level: yes",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "chunkID",
+                        "in": "path",
+                        "description": "the input chunk ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "state": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Syncing",
+                                        "Determining",
+                                        "Validating",
+                                        "Running",
+                                        "Failed",
+                                        "Succeeded"
+                                    ],
+                                    "description": "the state of the data chunk."
+                                },
+                                "chunk_id": {
+                                    "type": "string",
+                                    "description": "the ID of the chunk"
+                                },
+                                "error": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "trace": {
+                                            "type": "string",
+                                            "description": "The full trace of the error. This may only be available in a debug mode"
+                                        }
+                                    },
+                                    "required": [
+                                        "value"
+                                    ],
+                                    "description": "the error which caused the chunk to fail if it is in the Failed state"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {}
+                                },
+                                "output_chunk_id": {
+                                    "type": "string",
+                                    "description": "the output chunk ID association"
+                                }
+                            },
+                            "required": [
+                                "state",
+                                "chunk_id"
+                            ],
+                            "example": {
+                                "chunk_id": "e916d66c-6491-59a0-b555-ee02a08e1028",
+                                "output_chunk_id": "61580ac1-5de8-59e1-b9cd-7766d1667dd9",
+                                "state": "Syncing",
+                                "data": {
+                                    "type": "file",
+                                    "value": {
+                                        "fs_data": {
+                                            "driver": "local",
+                                            "location": "/bls/series.file"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            },
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "state": "Syncing",
+                                "chunk_id": "a72eda4e-8db4-5692-b40c-eacc6c755d64",
+                                "error": {
+                                    "value": "example error",
+                                    "trace": "example_stack_trace"
+                                },
+                                "output_chunk_id": "a3a3a1c6-826f-5fc0-8dee-9d015e1fff30"
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "state": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Syncing",
+                                        "Determining",
+                                        "Validating",
+                                        "Running",
+                                        "Failed",
+                                        "Succeeded"
+                                    ],
+                                    "description": "the state of the data chunk."
+                                },
+                                "chunk_id": {
+                                    "type": "string",
+                                    "description": "the ID of the chunk"
+                                },
+                                "error": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "trace": {
+                                            "type": "string",
+                                            "description": "The full trace of the error. This may only be available in a debug mode"
+                                        }
+                                    },
+                                    "required": [
+                                        "value"
+                                    ],
+                                    "description": "the error which caused the chunk to fail if it is in the Failed state"
+                                },
+                                "output_chunk_id": {
+                                    "type": "string",
+                                    "description": "the output chunk ID association"
+                                }
+                            },
+                            "required": [
+                                "state",
+                                "chunk_id"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Get specific chunk",
+                "description": "This is not likely to be used, as we might as well get all chunks, but it needs to be here.",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "chunkID",
+                        "in": "path",
+                        "description": "the input chunk ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
+        },
+        "/processors/{id}/runs/{runID}/data/output/{chunkID}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "examples": {
+                            "application/json": {
+                                "state": "Syncing",
+                                "chunk_id": "a72eda4e-8db4-5692-b40c-eacc6c755d64",
+                                "error": {
+                                    "value": "example error",
+                                    "trace": "example_stack_trace"
+                                },
+                                "data": {}
+                            }
+                        },
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "state": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Syncing",
+                                        "Determining",
+                                        "Validating",
+                                        "Running",
+                                        "Failed",
+                                        "Succeeded"
+                                    ],
+                                    "description": "the state of the data chunk."
+                                },
+                                "chunk_id": {
+                                    "type": "string",
+                                    "description": "the ID of the chunk"
+                                },
+                                "error": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "trace": {
+                                            "type": "string",
+                                            "description": "The full trace of the error. This may only be available in a debug mode"
+                                        }
+                                    },
+                                    "required": [
+                                        "value"
+                                    ],
+                                    "description": "the error which caused the chunk to fail if it is in the Failed state"
+                                },
+                                "data": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            },
+                            "required": [
+                                "state",
+                                "chunk_id"
+                            ]
+                        }
+                    }
+                },
+                "summary": "Get specific chunk",
+                "description": "",
+                "tags": [
+                    "Processors"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The processor ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "runID",
+                        "in": "path",
+                        "description": "The run ID",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "chunkID",
+                        "in": "path",
+                        "description": "The output chunk ID to retrieve",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ]
+            }
         }
     },
     "definitions": {
-        "Processor": {
+        "Processors Collection": {},
+        "Processor": {},
+        "Runs": {},
+        "Run/Generic State Information": {},
+        "Configuration": {
+            "type": "object",
+            "properties": {}
+        },
+        "Data": {
+            "type": "object",
+            "properties": {}
+        },
+        "Data Chunk Input": {},
+        "Data Chunk Output": {},
+        "ProcessorObject": {
             "type": "object",
             "required": [
                 "id",
@@ -128,14 +823,153 @@
                 "tags": {
                     "type": "array",
                     "items": {}
-                },
-                "author": {
-                    "type": "string"
                 }
             }
         },
-        "Processors": {}
+        "Run": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ProcessorState"
+                },
+                {
+                    "type": "object",
+                    "required": [
+                        "runID"
+                    ],
+                    "properties": {
+                        "runID": {
+                            "type": "string",
+                            "description": "the globally unique ID of the run"
+                        },
+                        "configuration": {
+                            "$ref": "#/definitions/Configuration",
+                            "description": "the current configuration"
+                        }
+                    }
+                }
+            ]
+        },
+        "Error": {
+            "type": "object",
+            "required": [
+                "value"
+            ],
+            "properties": {
+                "value": {
+                    "type": "string"
+                },
+                "trace": {
+                    "type": "string",
+                    "description": "The full trace of the error. This may only be available in a debug mode"
+                }
+            }
+        },
+        "ChunkState": {
+            "type": "object",
+            "required": [
+                "state"
+            ],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "Syncing",
+                        "Determining",
+                        "Validating",
+                        "Running",
+                        "Failed",
+                        "Succeeded"
+                    ],
+                    "description": "the state of the data chunk."
+                }
+            }
+        },
+        "Chunk": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ChunkState"
+                },
+                {
+                    "type": "object",
+                    "required": [
+                        "chunk_id"
+                    ],
+                    "properties": {
+                        "chunk_id": {
+                            "type": "string",
+                            "description": "the ID of the chunk"
+                        },
+                        "error": {
+                            "$ref": "#/definitions/Error",
+                            "description": "the error which caused the chunk to fail if it is in the Failed state"
+                        }
+                    }
+                }
+            ]
+        },
+        "ProcessorState": {
+            "type": "object",
+            "required": [
+                "state"
+            ],
+            "properties": {
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "Uninitialized",
+                        "Configured",
+                        "Idle",
+                        "Processing",
+                        "Failed",
+                        "Succeeded",
+                        "CompletedWithErrors"
+                    ],
+                    "description": "the state of the processor"
+                }
+            }
+        },
+        "Source": {
+            "type": "object",
+            "properties": {}
+        },
+        "Sink": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "the sink stream identifier"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "a human readable name for the sink"
+                }
+            }
+        },
+        "Filesystem": {
+            "type": "object",
+            "required": [
+                "driver",
+                "location"
+            ],
+            "properties": {
+                "driver": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                }
+            }
+        }
     },
     "securityDefinitions": {},
-    "tags": []
+    "tags": [
+        {
+            "name": "Processors",
+            "description": "All of the processor API is designed here.\n\nBecause the Wiz Manager could likely schedule multiple Pipelines or Tasks in the same Pipeline that use the same Processor Task on one physical/logical Processor, the Processor MUST support partitioning all of its logic including Configuration and State by a Manager-scope globally unique **Run ID**"
+        }
+    ]
 }
