@@ -2,23 +2,24 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
-//import "google/rpc/status.proto";
 
-//option go_package = "github.com/alexkreidler/api";
 package api;
 
-// TODO: handle errors idiomatically. For now just return a null object
+// TODO: handle errors idiomatically with: (For now we just return a null object)
+//import "google/rpc/status.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 // ProcessorAPI defines the Wiz Procesor API
 service ProcessorAPI {
 
     // GetAllProcessors lists all processors on an endpoint
     rpc GetAllProcessors (google.protobuf.Empty) returns (Processors);
-    rpc GetProcessor (Processor.ID) returns (Processor);
+    rpc GetProcessor (ProcessorID) returns (Processor);
 
 
     // GetRuns lists all runs on a processor
-    rpc GetRuns (Processor.ID) returns (Run);
+    rpc GetRuns (ProcessorID) returns (Run);
 
     // GetRun returns an individual run
     rpc GetRun (IndividualRunID) returns (Configuration);
@@ -54,14 +55,15 @@ service ProcessorAPI {
 }
 
 message Processors {
-    repeated Processor processors = 1;
+    repeated Processor processors = 1 [(gogoproto.nullable) = false];
+}
+
+message ProcessorID {
+    string ID = 1;
 }
 
 message Processor {
-    message ID {
-        string id = 1;
-    }
-
+    ProcessorID ID = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
     // human readable name
     string name = 2;
     string version = 3;
@@ -78,7 +80,7 @@ message AddDataRequest {
 
 // ConfigureRequest requires a processor ID, Run ID, and the configuration to send
 message ConfigureRequest {
-    // Processor.ID processorID = 1;
+    // ProcessorID processorID = 1;
     // string runID = 2;
     IndividualRunID runID = 1;
     Configuration config = 2;
@@ -93,7 +95,7 @@ message Run {
 
 // IndividualRunRequest identifies one specific run on a processor
 message IndividualRunID {
-    Processor.ID processorID = 1;
+    ProcessorID processorID = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
     string runID = 2;
 }
 

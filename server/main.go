@@ -28,45 +28,6 @@ func newServer() *server {
 	}
 }
 
-
-func (s server) GetAllProcessors(context.Context, *empty.Empty) (*Processors, error) {
-	z:=s.api.GetAllProcessors()
-	return &Processors{Processors:z}, nil
-}
-
-func (s server) GetProcessor(c context.Context, id *Processor_ID) (*Processor, error) {
-	return s.api.GetProcessor(id.Id)
-}
-
-func (s server) GetRuns(context.Context, *Processor_ID) (*Run, error) {
-	panic("implement me")
-}
-
-func (s server) GetRun(context.Context, *IndividualRunID) (*Configuration, error) {
-	panic("implement me")
-}
-
-func (s server) GetConfig(context.Context, *IndividualRunID) (*Configuration, error) {
-	panic("implement me")
-}
-
-func (s server) Configure(context.Context, *ConfigureRequest) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (s server) GetRunState(*IndividualRunID, ProcessorAPI_GetRunStateServer) error {
-	panic("implement me")
-}
-
-func (s server) GetRunData(context.Context, *IndividualRunID) (*DataSpec, error) {
-	panic("implement me")
-}
-
-func (s server) AddData(context.Context, *AddDataRequest) (*Data, error) {
-	panic("implement me")
-}
-
-
 // SayHello implements helloworld.GreeterServer
 // func (s *server) SayHello(ctx context.Context, in *pb.test) (*pb.HelloReply, error) {
 // 	log.Printf("Received: %v", in.GetName())
