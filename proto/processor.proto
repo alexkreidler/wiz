@@ -4,6 +4,9 @@ import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 //import "google/rpc/status.proto";
 
+//option go_package = "github.com/alexkreidler/api";
+package api;
+
 // TODO: handle errors idiomatically. For now just return a null object
 
 // ProcessorAPI defines the Wiz Procesor API

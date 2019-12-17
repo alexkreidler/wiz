@@ -1,6 +1,8 @@
 package executor
 
-import "github.com/alexkreidler/wiz/models"
+import (
+	"github.com/alexkreidler/wiz/api"
+)
 
 //Processor is a simple system for Go builtin processors. It should abstract away Runs, etc and only need configuration and data
 //Each chunk should be able to spawn a new processor. In the future, this may change
@@ -13,7 +15,7 @@ type Processor interface {
 	//Configure(config interface{}) error
 
 	//It will be in Syncing by default, and then for our simple implementation case, go into validating, running, and then success or failure
-	State() <-chan models.ChunkState
+	State() <-chan api.State
 
 	// This provides the raw data to the processor, either in FS form or raw form.
 	Run(data interface{})
@@ -21,7 +23,7 @@ type Processor interface {
 	//GetError returns the error which occured if it goes from validating to configured, running to configured or failed
 	GetError()
 
-	Metadata() models.ProcessorObject
+	Metadata() api.Processor
 
 	//The processor should automatically shutdown any resources used by it upon the
 	//sending of the Succeeded or Failed states

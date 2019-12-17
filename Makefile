@@ -22,3 +22,11 @@ clean-gen-swagger-server: clean-swagger gen-swagger-server
 
 gen-swagger-server: # in the past we did this, now swagger is the truth: gen-swagger
 	swagger generate server -f $(SWAGGER_FILE)
+
+.PHONY: proto
+proto:
+	mkdir ./api
+	protoc --proto_path=./proto --go_out=./api ./proto/*.proto
+
+clean-proto:
+	rm -rf ./api/

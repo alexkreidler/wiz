@@ -2,23 +2,24 @@ package executor
 
 import (
 	"fmt"
-	"github.com/alexkreidler/wiz/models"
+	"github.com/alexkreidler/wiz/api"
+	"github.com/golang/protobuf/ptypes/any"
 )
 
 //ProcessorExecutorAPI implements the Wiz Processor interface, and can be called by an HTTP  or gRPC transport layer
 type ProcessorExecutorAPI interface {
-	GetAllProcessors() []*models.ProcessorObject
-	GetProcessor(id string) (models.ProcessorObject, error)
-	GetAllRuns(processorID string) ([]*models.Run, error)
-	GetRun(processorID string, runID string) (models.Run, error)
-	GetConfig(processorID string, runID string) (models.Configuration, error)
-	UpdateConfig(processorID string, runID string, configuration models.Configuration) (models.Configuration, error)
+	GetAllProcessors() []*api.Processor
+	GetProcessor(id string) (api.Processor, error)
+	GetAllRuns(processorID string) ([]*api.Run, error)
+	GetRun(processorID string, runID string) (api.Run, error)
+	GetConfig(processorID string, runID string) (api.Configuration, error)
+	UpdateConfig(processorID string, runID string, configuration api.Configuration) (api.Configuration, error)
 
-	GetData(processorID string, runID string) (models.DataSpec, error)
+	GetData(processorID string, runID string) (api.DataSpec, error)
 
-	AddData(processorID string, runID string, chunkID string) (models.Data, error)
-	GetInputChunk(processorID string, runID string, chunkID string) (models.Data, error)
-	GetOutputChunk(processorID string, runID string, chunkID string) (models.Data, error)
+	AddData(processorID string, runID string, chunkID string) (api.Data, error)
+	GetInputChunk(processorID string, runID string, chunkID string) (api.Data, error)
+	GetOutputChunk(processorID string, runID string, chunkID string) (api.Data, error)
 }
 
 const Version = "0.1.0"
@@ -38,8 +39,8 @@ func NewProcessorExecutor() *ProcessorExecutor {
 
 //func NewProcessor
 
-func (p ProcessorExecutor) GetAllProcessors() []*models.ProcessorObject {
-	all := make([]*models.ProcessorObject, len(p.p))
+func (p ProcessorExecutor) GetAllProcessors() []*api.Processor {
+	all := make([]*api.Processor, len(p.p))
 	for _, processor := range p.p {
 		z := processor.Metadata()
 		all = append(all, &z)
@@ -47,61 +48,65 @@ func (p ProcessorExecutor) GetAllProcessors() []*models.ProcessorObject {
 	return all
 }
 
-func (p ProcessorExecutor) GetProcessor(id string) (models.ProcessorObject, error) {
+func (p ProcessorExecutor) GetProcessor(id string) (api.Processor, error) {
 	processor, ok := p.p[id]
 	if !ok {
-		return models.ProcessorObject{}, fmt.Errorf("processor %s not found", id)
+		return api.Processor{}, fmt.Errorf("processor %s not found", id)
 	} else {
 		return processor.Metadata(), nil
 	}
 }
 
-func (p ProcessorExecutor) GetAllRuns(processorID string) ([]*models.Run, error) {
+func (p ProcessorExecutor) GetAllRuns(processorID string) ([]*api.Run, error) {
 	panic("implement me")
 }
 
-func (p ProcessorExecutor) GetRun(processorID string, runID string) (models.Run, error) {
+func (p ProcessorExecutor) GetRun(processorID string, runID string) (api.Run, error) {
 	panic("implement me")
 }
 
-func (p ProcessorExecutor) GetConfig(processorID string, runID string) (models.Configuration, error) {
-	processor, ok := p.p[processorID]
+func (p ProcessorExecutor) GetConfig(processorID string, runID string) (api.Configuration, error) {
+	_, ok := p.p[processorID]
 	if !ok {
-		return nil, fmt.Errorf("processor %s not found", processorID)
+		return api.Configuration{}, fmt.Errorf("processor %s not found", processorID)
 	}
-	return processor.Metadata(), nil
+	//return processor.Metadata()., nil
+	return buildConfig(), nil
+}
+func buildConfig() api.Configuration  {
+	return api.Configuration{Config: &any.Any{TypeUrl: "https://wiz-project.ml/configurtion",Value:[]byte(`test`)}}
 }
 
-func (p ProcessorExecutor) UpdateConfig(processorID string, runID string, configuration models.Configuration) (models.Configuration, error) {
+func (p ProcessorExecutor) UpdateConfig(processorID string, runID string, configuration api.Configuration) (api.Configuration, error) {
 	processor, ok := p.p[processorID]
 	if !ok {
-		return nil, fmt.Errorf("processor %s not found", processorID)
+		return buildConfig(), fmt.Errorf("processor %s not found", processorID)
 	}
 
 	if p.concreteProcessors[processorID] == nil {
-		return nil, fmt.Errorf("failed")
+		return buildConfig(), fmt.Errorf("failed")
 		//p.concreteProcessors[processorID] = make(map[string]Processor)
 	}
 	proc, err := processor.New(configuration)
 	if err != nil {
-		return nil, err
+		return buildConfig(), err
 	}
 	p.concreteProcessors[processorID][runID] = proc
 	return configuration, nil
 }
 
-func (p ProcessorExecutor) GetData(processorID string, runID string) (models.DataSpec, error) {
+func (p ProcessorExecutor) GetData(processorID string, runID string) (api.DataSpec, error) {
 	panic("implement me")
 }
 
-func (p ProcessorExecutor) AddData(processorID string, runID string, chunkID string) (models.Data, error) {
+func (p ProcessorExecutor) AddData(processorID string, runID string, chunkID string) (api.Data, error) {
 	panic("implement me")
 }
 
-func (p ProcessorExecutor) GetInputChunk(processorID string, runID string, chunkID string) (models.Data, error) {
+func (p ProcessorExecutor) GetInputChunk(processorID string, runID string, chunkID string) (api.Data, error) {
 	panic("implement me")
 }
 
-func (p ProcessorExecutor) GetOutputChunk(processorID string, runID string, chunkID string) (models.Data, error) {
+func (p ProcessorExecutor) GetOutputChunk(processorID string, runID string, chunkID string) (api.Data, error) {
 	panic("implement me")
 }
