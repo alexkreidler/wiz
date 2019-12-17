@@ -4,6 +4,9 @@ package restapi
 
 import (
 	"crypto/tls"
+	"fmt"
+	"github.com/alexkreidler/wiz/executor"
+	"github.com/alexkreidler/wiz/models"
 	"net/http"
 
 	errors "github.com/go-openapi/errors"
@@ -21,6 +24,7 @@ func configureFlags(api *operations.WizProcessorAPI) {
 }
 
 func configureAPI(api *operations.WizProcessorAPI) http.Handler {
+	fmt.Println("hello  ")
 	// configure the api here
 	api.ServeError = errors.ServeError
 
@@ -34,19 +38,35 @@ func configureAPI(api *operations.WizProcessorAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	e := executor.NewProcessorExecutor()
+
 	if api.ProcessorsAddDataHandler == nil {
 		api.ProcessorsAddDataHandler = processors.AddDataHandlerFunc(func(params processors.AddDataParams) middleware.Responder {
 			return middleware.NotImplemented("operation processors.AddData has not yet been implemented")
 		})
 	}
-	if api.ProcessorsGetAllProcessorsHandler == nil {
-		api.ProcessorsGetAllProcessorsHandler = processors.GetAllProcessorsHandlerFunc(func(params processors.GetAllProcessorsParams) middleware.Responder {
-			return middleware.NotImplemented("operation processors.GetAllProcessors has not yet been implemented")
-		})
-	}
+
+
+	//	Processor Handlers
+	api.ProcessorsGetAllProcessorsHandler = processors.GetAllProcessorsHandlerFunc(func(params processors.GetAllProcessorsParams) middleware.Responder {
+		ps := e.GetAllProcessors()
+		return &processors.GetAllProcessorsOK{Payload: ps}
+	})
+
+	api.ProcessorsGetProcessorHandler = processors.GetProcessorHandlerFunc(func(params processors.GetProcessorParams) middleware.Responder {
+		ps, err := e.GetProcessor(params.ID)
+		if err != nil {
+			z := err.Error()
+			return &processors.GetProcessorNotFound{Payload:&models.Error{Value:&z}}
+		}
+		//How is this so tedious
+		return &processors.GetProcessorOK{Payload:&ps}
+	})
+
 	if api.ProcessorsGetAllRunsHandler == nil {
 		api.ProcessorsGetAllRunsHandler = processors.GetAllRunsHandlerFunc(func(params processors.GetAllRunsParams) middleware.Responder {
 			return middleware.NotImplemented("operation processors.GetAllRuns has not yet been implemented")
+			//return &processors.GetAllRunsOK{Payload:}
 		})
 	}
 	if api.ProcessorsGetConfigHandler == nil {
@@ -69,11 +89,8 @@ func configureAPI(api *operations.WizProcessorAPI) http.Handler {
 			return middleware.NotImplemented("operation processors.GetOutputChunk has not yet been implemented")
 		})
 	}
-	if api.ProcessorsGetProcessorHandler == nil {
-		api.ProcessorsGetProcessorHandler = processors.GetProcessorHandlerFunc(func(params processors.GetProcessorParams) middleware.Responder {
-			return middleware.NotImplemented("operation processors.GetProcessor has not yet been implemented")
-		})
-	}
+	//if api.ProcessorsGetProcessorHandler == nil {
+	//}
 	if api.ProcessorsGetRunHandler == nil {
 		api.ProcessorsGetRunHandler = processors.GetRunHandlerFunc(func(params processors.GetRunParams) middleware.Responder {
 			return middleware.NotImplemented("operation processors.GetRun has not yet been implemented")

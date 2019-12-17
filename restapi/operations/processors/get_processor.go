@@ -8,11 +8,7 @@ package processors
 import (
 	"net/http"
 
-	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
-	strfmt "github.com/go-openapi/strfmt"
-	swag "github.com/go-openapi/swag"
-	validate "github.com/go-openapi/validate"
 )
 
 // GetProcessorHandlerFunc turns a function with the right signature into a get processor handler
@@ -59,77 +55,4 @@ func (o *GetProcessor) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
-}
-
-// GetProcessorOKBody get processor o k body
-// swagger:model GetProcessorOKBody
-type GetProcessorOKBody struct {
-
-	// the machine readable processor ID
-	// Required: true
-	ID *string `json:"id"`
-
-	// a human readable name for the processor
-	// Required: true
-	Name *string `json:"name"`
-
-	// tags
-	Tags []interface{} `json:"tags"`
-
-	// version
-	Version string `json:"version,omitempty"`
-}
-
-// Validate validates this get processor o k body
-func (o *GetProcessorOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *GetProcessorOKBody) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("getProcessorOK"+"."+"id", "body", o.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (o *GetProcessorOKBody) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("getProcessorOK"+"."+"name", "body", o.Name); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetProcessorOKBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetProcessorOKBody) UnmarshalBinary(b []byte) error {
-	var res GetProcessorOKBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
 }

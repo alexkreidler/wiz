@@ -48,28 +48,7 @@ func init() {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "name"
-              ],
-              "properties": {
-                "id": {
-                  "description": "the machine readable processor ID",
-                  "type": "string"
-                },
-                "name": {
-                  "description": "a human readable name for the processor",
-                  "type": "string"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {}
-                },
-                "version": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ProcessorObject"
             },
             "examples": {
               "application/json": {
@@ -81,6 +60,12 @@ func init() {
                 ],
                 "version": "0.1.0"
               }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
         }
@@ -333,14 +318,22 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "object",
+              "required": [
+                "in",
+                "out"
+              ],
               "properties": {
                 "in": {
                   "type": "array",
-                  "items": {}
+                  "items": {
+                    "$ref": "#/definitions/Chunk"
+                  }
                 },
                 "out": {
                   "type": "array",
-                  "items": {}
+                  "items": {
+                    "$ref": "#/definitions/Chunk"
+                  }
                 }
               }
             },
@@ -744,7 +737,9 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "array",
-              "items": {}
+              "items": {
+                "$ref": "#/definitions/Run"
+              }
             },
             "examples": {
               "application/json": [
@@ -774,7 +769,9 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "array",
-              "items": {}
+              "items": {
+                "$ref": "#/definitions/ProcessorObject"
+              }
             },
             "examples": {
               "application/json": [
@@ -846,6 +843,23 @@ func init() {
     },
     "Data Chunk Input": {},
     "Data Chunk Output": {},
+    "DataSpec": {
+      "type": "object",
+      "required": [
+        "in",
+        "out"
+      ],
+      "properties": {
+        "in": {
+          "type": "array",
+          "items": {}
+        },
+        "out": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
     "Error": {
       "type": "object",
       "required": [
@@ -894,7 +908,9 @@ func init() {
         },
         "tags": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "string"
+          }
         },
         "version": {
           "type": "string"
@@ -1007,28 +1023,7 @@ func init() {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "name"
-              ],
-              "properties": {
-                "id": {
-                  "description": "the machine readable processor ID",
-                  "type": "string"
-                },
-                "name": {
-                  "description": "a human readable name for the processor",
-                  "type": "string"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {}
-                },
-                "version": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/ProcessorObject"
             },
             "examples": {
               "application/json": {
@@ -1040,6 +1035,12 @@ func init() {
                 ],
                 "version": "0.1.0"
               }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
         }
@@ -1292,14 +1293,22 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "object",
+              "required": [
+                "in",
+                "out"
+              ],
               "properties": {
                 "in": {
                   "type": "array",
-                  "items": {}
+                  "items": {
+                    "$ref": "#/definitions/Chunk"
+                  }
                 },
                 "out": {
                   "type": "array",
-                  "items": {}
+                  "items": {
+                    "$ref": "#/definitions/Chunk"
+                  }
                 }
               }
             },
@@ -1703,7 +1712,9 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "array",
-              "items": {}
+              "items": {
+                "$ref": "#/definitions/Run"
+              }
             },
             "examples": {
               "application/json": [
@@ -1733,7 +1744,9 @@ func init() {
             "description": "OK",
             "schema": {
               "type": "array",
-              "items": {}
+              "items": {
+                "$ref": "#/definitions/ProcessorObject"
+              }
             },
             "examples": {
               "application/json": [
@@ -1805,6 +1818,23 @@ func init() {
     },
     "Data Chunk Input": {},
     "Data Chunk Output": {},
+    "DataSpec": {
+      "type": "object",
+      "required": [
+        "in",
+        "out"
+      ],
+      "properties": {
+        "in": {
+          "type": "array",
+          "items": {}
+        },
+        "out": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
     "Error": {
       "type": "object",
       "required": [
@@ -1853,7 +1883,9 @@ func init() {
         },
         "tags": {
           "type": "array",
-          "items": {}
+          "items": {
+            "type": "string"
+          }
         },
         "version": {
           "type": "string"

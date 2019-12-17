@@ -26,7 +26,7 @@ type ProcessorObject struct {
 	Name *string `json:"name"`
 
 	// tags
-	Tags []interface{} `json:"tags"`
+	Tags []string `json:"tags"`
 
 	// version
 	Version string `json:"version,omitempty"`

@@ -7,10 +7,15 @@ package processors
 
 import (
 	"net/http"
+	"strconv"
 
+	errors "github.com/go-openapi/errors"
 	middleware "github.com/go-openapi/runtime/middleware"
 	strfmt "github.com/go-openapi/strfmt"
 	swag "github.com/go-openapi/swag"
+	validate "github.com/go-openapi/validate"
+
+	models "github.com/alexkreidler/wiz/models"
 )
 
 // GetDataHandlerFunc turns a function with the right signature into a get data handler
@@ -68,14 +73,79 @@ func (o *GetData) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type GetDataOKBody struct {
 
 	// in
-	In []interface{} `json:"in"`
+	// Required: true
+	In []*models.Chunk `json:"in"`
 
 	// out
-	Out []interface{} `json:"out"`
+	// Required: true
+	Out []*models.Chunk `json:"out"`
 }
 
 // Validate validates this get data o k body
 func (o *GetDataOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateIn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateOut(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetDataOKBody) validateIn(formats strfmt.Registry) error {
+
+	if err := validate.Required("getDataOK"+"."+"in", "body", o.In); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(o.In); i++ {
+		if swag.IsZero(o.In[i]) { // not required
+			continue
+		}
+
+		if o.In[i] != nil {
+			if err := o.In[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getDataOK" + "." + "in" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (o *GetDataOKBody) validateOut(formats strfmt.Registry) error {
+
+	if err := validate.Required("getDataOK"+"."+"out", "body", o.Out); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(o.Out); i++ {
+		if swag.IsZero(o.Out[i]) { // not required
+			continue
+		}
+
+		if o.Out[i] != nil {
+			if err := o.Out[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getDataOK" + "." + "out" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

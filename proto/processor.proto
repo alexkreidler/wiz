@@ -2,11 +2,11 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
+import "google/rpc/status.proto";
 
 message ProcessorID {
-    string name = 1;
-
-    int64 id = 2;
+    // The unique machine-readable processor ID
+    string id = 1;
 }
 
 service ProcessorAPI {
@@ -15,7 +15,7 @@ service ProcessorAPI {
 
     // Configure accepts configuration serialized to a []byte
     // It runs synchronously and returns an error if the configuration is rejected
-    rpc Configure (google.protobuf.Any) returns (google.protobuf.Empty);
+    rpc Configure (google.protobuf.Any) returns (google.rpc.Status);
 
     // ProvideData takes in any data serialized to a []byte and returns nothing on success. It returns an error if the Processor is not yet in a valid source state.
     // Depending on the type of data, this will transition from a Configured to either a Running or back to a Configured state, if the data is rejected. A warning will be sent to  This will transition to the validating state, and to a running state

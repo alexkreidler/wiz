@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+//import "google/rpc/status.proto";
+
+//message ProcessorID {
+//    // The unique machine-readable processor ID
+//    string id = 1;
+//}
+
+service ProcessorAPI {
+
+    // GetAllProcessors lists all processors on an endpoint
+    rpc GetAllProcessors (google.protobuf.Empty) returns (Processors);
+    rpc GetProcessor (Processor.ID) returns (Processor);
+
+
+    // GetRuns lists all runs on a processor
+    rpc GetRuns (Processor.ID) returns (Run);
+
+    // GetRun returns an individual run
+    rpc GetRun (IndividualRunID) returns (Configuration);
+
+    // GetConfig gets the current configuration of a processor Run
+    rpc GetConfig (IndividualRunID) returns (Configuration);
+
+    // Configure accepts configuration serialized to a []byte
+    // It runs synchronously and returns an error if the configuration is rejected
+    // It needs the Run ID to be unique and new (e.g. no existing run)
+    // It will create a new Run with the specified configuration
+    rpc Configure (ConfigureRequest) returns (google.protobuf.Empty);
+
+    // returns a streaming view of the state of a given Run
+    rpc GetRunState (IndividualRunID) returns (stream StateUpdate);
+
+
+    // GetRunData retrieves all of the data chunks associated with a Run
+    rpc GetRunData (IndividualRunID) returns (DataSpec);
+
+    rpc AddData(AddDataRequest) returns (Data);
+
+    // ProvideData takes in any data serialized to a []byte and returns nothing on success. It returns an error if the Processor is not yet in a valid source state.
+    // Depending on the type of data, this will transition from a Configured to either a Running or back to a Configured state, if the data is rejected. A warning will be sent to  This will transition to the validating state, and to a running state
+    // It runs async
+    // Transitions
+    // 1. Validating -> running
+    // 2. Determining -> determined -> validating
+    //    rpc ProvideData (Data) returns (google.protobuf.Empty);
+
+    // GetCacheState returns the cache state which specifies how an external resource is fetched
+    //    rpc GetCacheState (google.protobuf.Empty) returns (CacheState);
+}
+
+message Processors {
+    repeated Processor processors = 1;
+}
+
+message Processor {
+    message ID {
+        string id = 1;
+    }
+
+    // human readable name
+    string name = 2;
+    string version = 3;
+}
+
+message Configuration {
+    google.protobuf.Any config = 3;
+}
+
+message AddDataRequest {
+    IndividualRunID id = 1;
+    Data data = 2;
+}
+
+// ConfigureRequest requires a processor ID, Run ID, and the configuration to send
+message ConfigureRequest {
+    // Processor.ID processorID = 1;
+    // string runID = 2;
+    IndividualRunID runID = 1;
+    Configuration config = 2;
+}
+
+// A run is globally unique, associated with configuration, and has a state
+message Run {
+    string runID = 1;
+    Configuration config = 2;
+    State state = 3;
+}
+
+// IndividualRunRequest identifies one specific run on a processor
+message IndividualRunID {
+    Processor.ID processorID = 1;
+    string runID = 2;
+}
+
+
+message Data {
+    string chunk_id = 1;
+    DataType type = 2;
+    oneof data {
+        // raw byte serialized input data. This is specified in data type and is usually RAW_JSON.
+        google.protobuf.Any raw = 3;
+        FilesystemReference fs = 4;
+        // google.protobuf.Empty = 5;
+    }
+    string output_chunk_id = 5;
+}
+
+// DataSpec represents all the chunks that the processor has both recieved and written
+message DataSpec {
+    repeated Data in = 1;
+    repeated Data out = 2;
+}
+
+message FilesystemReference {
+    string driver = 1;
+    string location = 2;
+
+    // TODO: maybe add metadata like File Size?
+}
+
+// Data is either raw data, in JSON, or a filesystem reference
+enum DataType {
+    RAW_JSON = 0;
+    FILESYSTEM_REF = 1;
+}
+
+// State
+
+message StateUpdate {
+    State oldState = 1;
+    State newState = 2;
+}
+
+enum State {
+    UNINITIALIZED = 0;
+    CONFIGURED = 1;
+    DETERMINING = 2;
+    DETERMINED = 3;
+    VALIDATING = 4;
+    RUNNING = 5;
+    SUCCESS = 6;
+    FAILURE = 7;
+}

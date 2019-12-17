@@ -123,9 +123,7 @@ Returns all the data chunks which the processor has recieved, and all that it ha
 TODO: figure out if each chunk should report state: yes
 
 + Response 200 (application/json)
-    + Attributes
-        + in (array[Chunk])
-        + out (array[Chunk])
+    + Attributes (DataSpec)
 
 ## Data Chunk Input [/processor/{id}/run/{runID}/data/input/{chunkID}]
 A data chunk represents a logical division of the data. This is usually by file or by record. However, it could be a large file, so we need to consider the Syncing state where the chunk takes a long time to arrive.
@@ -236,3 +234,7 @@ TODO: add these, e.g. generic sources and sinks
 TODO: make the value use JSON OneOf or similar to strongly type the filesystem API and preserve the raw API.
 + type: raw, file (enum, required)
 + value (object)
+
+## DataSpec (object)
++ in (array[Chunk], required)
++ out (array[Chunk], required)

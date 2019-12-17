@@ -1,4 +1,4 @@
-package executor
+package environment
 
 // Environment represents a deployment/execution environment where tasks can be executed
 type Environment interface {

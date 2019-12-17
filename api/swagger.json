@@ -27,7 +27,9 @@
                         },
                         "schema": {
                             "type": "array",
-                            "items": {}
+                            "items": {
+                                "$ref": "#/definitions/ProcessorObject"
+                            }
                         }
                     }
                 },
@@ -61,28 +63,14 @@
                             }
                         },
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "string",
-                                    "description": "the machine readable processor ID"
-                                },
-                                "name": {
-                                    "type": "string",
-                                    "description": "a human readable name for the processor"
-                                },
-                                "version": {
-                                    "type": "string"
-                                },
-                                "tags": {
-                                    "type": "array",
-                                    "items": {}
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "name"
-                            ]
+                            "$ref": "#/definitions/ProcessorObject"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 },
@@ -123,7 +111,9 @@
                         },
                         "schema": {
                             "type": "array",
-                            "items": {}
+                            "items": {
+                                "$ref": "#/definitions/Run"
+                            }
                         }
                     }
                 },
@@ -405,13 +395,21 @@
                             "properties": {
                                 "in": {
                                     "type": "array",
-                                    "items": {}
+                                    "items": {
+                                        "$ref": "#/definitions/Chunk"
+                                    }
                                 },
                                 "out": {
                                     "type": "array",
-                                    "items": {}
+                                    "items": {
+                                        "$ref": "#/definitions/Chunk"
+                                    }
                                 }
-                            }
+                            },
+                            "required": [
+                                "in",
+                                "out"
+                            ]
                         }
                     }
                 },
@@ -832,7 +830,9 @@
                 },
                 "tags": {
                     "type": "array",
-                    "items": {}
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -971,6 +971,23 @@
                 },
                 "location": {
                     "type": "string"
+                }
+            }
+        },
+        "DataSpec": {
+            "type": "object",
+            "required": [
+                "in",
+                "out"
+            ],
+            "properties": {
+                "in": {
+                    "type": "array",
+                    "items": {}
+                },
+                "out": {
+                    "type": "array",
+                    "items": {}
                 }
             }
         }

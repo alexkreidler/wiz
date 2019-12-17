@@ -20,5 +20,5 @@ clean-swagger:
 
 clean-gen-swagger-server: clean-swagger gen-swagger-server
 
-gen-swagger-server: gen-swagger
+gen-swagger-server: # in the past we did this, now swagger is the truth: gen-swagger
 	swagger generate server -f $(SWAGGER_FILE)

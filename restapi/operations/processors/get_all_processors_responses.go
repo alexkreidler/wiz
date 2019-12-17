@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "github.com/alexkreidler/wiz/models"
 )
 
 // GetAllProcessorsOKCode is the HTTP code returned for type GetAllProcessorsOK
@@ -23,7 +25,7 @@ type GetAllProcessorsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []interface{} `json:"body,omitempty"`
+	Payload []*models.ProcessorObject `json:"body,omitempty"`
 }
 
 // NewGetAllProcessorsOK creates GetAllProcessorsOK with default headers values
@@ -33,13 +35,13 @@ func NewGetAllProcessorsOK() *GetAllProcessorsOK {
 }
 
 // WithPayload adds the payload to the get all processors o k response
-func (o *GetAllProcessorsOK) WithPayload(payload []interface{}) *GetAllProcessorsOK {
+func (o *GetAllProcessorsOK) WithPayload(payload []*models.ProcessorObject) *GetAllProcessorsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get all processors o k response
-func (o *GetAllProcessorsOK) SetPayload(payload []interface{}) {
+func (o *GetAllProcessorsOK) SetPayload(payload []*models.ProcessorObject) {
 	o.Payload = payload
 }
 
@@ -50,7 +52,7 @@ func (o *GetAllProcessorsOK) WriteResponse(rw http.ResponseWriter, producer runt
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]interface{}, 0, 50)
+		payload = make([]*models.ProcessorObject, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

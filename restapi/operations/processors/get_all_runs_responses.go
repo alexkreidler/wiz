@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+
+	models "github.com/alexkreidler/wiz/models"
 )
 
 // GetAllRunsOKCode is the HTTP code returned for type GetAllRunsOK
@@ -23,7 +25,7 @@ type GetAllRunsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []interface{} `json:"body,omitempty"`
+	Payload []*models.Run `json:"body,omitempty"`
 }
 
 // NewGetAllRunsOK creates GetAllRunsOK with default headers values
@@ -33,13 +35,13 @@ func NewGetAllRunsOK() *GetAllRunsOK {
 }
 
 // WithPayload adds the payload to the get all runs o k response
-func (o *GetAllRunsOK) WithPayload(payload []interface{}) *GetAllRunsOK {
+func (o *GetAllRunsOK) WithPayload(payload []*models.Run) *GetAllRunsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get all runs o k response
-func (o *GetAllRunsOK) SetPayload(payload []interface{}) {
+func (o *GetAllRunsOK) SetPayload(payload []*models.Run) {
 	o.Payload = payload
 }
 
@@ -50,7 +52,7 @@ func (o *GetAllRunsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pr
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]interface{}, 0, 50)
+		payload = make([]*models.Run, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
