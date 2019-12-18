@@ -3,14 +3,14 @@ package executor
 import (
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
-	"github.com/golang/protobuf/ptypes/any"
+	"github.com/gogo/protobuf/types"
 )
 
 //ProcessorExecutorAPI implements the Wiz Processor interface, and can be called by an HTTP  or gRPC transport layer
 type ProcessorExecutorAPI interface {
-	GetAllProcessors() []*api.Processor
+	GetAllProcessors() []api.Processor
 	GetProcessor(id string) (api.Processor, error)
-	GetAllRuns(processorID string) ([]*api.Run, error)
+	GetAllRuns(processorID string) ([]api.Run, error)
 	GetRun(processorID string, runID string) (api.Run, error)
 	GetConfig(processorID string, runID string) (api.Configuration, error)
 	UpdateConfig(processorID string, runID string, configuration api.Configuration) (api.Configuration, error)
@@ -33,17 +33,17 @@ type ProcessorExecutor struct {
 	concreteProcessors map[string]map[string]Processor
 }
 
-func NewProcessorExecutor() *ProcessorExecutor {
-	return &ProcessorExecutor{version: Version, p: make(map[string]Processor), concreteProcessors: make(map[string]map[string]Processor)}
+
+func NewProcessorExecutor() ProcessorExecutor {
+	return ProcessorExecutor{version: Version, p: make(map[string]Processor), concreteProcessors: make(map[string]map[string]Processor)}
 }
 
 //func NewProcessor
 
-func (p ProcessorExecutor) GetAllProcessors() []*api.Processor {
-	all := make([]*api.Processor, len(p.p))
+func (p ProcessorExecutor) GetAllProcessors() []api.Processor {
+	all := make([]api.Processor, len(p.p))
 	for _, processor := range p.p {
-		z := processor.Metadata()
-		all = append(all, &z)
+		all = append(all, processor.Metadata())
 	}
 	return all
 }
@@ -57,7 +57,7 @@ func (p ProcessorExecutor) GetProcessor(id string) (api.Processor, error) {
 	}
 }
 
-func (p ProcessorExecutor) GetAllRuns(processorID string) ([]*api.Run, error) {
+func (p ProcessorExecutor) GetAllRuns(processorID string) ([]api.Run, error) {
 	panic("implement me")
 }
 
@@ -74,7 +74,7 @@ func (p ProcessorExecutor) GetConfig(processorID string, runID string) (api.Conf
 	return buildConfig(), nil
 }
 func buildConfig() api.Configuration  {
-	return api.Configuration{Config: &any.Any{TypeUrl: "https://wiz-project.ml/configurtion",Value:[]byte(`test`)}}
+	return api.Configuration{Config: &types.Any{TypeUrl: "https://wiz-project.ml/configurtion",Value:[]byte(`test`)}}
 }
 
 func (p ProcessorExecutor) UpdateConfig(processorID string, runID string, configuration api.Configuration) (api.Configuration, error) {

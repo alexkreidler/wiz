@@ -19,10 +19,10 @@ service ProcessorAPI {
 
 
     // GetRuns lists all runs on a processor
-    rpc GetRuns (ProcessorID) returns (Run);
+    rpc GetRuns (ProcessorID) returns (Runs);
 
     // GetRun returns an individual run
-    rpc GetRun (IndividualRunID) returns (Configuration);
+    rpc GetRun (IndividualRunID) returns (Run);
 
     // GetConfig gets the current configuration of a processor Run
     rpc GetConfig (IndividualRunID) returns (Configuration);
@@ -56,6 +56,10 @@ service ProcessorAPI {
 
 message Processors {
     repeated Processor processors = 1 [(gogoproto.nullable) = false];
+}
+
+message Runs {
+    repeated Run runs = 1 [(gogoproto.nullable) = false];
 }
 
 message ProcessorID {

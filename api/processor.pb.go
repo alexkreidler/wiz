@@ -9,16 +9,12 @@ import (
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
-	any "github.com/golang/protobuf/ptypes/any"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
 	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -36,8 +32,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type DataType int32
 
 const (
-	RAW_JSON       DataType = 0
-	FILESYSTEM_REF DataType = 1
+	DataType_RAW_JSON       DataType = 0
+	DataType_FILESYSTEM_REF DataType = 1
 )
 
 var DataType_name = map[int32]string{
@@ -50,6 +46,10 @@ var DataType_value = map[string]int32{
 	"FILESYSTEM_REF": 1,
 }
 
+func (x DataType) String() string {
+	return proto.EnumName(DataType_name, int32(x))
+}
+
 func (DataType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_6783724e039e1aa6, []int{0}
 }
@@ -57,14 +57,14 @@ func (DataType) EnumDescriptor() ([]byte, []int) {
 type State int32
 
 const (
-	UNINITIALIZED State = 0
-	CONFIGURED    State = 1
-	DETERMINING   State = 2
-	DETERMINED    State = 3
-	VALIDATING    State = 4
-	RUNNING       State = 5
-	SUCCESS       State = 6
-	FAILURE       State = 7
+	State_UNINITIALIZED State = 0
+	State_CONFIGURED    State = 1
+	State_DETERMINING   State = 2
+	State_DETERMINED    State = 3
+	State_VALIDATING    State = 4
+	State_RUNNING       State = 5
+	State_SUCCESS       State = 6
+	State_FAILURE       State = 7
 )
 
 var State_name = map[int32]string{
@@ -89,6 +89,10 @@ var State_value = map[string]int32{
 	"FAILURE":       7,
 }
 
+func (x State) String() string {
+	return proto.EnumName(State_name, int32(x))
+}
+
 func (State) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_6783724e039e1aa6, []int{1}
 }
@@ -97,8 +101,9 @@ type Processors struct {
 	Processors []Processor `protobuf:"bytes,1,rep,name=processors,proto3" json:"processors"`
 }
 
-func (m *Processors) Reset()      { *m = Processors{} }
-func (*Processors) ProtoMessage() {}
+func (m *Processors) Reset()         { *m = Processors{} }
+func (m *Processors) String() string { return proto.CompactTextString(m) }
+func (*Processors) ProtoMessage()    {}
 func (*Processors) Descriptor() ([]byte, []int) {
 	return fileDescriptor_6783724e039e1aa6, []int{0}
 }
@@ -136,14 +141,59 @@ func (m *Processors) GetProcessors() []Processor {
 	return nil
 }
 
+type Runs struct {
+	Runs []Run `protobuf:"bytes,1,rep,name=runs,proto3" json:"runs"`
+}
+
+func (m *Runs) Reset()         { *m = Runs{} }
+func (m *Runs) String() string { return proto.CompactTextString(m) }
+func (*Runs) ProtoMessage()    {}
+func (*Runs) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6783724e039e1aa6, []int{1}
+}
+func (m *Runs) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Runs) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Runs.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Runs) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Runs.Merge(m, src)
+}
+func (m *Runs) XXX_Size() int {
+	return m.Size()
+}
+func (m *Runs) XXX_DiscardUnknown() {
+	xxx_messageInfo_Runs.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Runs proto.InternalMessageInfo
+
+func (m *Runs) GetRuns() []Run {
+	if m != nil {
+		return m.Runs
+	}
+	return nil
+}
+
 type ProcessorID struct {
 	ID string `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
 }
 
-func (m *ProcessorID) Reset()      { *m = ProcessorID{} }
-func (*ProcessorID) ProtoMessage() {}
+func (m *ProcessorID) Reset()         { *m = ProcessorID{} }
+func (m *ProcessorID) String() string { return proto.CompactTextString(m) }
+func (*ProcessorID) ProtoMessage()    {}
 func (*ProcessorID) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{1}
+	return fileDescriptor_6783724e039e1aa6, []int{2}
 }
 func (m *ProcessorID) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -186,10 +236,11 @@ type Processor struct {
 	Version string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 }
 
-func (m *Processor) Reset()      { *m = Processor{} }
-func (*Processor) ProtoMessage() {}
+func (m *Processor) Reset()         { *m = Processor{} }
+func (m *Processor) String() string { return proto.CompactTextString(m) }
+func (*Processor) ProtoMessage()    {}
 func (*Processor) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{2}
+	return fileDescriptor_6783724e039e1aa6, []int{3}
 }
 func (m *Processor) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -233,13 +284,14 @@ func (m *Processor) GetVersion() string {
 }
 
 type Configuration struct {
-	Config *any.Any `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
+	Config *types.Any `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
 }
 
-func (m *Configuration) Reset()      { *m = Configuration{} }
-func (*Configuration) ProtoMessage() {}
+func (m *Configuration) Reset()         { *m = Configuration{} }
+func (m *Configuration) String() string { return proto.CompactTextString(m) }
+func (*Configuration) ProtoMessage()    {}
 func (*Configuration) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{3}
+	return fileDescriptor_6783724e039e1aa6, []int{4}
 }
 func (m *Configuration) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -268,7 +320,7 @@ func (m *Configuration) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Configuration proto.InternalMessageInfo
 
-func (m *Configuration) GetConfig() *any.Any {
+func (m *Configuration) GetConfig() *types.Any {
 	if m != nil {
 		return m.Config
 	}
@@ -280,10 +332,11 @@ type AddDataRequest struct {
 	Data *Data            `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
-func (m *AddDataRequest) Reset()      { *m = AddDataRequest{} }
-func (*AddDataRequest) ProtoMessage() {}
+func (m *AddDataRequest) Reset()         { *m = AddDataRequest{} }
+func (m *AddDataRequest) String() string { return proto.CompactTextString(m) }
+func (*AddDataRequest) ProtoMessage()    {}
 func (*AddDataRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{4}
+	return fileDescriptor_6783724e039e1aa6, []int{5}
 }
 func (m *AddDataRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -334,10 +387,11 @@ type ConfigureRequest struct {
 	Config *Configuration   `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
 }
 
-func (m *ConfigureRequest) Reset()      { *m = ConfigureRequest{} }
-func (*ConfigureRequest) ProtoMessage() {}
+func (m *ConfigureRequest) Reset()         { *m = ConfigureRequest{} }
+func (m *ConfigureRequest) String() string { return proto.CompactTextString(m) }
+func (*ConfigureRequest) ProtoMessage()    {}
 func (*ConfigureRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{5}
+	return fileDescriptor_6783724e039e1aa6, []int{6}
 }
 func (m *ConfigureRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -387,10 +441,11 @@ type Run struct {
 	State  State          `protobuf:"varint,3,opt,name=state,proto3,enum=api.State" json:"state,omitempty"`
 }
 
-func (m *Run) Reset()      { *m = Run{} }
-func (*Run) ProtoMessage() {}
+func (m *Run) Reset()         { *m = Run{} }
+func (m *Run) String() string { return proto.CompactTextString(m) }
+func (*Run) ProtoMessage()    {}
 func (*Run) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{6}
+	return fileDescriptor_6783724e039e1aa6, []int{7}
 }
 func (m *Run) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -437,7 +492,7 @@ func (m *Run) GetState() State {
 	if m != nil {
 		return m.State
 	}
-	return UNINITIALIZED
+	return State_UNINITIALIZED
 }
 
 // IndividualRunRequest identifies one specific run on a processor
@@ -446,10 +501,11 @@ type IndividualRunID struct {
 	RunID       string `protobuf:"bytes,2,opt,name=runID,proto3" json:"runID,omitempty"`
 }
 
-func (m *IndividualRunID) Reset()      { *m = IndividualRunID{} }
-func (*IndividualRunID) ProtoMessage() {}
+func (m *IndividualRunID) Reset()         { *m = IndividualRunID{} }
+func (m *IndividualRunID) String() string { return proto.CompactTextString(m) }
+func (*IndividualRunID) ProtoMessage()    {}
 func (*IndividualRunID) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{7}
+	return fileDescriptor_6783724e039e1aa6, []int{8}
 }
 func (m *IndividualRunID) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -495,10 +551,11 @@ type Data struct {
 	OutputChunkId string      `protobuf:"bytes,5,opt,name=output_chunk_id,json=outputChunkId,proto3" json:"output_chunk_id,omitempty"`
 }
 
-func (m *Data) Reset()      { *m = Data{} }
-func (*Data) ProtoMessage() {}
+func (m *Data) Reset()         { *m = Data{} }
+func (m *Data) String() string { return proto.CompactTextString(m) }
+func (*Data) ProtoMessage()    {}
 func (*Data) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{8}
+	return fileDescriptor_6783724e039e1aa6, []int{9}
 }
 func (m *Data) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -529,13 +586,12 @@ var xxx_messageInfo_Data proto.InternalMessageInfo
 
 type isData_Data interface {
 	isData_Data()
-	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
 
 type Data_Raw struct {
-	Raw *any.Any `protobuf:"bytes,3,opt,name=raw,proto3,oneof" json:"raw,omitempty"`
+	Raw *types.Any `protobuf:"bytes,3,opt,name=raw,proto3,oneof" json:"raw,omitempty"`
 }
 type Data_Fs struct {
 	Fs *FilesystemReference `protobuf:"bytes,4,opt,name=fs,proto3,oneof" json:"fs,omitempty"`
@@ -562,10 +618,10 @@ func (m *Data) GetType() DataType {
 	if m != nil {
 		return m.Type
 	}
-	return RAW_JSON
+	return DataType_RAW_JSON
 }
 
-func (m *Data) GetRaw() *any.Any {
+func (m *Data) GetRaw() *types.Any {
 	if x, ok := m.GetData().(*Data_Raw); ok {
 		return x.Raw
 	}
@@ -600,10 +656,11 @@ type DataSpec struct {
 	Out []*Data `protobuf:"bytes,2,rep,name=out,proto3" json:"out,omitempty"`
 }
 
-func (m *DataSpec) Reset()      { *m = DataSpec{} }
-func (*DataSpec) ProtoMessage() {}
+func (m *DataSpec) Reset()         { *m = DataSpec{} }
+func (m *DataSpec) String() string { return proto.CompactTextString(m) }
+func (*DataSpec) ProtoMessage()    {}
 func (*DataSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{9}
+	return fileDescriptor_6783724e039e1aa6, []int{10}
 }
 func (m *DataSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -651,10 +708,11 @@ type FilesystemReference struct {
 	Location string `protobuf:"bytes,2,opt,name=location,proto3" json:"location,omitempty"`
 }
 
-func (m *FilesystemReference) Reset()      { *m = FilesystemReference{} }
-func (*FilesystemReference) ProtoMessage() {}
+func (m *FilesystemReference) Reset()         { *m = FilesystemReference{} }
+func (m *FilesystemReference) String() string { return proto.CompactTextString(m) }
+func (*FilesystemReference) ProtoMessage()    {}
 func (*FilesystemReference) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{10}
+	return fileDescriptor_6783724e039e1aa6, []int{11}
 }
 func (m *FilesystemReference) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -702,10 +760,11 @@ type StateUpdate struct {
 	NewState State `protobuf:"varint,2,opt,name=newState,proto3,enum=api.State" json:"newState,omitempty"`
 }
 
-func (m *StateUpdate) Reset()      { *m = StateUpdate{} }
-func (*StateUpdate) ProtoMessage() {}
+func (m *StateUpdate) Reset()         { *m = StateUpdate{} }
+func (m *StateUpdate) String() string { return proto.CompactTextString(m) }
+func (*StateUpdate) ProtoMessage()    {}
 func (*StateUpdate) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6783724e039e1aa6, []int{11}
+	return fileDescriptor_6783724e039e1aa6, []int{12}
 }
 func (m *StateUpdate) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -738,20 +797,21 @@ func (m *StateUpdate) GetOldState() State {
 	if m != nil {
 		return m.OldState
 	}
-	return UNINITIALIZED
+	return State_UNINITIALIZED
 }
 
 func (m *StateUpdate) GetNewState() State {
 	if m != nil {
 		return m.NewState
 	}
-	return UNINITIALIZED
+	return State_UNINITIALIZED
 }
 
 func init() {
 	proto.RegisterEnum("api.DataType", DataType_name, DataType_value)
 	proto.RegisterEnum("api.State", State_name, State_value)
 	proto.RegisterType((*Processors)(nil), "api.Processors")
+	proto.RegisterType((*Runs)(nil), "api.Runs")
 	proto.RegisterType((*ProcessorID)(nil), "api.ProcessorID")
 	proto.RegisterType((*Processor)(nil), "api.Processor")
 	proto.RegisterType((*Configuration)(nil), "api.Configuration")
@@ -768,659 +828,66 @@ func init() {
 func init() { proto.RegisterFile("processor.proto", fileDescriptor_6783724e039e1aa6) }
 
 var fileDescriptor_6783724e039e1aa6 = []byte{
-	// 946 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x5d, 0x6f, 0xdb, 0x64,
-	0x14, 0xb6, 0x9d, 0x34, 0x1f, 0xc7, 0x6d, 0x6a, 0xce, 0xca, 0x94, 0x66, 0x9a, 0x57, 0x2c, 0x98,
-	0x4a, 0x34, 0xd2, 0x11, 0x86, 0x90, 0xf8, 0xb8, 0x48, 0x62, 0x27, 0x33, 0xea, 0xb2, 0xe9, 0x4d,
-	0x02, 0x02, 0x09, 0x55, 0x6e, 0xfc, 0x26, 0x33, 0xa4, 0xb6, 0xf1, 0x47, 0xa7, 0xdc, 0x21, 0x7e,
-	0x01, 0x3f, 0x83, 0x9f, 0x32, 0x71, 0xd5, 0xcb, 0x5d, 0x4d, 0x34, 0xbd, 0xe1, 0x72, 0x3f, 0x01,
-	0xf9, 0x7d, 0x13, 0x27, 0x69, 0xc3, 0x04, 0xdc, 0xf9, 0x9c, 0xe7, 0x79, 0x8f, 0x9f, 0xf3, 0x09,
-	0xbb, 0x7e, 0xe0, 0x0d, 0x69, 0x18, 0x7a, 0x41, 0xcd, 0x0f, 0xbc, 0xc8, 0xc3, 0x8c, 0xe5, 0x3b,
-	0x95, 0xfd, 0xb1, 0xe7, 0x8d, 0x27, 0xf4, 0x88, 0xb9, 0x4e, 0xe3, 0xd1, 0x91, 0xe5, 0x4e, 0x39,
-	0x5e, 0xb9, 0x73, 0x1d, 0xa2, 0x67, 0x7e, 0xb4, 0x00, 0x3f, 0x1a, 0x3b, 0xd1, 0xf3, 0xf8, 0xb4,
-	0x36, 0xf4, 0xce, 0x8e, 0xc6, 0xde, 0xd8, 0x5b, 0xb2, 0x12, 0x8b, 0x19, 0xec, 0x8b, 0xd3, 0xb5,
-	0x26, 0xc0, 0xb3, 0xc5, 0xef, 0x43, 0x7c, 0x04, 0x90, 0x8a, 0x09, 0xcb, 0xe2, 0x41, 0xe6, 0x50,
-	0xae, 0x97, 0x6a, 0x96, 0xef, 0xd4, 0x52, 0x52, 0x33, 0xfb, 0xf2, 0xf5, 0x3d, 0x81, 0xac, 0xf0,
-	0xb4, 0xbb, 0x20, 0xa7, 0xb0, 0xa9, 0x63, 0x09, 0x24, 0x53, 0x2f, 0x8b, 0x07, 0xe2, 0x61, 0x91,
-	0x48, 0xa6, 0xae, 0x51, 0x28, 0xa6, 0x30, 0x56, 0x53, 0x50, 0xae, 0x2b, 0xeb, 0x91, 0x4d, 0xbd,
-	0x59, 0x48, 0x62, 0x5f, 0xbc, 0xbe, 0x27, 0x26, 0x0f, 0x11, 0x21, 0xeb, 0x5a, 0x67, 0xb4, 0x2c,
-	0xb1, 0x50, 0xec, 0x1b, 0xcb, 0x90, 0x3f, 0xa7, 0x41, 0xe8, 0x78, 0x6e, 0x39, 0xc3, 0xdc, 0x0b,
-	0x53, 0xfb, 0x0a, 0x76, 0x5a, 0x9e, 0x3b, 0x72, 0xc6, 0x71, 0x60, 0x45, 0x8e, 0xe7, 0xe2, 0x03,
-	0xc8, 0x0d, 0x99, 0x83, 0x31, 0xe5, 0xfa, 0x5e, 0x8d, 0xd7, 0xad, 0xb6, 0xa8, 0x48, 0xad, 0xe1,
-	0x4e, 0xc9, 0x9c, 0xa3, 0x0d, 0xa0, 0xd4, 0xb0, 0x6d, 0xdd, 0x8a, 0x2c, 0x42, 0x7f, 0x8e, 0x69,
-	0x18, 0xe1, 0xfb, 0x20, 0x39, 0xf6, 0x5c, 0xea, 0x1e, 0x93, 0x6a, 0xba, 0xb6, 0x73, 0xee, 0xd8,
-	0xb1, 0x35, 0x21, 0xb1, 0x6b, 0xea, 0x44, 0x72, 0x6c, 0xbc, 0x0b, 0x59, 0xdb, 0x8a, 0x2c, 0x26,
-	0x52, 0xae, 0x17, 0x19, 0x8f, 0x45, 0x61, 0x6e, 0xed, 0x47, 0x50, 0x16, 0xaa, 0xe8, 0x22, 0x70,
-	0x15, 0xb6, 0x82, 0xe4, 0xfd, 0x5b, 0x63, 0x73, 0x0a, 0x56, 0xd3, 0x24, 0xf8, 0x0f, 0x90, 0x91,
-	0xd7, 0x12, 0x4d, 0x53, 0x70, 0x20, 0x43, 0x62, 0x17, 0xf7, 0x56, 0xc3, 0x17, 0xff, 0x47, 0x20,
-	0x3c, 0x80, 0xad, 0x30, 0xb2, 0x22, 0xca, 0x0a, 0x57, 0xaa, 0x03, 0xa3, 0xf6, 0x12, 0x0f, 0xe1,
-	0x80, 0x46, 0x61, 0xf7, 0x9a, 0x60, 0xfc, 0x12, 0x64, 0x7f, 0xd9, 0xca, 0x7f, 0xd1, 0xe2, 0x55,
-	0xfa, 0x52, 0xb4, 0xb4, 0x22, 0x5a, 0xfb, 0x43, 0x84, 0x6c, 0x52, 0x4c, 0xdc, 0x87, 0xc2, 0xf0,
-	0x79, 0xec, 0xfe, 0x74, 0x32, 0xef, 0x48, 0x91, 0xe4, 0x99, 0x6d, 0xda, 0xf8, 0x1e, 0x64, 0xa3,
-	0xa9, 0xcf, 0xa7, 0xa4, 0x54, 0xdf, 0x49, 0x1b, 0xd0, 0x9f, 0xfa, 0x94, 0x30, 0x08, 0x0f, 0x21,
-	0x13, 0x58, 0x2f, 0xde, 0x36, 0x06, 0x8f, 0x05, 0x92, 0x50, 0x92, 0xf1, 0x1c, 0x85, 0xe5, 0x2c,
-	0x23, 0x96, 0x59, 0xa8, 0xb6, 0x33, 0xa1, 0xe1, 0x34, 0x8c, 0xe8, 0x19, 0xa1, 0x23, 0x1a, 0x50,
-	0x77, 0x48, 0x1f, 0x0b, 0x44, 0x1a, 0x85, 0x78, 0x1f, 0x76, 0xbd, 0x38, 0xf2, 0xe3, 0xe8, 0x24,
-	0x95, 0xb6, 0xc5, 0xa4, 0xed, 0x70, 0x77, 0x8b, 0x0b, 0x6c, 0xe6, 0xf8, 0x84, 0x68, 0x4d, 0x28,
-	0x24, 0xba, 0x7a, 0x3e, 0x1d, 0xe2, 0x3e, 0x48, 0x8e, 0x3b, 0x5f, 0xb0, 0x95, 0x99, 0x91, 0x1c,
-	0x17, 0xef, 0x40, 0xc6, 0x8b, 0xa3, 0xb2, 0x74, 0x1d, 0x4b, 0xbc, 0x9a, 0x09, 0xb7, 0x36, 0x08,
-	0xc2, 0xdb, 0x90, 0xb3, 0x03, 0xe7, 0x9c, 0x06, 0xf3, 0xe2, 0xcc, 0x2d, 0xac, 0x40, 0x61, 0xe2,
-	0x0d, 0x59, 0x73, 0xe7, 0x85, 0x4d, 0x6d, 0xed, 0x07, 0x90, 0x59, 0x4b, 0x07, 0xbe, 0x6d, 0x45,
-	0x14, 0xef, 0x43, 0xc1, 0x9b, 0xd8, 0xcc, 0xc3, 0x82, 0xac, 0xb7, 0x3d, 0xc5, 0x12, 0x9e, 0x4b,
-	0x5f, 0x70, 0x9e, 0x74, 0x93, 0xb7, 0xc0, 0xaa, 0x0f, 0x78, 0xb6, 0x49, 0x17, 0x70, 0x1b, 0x0a,
-	0xa4, 0xf1, 0xed, 0xc9, 0xd7, 0xbd, 0xa7, 0x5d, 0x45, 0x40, 0x84, 0x52, 0xdb, 0x3c, 0x36, 0x7a,
-	0xdf, 0xf5, 0xfa, 0xc6, 0x93, 0x13, 0x62, 0xb4, 0x15, 0xb1, 0xfa, 0xab, 0x08, 0x5b, 0x3c, 0xfe,
-	0x3b, 0xb0, 0x33, 0xe8, 0x9a, 0x5d, 0xb3, 0x6f, 0x36, 0x8e, 0xcd, 0xef, 0x0d, 0x5d, 0x11, 0xb0,
-	0x04, 0xd0, 0x7a, 0xda, 0x6d, 0x9b, 0x9d, 0x01, 0x31, 0x74, 0x45, 0xc4, 0x5d, 0x90, 0x75, 0xa3,
-	0x6f, 0x90, 0x27, 0x66, 0xd7, 0xec, 0x76, 0x14, 0x29, 0x21, 0x2c, 0x1c, 0x86, 0xae, 0x64, 0x12,
-	0xfb, 0x9b, 0xc6, 0xb1, 0xa9, 0x37, 0xfa, 0x09, 0x9e, 0x45, 0x19, 0xf2, 0x64, 0xd0, 0x65, 0xe4,
-	0xad, 0xc4, 0xe8, 0x0d, 0x5a, 0x2d, 0xa3, 0xd7, 0x53, 0x72, 0x89, 0xd1, 0x6e, 0x98, 0xc7, 0x03,
-	0x62, 0x28, 0xf9, 0xfa, 0x2c, 0x03, 0xdb, 0xe9, 0xa8, 0x36, 0x9e, 0x99, 0xf8, 0x05, 0x28, 0x1d,
-	0x1a, 0x35, 0x26, 0x93, 0x95, 0x13, 0x79, 0xfb, 0xc6, 0xf8, 0x18, 0xc9, 0xf5, 0xad, 0xec, 0xae,
-	0x4f, 0x7a, 0x88, 0x0f, 0x61, 0xbb, 0x43, 0xa3, 0xe5, 0xe5, 0xbb, 0xb1, 0x0a, 0x95, 0x6b, 0x97,
-	0x15, 0x3f, 0x80, 0x7c, 0x87, 0x46, 0x24, 0x76, 0xc3, 0x0d, 0xe4, 0x02, 0xf3, 0x24, 0xfb, 0x5d,
-	0x87, 0x1c, 0xa7, 0xe1, 0xc6, 0xcb, 0x51, 0xd9, 0xb0, 0xd9, 0xf8, 0x29, 0x14, 0x3b, 0x34, 0xe2,
-	0xbe, 0xff, 0xf0, 0xec, 0x73, 0x28, 0xa6, 0xd7, 0x0b, 0xdf, 0x5d, 0x23, 0x2c, 0xae, 0x59, 0xe5,
-	0x1f, 0x0a, 0x82, 0x9f, 0x81, 0xcc, 0x65, 0xf2, 0xbe, 0x6e, 0xfe, 0xa9, 0xb2, 0x9c, 0x1d, 0x3e,
-	0x87, 0x0f, 0x45, 0xfc, 0x18, 0x80, 0x3f, 0x64, 0x9b, 0xbf, 0xf9, 0xdd, 0x72, 0xcd, 0xd9, 0x3a,
-	0x7d, 0x08, 0xf9, 0xf9, 0xf1, 0xc6, 0x5b, 0x0c, 0x59, 0x3f, 0xe5, 0x95, 0xe5, 0x1a, 0x35, 0x1f,
-	0x5d, 0x5c, 0xaa, 0xc2, 0xab, 0x4b, 0x55, 0x78, 0x73, 0xa9, 0x8a, 0xbf, 0xcc, 0x54, 0xf1, 0xf7,
-	0x99, 0x2a, 0xbe, 0x9c, 0xa9, 0xe2, 0xc5, 0x4c, 0x15, 0xff, 0x9c, 0xa9, 0xe2, 0x5f, 0x33, 0x55,
-	0x78, 0x33, 0x53, 0xc5, 0xdf, 0xae, 0x54, 0xe1, 0xe2, 0x4a, 0x15, 0x5e, 0x5d, 0xa9, 0xc2, 0x69,
-	0x8e, 0x25, 0xf7, 0xc9, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x19, 0x14, 0x6d, 0xa9, 0xac, 0x07,
-	0x00, 0x00,
-}
-
-func (x DataType) String() string {
-	s, ok := DataType_name[int32(x)]
-	if ok {
-		return s
-	}
-	return strconv.Itoa(int(x))
-}
-func (x State) String() string {
-	s, ok := State_name[int32(x)]
-	if ok {
-		return s
-	}
-	return strconv.Itoa(int(x))
-}
-func (this *Processors) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Processors)
-	if !ok {
-		that2, ok := that.(Processors)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.Processors) != len(that1.Processors) {
-		return false
-	}
-	for i := range this.Processors {
-		if !this.Processors[i].Equal(&that1.Processors[i]) {
-			return false
-		}
-	}
-	return true
-}
-func (this *ProcessorID) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ProcessorID)
-	if !ok {
-		that2, ok := that.(ProcessorID)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.ID != that1.ID {
-		return false
-	}
-	return true
-}
-func (this *Processor) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Processor)
-	if !ok {
-		that2, ok := that.(Processor)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ProcessorID.Equal(&that1.ProcessorID) {
-		return false
-	}
-	if this.Name != that1.Name {
-		return false
-	}
-	if this.Version != that1.Version {
-		return false
-	}
-	return true
-}
-func (this *Configuration) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Configuration)
-	if !ok {
-		that2, ok := that.(Configuration)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Config.Equal(that1.Config) {
-		return false
-	}
-	return true
-}
-func (this *AddDataRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*AddDataRequest)
-	if !ok {
-		that2, ok := that.(AddDataRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Id.Equal(that1.Id) {
-		return false
-	}
-	if !this.Data.Equal(that1.Data) {
-		return false
-	}
-	return true
-}
-func (this *ConfigureRequest) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ConfigureRequest)
-	if !ok {
-		that2, ok := that.(ConfigureRequest)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.RunID.Equal(that1.RunID) {
-		return false
-	}
-	if !this.Config.Equal(that1.Config) {
-		return false
-	}
-	return true
-}
-func (this *Run) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Run)
-	if !ok {
-		that2, ok := that.(Run)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.RunID != that1.RunID {
-		return false
-	}
-	if !this.Config.Equal(that1.Config) {
-		return false
-	}
-	if this.State != that1.State {
-		return false
-	}
-	return true
-}
-func (this *IndividualRunID) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*IndividualRunID)
-	if !ok {
-		that2, ok := that.(IndividualRunID)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ProcessorID.Equal(&that1.ProcessorID) {
-		return false
-	}
-	if this.RunID != that1.RunID {
-		return false
-	}
-	return true
-}
-func (this *Data) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Data)
-	if !ok {
-		that2, ok := that.(Data)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.ChunkId != that1.ChunkId {
-		return false
-	}
-	if this.Type != that1.Type {
-		return false
-	}
-	if that1.Data == nil {
-		if this.Data != nil {
-			return false
-		}
-	} else if this.Data == nil {
-		return false
-	} else if !this.Data.Equal(that1.Data) {
-		return false
-	}
-	if this.OutputChunkId != that1.OutputChunkId {
-		return false
-	}
-	return true
-}
-func (this *Data_Raw) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Data_Raw)
-	if !ok {
-		that2, ok := that.(Data_Raw)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Raw.Equal(that1.Raw) {
-		return false
-	}
-	return true
-}
-func (this *Data_Fs) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*Data_Fs)
-	if !ok {
-		that2, ok := that.(Data_Fs)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Fs.Equal(that1.Fs) {
-		return false
-	}
-	return true
-}
-func (this *DataSpec) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*DataSpec)
-	if !ok {
-		that2, ok := that.(DataSpec)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.In) != len(that1.In) {
-		return false
-	}
-	for i := range this.In {
-		if !this.In[i].Equal(that1.In[i]) {
-			return false
-		}
-	}
-	if len(this.Out) != len(that1.Out) {
-		return false
-	}
-	for i := range this.Out {
-		if !this.Out[i].Equal(that1.Out[i]) {
-			return false
-		}
-	}
-	return true
-}
-func (this *FilesystemReference) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*FilesystemReference)
-	if !ok {
-		that2, ok := that.(FilesystemReference)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.Driver != that1.Driver {
-		return false
-	}
-	if this.Location != that1.Location {
-		return false
-	}
-	return true
-}
-func (this *StateUpdate) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*StateUpdate)
-	if !ok {
-		that2, ok := that.(StateUpdate)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.OldState != that1.OldState {
-		return false
-	}
-	if this.NewState != that1.NewState {
-		return false
-	}
-	return true
-}
-func (this *Processors) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&api.Processors{")
-	if this.Processors != nil {
-		vs := make([]Processor, len(this.Processors))
-		for i := range vs {
-			vs[i] = this.Processors[i]
-		}
-		s = append(s, "Processors: "+fmt.Sprintf("%#v", vs)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *ProcessorID) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&api.ProcessorID{")
-	s = append(s, "ID: "+fmt.Sprintf("%#v", this.ID)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *Processor) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&api.Processor{")
-	s = append(s, "ProcessorID: "+strings.Replace(this.ProcessorID.GoString(), `&`, ``, 1)+",\n")
-	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
-	s = append(s, "Version: "+fmt.Sprintf("%#v", this.Version)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *Configuration) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 5)
-	s = append(s, "&api.Configuration{")
-	if this.Config != nil {
-		s = append(s, "Config: "+fmt.Sprintf("%#v", this.Config)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *AddDataRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.AddDataRequest{")
-	if this.Id != nil {
-		s = append(s, "Id: "+fmt.Sprintf("%#v", this.Id)+",\n")
-	}
-	if this.Data != nil {
-		s = append(s, "Data: "+fmt.Sprintf("%#v", this.Data)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *ConfigureRequest) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.ConfigureRequest{")
-	if this.RunID != nil {
-		s = append(s, "RunID: "+fmt.Sprintf("%#v", this.RunID)+",\n")
-	}
-	if this.Config != nil {
-		s = append(s, "Config: "+fmt.Sprintf("%#v", this.Config)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *Run) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&api.Run{")
-	s = append(s, "RunID: "+fmt.Sprintf("%#v", this.RunID)+",\n")
-	if this.Config != nil {
-		s = append(s, "Config: "+fmt.Sprintf("%#v", this.Config)+",\n")
-	}
-	s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *IndividualRunID) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.IndividualRunID{")
-	s = append(s, "ProcessorID: "+strings.Replace(this.ProcessorID.GoString(), `&`, ``, 1)+",\n")
-	s = append(s, "RunID: "+fmt.Sprintf("%#v", this.RunID)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *Data) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 9)
-	s = append(s, "&api.Data{")
-	s = append(s, "ChunkId: "+fmt.Sprintf("%#v", this.ChunkId)+",\n")
-	s = append(s, "Type: "+fmt.Sprintf("%#v", this.Type)+",\n")
-	if this.Data != nil {
-		s = append(s, "Data: "+fmt.Sprintf("%#v", this.Data)+",\n")
-	}
-	s = append(s, "OutputChunkId: "+fmt.Sprintf("%#v", this.OutputChunkId)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *Data_Raw) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&api.Data_Raw{` +
-		`Raw:` + fmt.Sprintf("%#v", this.Raw) + `}`}, ", ")
-	return s
-}
-func (this *Data_Fs) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&api.Data_Fs{` +
-		`Fs:` + fmt.Sprintf("%#v", this.Fs) + `}`}, ", ")
-	return s
-}
-func (this *DataSpec) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.DataSpec{")
-	if this.In != nil {
-		s = append(s, "In: "+fmt.Sprintf("%#v", this.In)+",\n")
-	}
-	if this.Out != nil {
-		s = append(s, "Out: "+fmt.Sprintf("%#v", this.Out)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *FilesystemReference) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.FilesystemReference{")
-	s = append(s, "Driver: "+fmt.Sprintf("%#v", this.Driver)+",\n")
-	s = append(s, "Location: "+fmt.Sprintf("%#v", this.Location)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *StateUpdate) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&api.StateUpdate{")
-	s = append(s, "OldState: "+fmt.Sprintf("%#v", this.OldState)+",\n")
-	s = append(s, "NewState: "+fmt.Sprintf("%#v", this.NewState)+",\n")
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func valueToGoStringProcessor(v interface{}, typ string) string {
-	rv := reflect.ValueOf(v)
-	if rv.IsNil() {
-		return "nil"
-	}
-	pv := reflect.Indirect(rv).Interface()
-	return fmt.Sprintf("func(v %v) *%v { return &v } ( %#v )", typ, typ, pv)
+	// 939 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x5f, 0x6f, 0xda, 0x56,
+	0x14, 0xc7, 0x86, 0xf0, 0xe7, 0x38, 0x01, 0xef, 0x34, 0xab, 0x08, 0x55, 0x69, 0x66, 0x4d, 0x51,
+	0x86, 0x3a, 0xd2, 0xb1, 0x4d, 0x93, 0xf6, 0xe7, 0x01, 0xb0, 0xa1, 0x9e, 0x52, 0x5a, 0x5d, 0x60,
+	0xd3, 0x26, 0x4d, 0x91, 0x83, 0x2f, 0xd4, 0x1b, 0xb1, 0x3d, 0xfb, 0x3a, 0x15, 0xaf, 0xfb, 0x04,
+	0xfb, 0x58, 0xd5, 0x9e, 0xf2, 0xb8, 0xbd, 0x54, 0x53, 0xf2, 0x45, 0x26, 0xdf, 0x8b, 0x0d, 0x24,
+	0xb4, 0x9a, 0xfa, 0xe6, 0x73, 0xce, 0xef, 0x1c, 0xff, 0xee, 0xf9, 0xf3, 0x83, 0x8a, 0x1f, 0x78,
+	0x13, 0x1a, 0x86, 0x5e, 0xd0, 0xf4, 0x03, 0x8f, 0x79, 0x98, 0xb5, 0x7c, 0xa7, 0x76, 0x30, 0xf3,
+	0xbc, 0xd9, 0x9c, 0x9e, 0x70, 0xd7, 0x79, 0x34, 0x3d, 0xb1, 0xdc, 0x85, 0x88, 0xd7, 0x1e, 0xdc,
+	0x0e, 0xd1, 0x0b, 0x9f, 0x25, 0xc1, 0x4f, 0x67, 0x0e, 0x7b, 0x19, 0x9d, 0x37, 0x27, 0xde, 0xc5,
+	0xc9, 0xcc, 0x9b, 0x79, 0x2b, 0x54, 0x6c, 0x71, 0x83, 0x7f, 0x09, 0xb8, 0xd6, 0x01, 0x78, 0x91,
+	0xfc, 0x3e, 0xc4, 0x2f, 0x00, 0x52, 0x32, 0x61, 0x55, 0x3a, 0xcc, 0x1e, 0x2b, 0xad, 0x72, 0xd3,
+	0xf2, 0x9d, 0x66, 0x0a, 0xea, 0xe4, 0x5e, 0xbf, 0x79, 0x94, 0x21, 0x6b, 0x38, 0xad, 0x01, 0x39,
+	0x12, 0xb9, 0x21, 0x6a, 0x90, 0x0b, 0x22, 0x37, 0xc9, 0x2b, 0xf2, 0x3c, 0x12, 0xb9, 0xcb, 0x0c,
+	0x1e, 0xd3, 0x1e, 0x82, 0x92, 0x96, 0x32, 0x75, 0x2c, 0x83, 0x6c, 0xea, 0x55, 0xe9, 0x50, 0x3a,
+	0x2e, 0x11, 0xd9, 0xd4, 0x35, 0x0a, 0xa5, 0x34, 0x8c, 0x8d, 0x34, 0xa8, 0xb4, 0xd4, 0x4d, 0x16,
+	0xa6, 0xde, 0x29, 0xc6, 0x55, 0xaf, 0xde, 0x3c, 0x92, 0xe2, 0x44, 0x44, 0xc8, 0xb9, 0xd6, 0x05,
+	0xad, 0xca, 0xbc, 0x14, 0xff, 0xc6, 0x2a, 0x14, 0x2e, 0x69, 0x10, 0x3a, 0x9e, 0x5b, 0xcd, 0x72,
+	0x77, 0x62, 0x6a, 0xdf, 0xc1, 0x5e, 0xd7, 0x73, 0xa7, 0xce, 0x2c, 0x0a, 0x2c, 0xe6, 0x78, 0x2e,
+	0x3e, 0x86, 0xfc, 0x84, 0x3b, 0x38, 0x52, 0x69, 0xed, 0x37, 0x45, 0x8f, 0x9b, 0x49, 0xf7, 0x9a,
+	0x6d, 0x77, 0x41, 0x96, 0x18, 0x6d, 0x0c, 0xe5, 0xb6, 0x6d, 0xeb, 0x16, 0xb3, 0x08, 0xfd, 0x3d,
+	0xa2, 0x21, 0xc3, 0x8f, 0x41, 0x76, 0xec, 0x25, 0xd5, 0x7d, 0x4e, 0xd5, 0x74, 0x6d, 0xe7, 0xd2,
+	0xb1, 0x23, 0x6b, 0x4e, 0x22, 0xd7, 0xd4, 0x89, 0xec, 0xd8, 0xf8, 0x10, 0x72, 0xb6, 0xc5, 0x2c,
+	0x4e, 0x52, 0x69, 0x95, 0x38, 0x8e, 0x57, 0xe1, 0x6e, 0xed, 0x57, 0x50, 0x13, 0x56, 0x34, 0x29,
+	0xdc, 0x80, 0x9d, 0x20, 0xce, 0x7f, 0x67, 0x6d, 0x01, 0xc1, 0x46, 0xfa, 0x08, 0xf1, 0x03, 0xe4,
+	0xe0, 0x8d, 0x87, 0xa6, 0x4f, 0x70, 0x20, 0x4b, 0x22, 0x17, 0xf7, 0xd7, 0xcb, 0x97, 0xde, 0xa3,
+	0x10, 0x1e, 0xc2, 0x4e, 0xc8, 0x2c, 0x46, 0x79, 0xe3, 0xca, 0x2d, 0xe0, 0xd0, 0x61, 0xec, 0x21,
+	0x22, 0xa0, 0x51, 0xa8, 0xdc, 0x22, 0x8c, 0xdf, 0x82, 0xe2, 0xaf, 0x46, 0xf9, 0x3f, 0x46, 0xbc,
+	0x0e, 0x5f, 0x91, 0x96, 0xd7, 0x48, 0x6b, 0x7f, 0x49, 0x90, 0x8b, 0x9b, 0x89, 0x07, 0x50, 0x9c,
+	0xbc, 0x8c, 0xdc, 0xdf, 0xce, 0x96, 0x13, 0x29, 0x91, 0x02, 0xb7, 0x4d, 0x1b, 0x3f, 0x82, 0x1c,
+	0x5b, 0xf8, 0x62, 0x4b, 0xca, 0xad, 0xbd, 0x74, 0x00, 0xa3, 0x85, 0x4f, 0x09, 0x0f, 0xe1, 0x31,
+	0x64, 0x03, 0xeb, 0xd5, 0xbb, 0xd6, 0xe0, 0x69, 0x86, 0xc4, 0x90, 0x78, 0x3d, 0xa7, 0x61, 0x35,
+	0xc7, 0x81, 0x55, 0x5e, 0xaa, 0xe7, 0xcc, 0x69, 0xb8, 0x08, 0x19, 0xbd, 0x20, 0x74, 0x4a, 0x03,
+	0xea, 0x4e, 0xe8, 0xd3, 0x0c, 0x91, 0xa7, 0x21, 0x1e, 0x41, 0xc5, 0x8b, 0x98, 0x1f, 0xb1, 0xb3,
+	0x94, 0xda, 0x0e, 0xa7, 0xb6, 0x27, 0xdc, 0x5d, 0x41, 0xb0, 0x93, 0x17, 0x1b, 0xa2, 0x75, 0xa0,
+	0x18, 0xf3, 0x1a, 0xfa, 0x74, 0x82, 0x07, 0x20, 0x3b, 0xee, 0xf2, 0xa8, 0xd6, 0x76, 0x46, 0x76,
+	0x5c, 0x7c, 0x00, 0x59, 0x2f, 0x62, 0x55, 0xf9, 0x76, 0x2c, 0xf6, 0x6a, 0x26, 0xdc, 0xdb, 0x42,
+	0x08, 0xef, 0x43, 0xde, 0x0e, 0x9c, 0x4b, 0x1a, 0x2c, 0x9b, 0xb3, 0xb4, 0xb0, 0x06, 0xc5, 0xb9,
+	0x37, 0xe1, 0xc3, 0x5d, 0x36, 0x36, 0xb5, 0xb5, 0x5f, 0x40, 0xe1, 0x23, 0x1d, 0xfb, 0xb6, 0xc5,
+	0x28, 0x1e, 0x41, 0xd1, 0x9b, 0xdb, 0xdc, 0xc3, 0x8b, 0x6c, 0x8e, 0x3d, 0x8d, 0xc5, 0x38, 0x97,
+	0xbe, 0x12, 0x38, 0xf9, 0x2e, 0x2e, 0x89, 0x35, 0x1e, 0x8b, 0xd7, 0xc6, 0x53, 0xc0, 0x5d, 0x28,
+	0x92, 0xf6, 0x8f, 0x67, 0xdf, 0x0f, 0x9f, 0x0f, 0xd4, 0x0c, 0x22, 0x94, 0x7b, 0xe6, 0xa9, 0x31,
+	0xfc, 0x69, 0x38, 0x32, 0x9e, 0x9d, 0x11, 0xa3, 0xa7, 0x4a, 0x8d, 0x3f, 0x24, 0xd8, 0x11, 0xf5,
+	0x3f, 0x80, 0xbd, 0xf1, 0xc0, 0x1c, 0x98, 0x23, 0xb3, 0x7d, 0x6a, 0xfe, 0x6c, 0xe8, 0x6a, 0x06,
+	0xcb, 0x00, 0xdd, 0xe7, 0x83, 0x9e, 0xd9, 0x1f, 0x13, 0x43, 0x57, 0x25, 0xac, 0x80, 0xa2, 0x1b,
+	0x23, 0x83, 0x3c, 0x33, 0x07, 0xe6, 0xa0, 0xaf, 0xca, 0x31, 0x20, 0x71, 0x18, 0xba, 0x9a, 0x8d,
+	0xed, 0x1f, 0xda, 0xa7, 0xa6, 0xde, 0x1e, 0xc5, 0xf1, 0x1c, 0x2a, 0x50, 0x20, 0xe3, 0x01, 0x07,
+	0xef, 0xc4, 0xc6, 0x70, 0xdc, 0xed, 0x1a, 0xc3, 0xa1, 0x9a, 0x8f, 0x8d, 0x5e, 0xdb, 0x3c, 0x1d,
+	0x13, 0x43, 0x2d, 0xb4, 0xfe, 0xc9, 0xc2, 0x6e, 0xba, 0xaa, 0xed, 0x17, 0x26, 0x7e, 0x03, 0x6a,
+	0x9f, 0xb2, 0xf6, 0x7c, 0xbe, 0x26, 0xa7, 0xf7, 0xef, 0xac, 0x8f, 0x11, 0x2b, 0x75, 0xad, 0xb2,
+	0xb9, 0xe9, 0x21, 0x3e, 0x81, 0xdd, 0x3e, 0x65, 0x2b, 0xe5, 0xbb, 0x73, 0x0a, 0xb5, 0x5b, 0x2a,
+	0x8c, 0x47, 0x50, 0xe8, 0x53, 0xc6, 0x65, 0xf7, 0x2e, 0xb8, 0x94, 0x48, 0x6f, 0x88, 0xc7, 0x90,
+	0x17, 0x38, 0xdc, 0x2a, 0x1d, 0xb5, 0x54, 0xa5, 0xf1, 0x4b, 0x28, 0xf5, 0x29, 0x13, 0x47, 0xfe,
+	0x16, 0xf0, 0x16, 0x1d, 0xc0, 0xaf, 0xa1, 0x94, 0x8a, 0x16, 0x7e, 0xb8, 0x01, 0x48, 0x44, 0xac,
+	0xf6, 0x96, 0x3e, 0xe0, 0x57, 0xa0, 0x08, 0x72, 0x62, 0x9c, 0xdb, 0x7f, 0xaa, 0xae, 0x56, 0x46,
+	0xac, 0xdf, 0x13, 0x09, 0x3f, 0x03, 0x10, 0x89, 0xfc, 0xe0, 0xb7, 0xe7, 0xad, 0xae, 0x9b, 0x5f,
+	0xd1, 0x27, 0x50, 0x58, 0x6a, 0x36, 0xde, 0xe3, 0x91, 0x4d, 0x05, 0xaf, 0xad, 0xae, 0xa7, 0x53,
+	0x7d, 0x7d, 0x5d, 0x97, 0xae, 0xae, 0xeb, 0xd2, 0xbf, 0xd7, 0x75, 0xe9, 0xcf, 0x9b, 0x7a, 0xe6,
+	0xea, 0xa6, 0x9e, 0xf9, 0xfb, 0xa6, 0x9e, 0x39, 0xcf, 0xf3, 0x07, 0x7c, 0xfe, 0x5f, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0x3a, 0x16, 0x13, 0xd9, 0xb3, 0x07, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1439,9 +906,9 @@ type ProcessorAPIClient interface {
 	GetAllProcessors(ctx context.Context, in *types.Empty, opts ...grpc.CallOption) (*Processors, error)
 	GetProcessor(ctx context.Context, in *ProcessorID, opts ...grpc.CallOption) (*Processor, error)
 	// GetRuns lists all runs on a processor
-	GetRuns(ctx context.Context, in *ProcessorID, opts ...grpc.CallOption) (*Run, error)
+	GetRuns(ctx context.Context, in *ProcessorID, opts ...grpc.CallOption) (*Runs, error)
 	// GetRun returns an individual run
-	GetRun(ctx context.Context, in *IndividualRunID, opts ...grpc.CallOption) (*Configuration, error)
+	GetRun(ctx context.Context, in *IndividualRunID, opts ...grpc.CallOption) (*Run, error)
 	// GetConfig gets the current configuration of a processor Run
 	GetConfig(ctx context.Context, in *IndividualRunID, opts ...grpc.CallOption) (*Configuration, error)
 	// Configure accepts configuration serialized to a []byte
@@ -1482,8 +949,8 @@ func (c *processorAPIClient) GetProcessor(ctx context.Context, in *ProcessorID, 
 	return out, nil
 }
 
-func (c *processorAPIClient) GetRuns(ctx context.Context, in *ProcessorID, opts ...grpc.CallOption) (*Run, error) {
-	out := new(Run)
+func (c *processorAPIClient) GetRuns(ctx context.Context, in *ProcessorID, opts ...grpc.CallOption) (*Runs, error) {
+	out := new(Runs)
 	err := c.cc.Invoke(ctx, "/api.ProcessorAPI/GetRuns", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1491,8 +958,8 @@ func (c *processorAPIClient) GetRuns(ctx context.Context, in *ProcessorID, opts 
 	return out, nil
 }
 
-func (c *processorAPIClient) GetRun(ctx context.Context, in *IndividualRunID, opts ...grpc.CallOption) (*Configuration, error) {
-	out := new(Configuration)
+func (c *processorAPIClient) GetRun(ctx context.Context, in *IndividualRunID, opts ...grpc.CallOption) (*Run, error) {
+	out := new(Run)
 	err := c.cc.Invoke(ctx, "/api.ProcessorAPI/GetRun", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1574,9 +1041,9 @@ type ProcessorAPIServer interface {
 	GetAllProcessors(context.Context, *types.Empty) (*Processors, error)
 	GetProcessor(context.Context, *ProcessorID) (*Processor, error)
 	// GetRuns lists all runs on a processor
-	GetRuns(context.Context, *ProcessorID) (*Run, error)
+	GetRuns(context.Context, *ProcessorID) (*Runs, error)
 	// GetRun returns an individual run
-	GetRun(context.Context, *IndividualRunID) (*Configuration, error)
+	GetRun(context.Context, *IndividualRunID) (*Run, error)
 	// GetConfig gets the current configuration of a processor Run
 	GetConfig(context.Context, *IndividualRunID) (*Configuration, error)
 	// Configure accepts configuration serialized to a []byte
@@ -1601,10 +1068,10 @@ func (*UnimplementedProcessorAPIServer) GetAllProcessors(ctx context.Context, re
 func (*UnimplementedProcessorAPIServer) GetProcessor(ctx context.Context, req *ProcessorID) (*Processor, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProcessor not implemented")
 }
-func (*UnimplementedProcessorAPIServer) GetRuns(ctx context.Context, req *ProcessorID) (*Run, error) {
+func (*UnimplementedProcessorAPIServer) GetRuns(ctx context.Context, req *ProcessorID) (*Runs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRuns not implemented")
 }
-func (*UnimplementedProcessorAPIServer) GetRun(ctx context.Context, req *IndividualRunID) (*Configuration, error) {
+func (*UnimplementedProcessorAPIServer) GetRun(ctx context.Context, req *IndividualRunID) (*Run, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRun not implemented")
 }
 func (*UnimplementedProcessorAPIServer) GetConfig(ctx context.Context, req *IndividualRunID) (*Configuration, error) {
@@ -1863,6 +1330,43 @@ func (m *Processors) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		for iNdEx := len(m.Processors) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.Processors[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintProcessor(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Runs) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Runs) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Runs) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Runs) > 0 {
+		for iNdEx := len(m.Runs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Runs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -2409,6 +1913,21 @@ func (m *Processors) Size() (n int) {
 	return n
 }
 
+func (m *Runs) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Runs) > 0 {
+		for _, e := range m.Runs {
+			l = e.Size()
+			n += 1 + l + sovProcessor(uint64(l))
+		}
+	}
+	return n
+}
+
 func (m *ProcessorID) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2629,182 +2148,6 @@ func sovProcessor(x uint64) (n int) {
 func sozProcessor(x uint64) (n int) {
 	return sovProcessor(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (this *Processors) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForProcessors := "[]Processor{"
-	for _, f := range this.Processors {
-		repeatedStringForProcessors += strings.Replace(strings.Replace(f.String(), "Processor", "Processor", 1), `&`, ``, 1) + ","
-	}
-	repeatedStringForProcessors += "}"
-	s := strings.Join([]string{`&Processors{`,
-		`Processors:` + repeatedStringForProcessors + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *ProcessorID) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ProcessorID{`,
-		`ID:` + fmt.Sprintf("%v", this.ID) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Processor) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Processor{`,
-		`ProcessorID:` + strings.Replace(strings.Replace(this.ProcessorID.String(), "ProcessorID", "ProcessorID", 1), `&`, ``, 1) + `,`,
-		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
-		`Version:` + fmt.Sprintf("%v", this.Version) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Configuration) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Configuration{`,
-		`Config:` + strings.Replace(fmt.Sprintf("%v", this.Config), "Any", "any.Any", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *AddDataRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&AddDataRequest{`,
-		`Id:` + strings.Replace(this.Id.String(), "IndividualRunID", "IndividualRunID", 1) + `,`,
-		`Data:` + strings.Replace(this.Data.String(), "Data", "Data", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *ConfigureRequest) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ConfigureRequest{`,
-		`RunID:` + strings.Replace(this.RunID.String(), "IndividualRunID", "IndividualRunID", 1) + `,`,
-		`Config:` + strings.Replace(this.Config.String(), "Configuration", "Configuration", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Run) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Run{`,
-		`RunID:` + fmt.Sprintf("%v", this.RunID) + `,`,
-		`Config:` + strings.Replace(this.Config.String(), "Configuration", "Configuration", 1) + `,`,
-		`State:` + fmt.Sprintf("%v", this.State) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *IndividualRunID) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&IndividualRunID{`,
-		`ProcessorID:` + strings.Replace(strings.Replace(this.ProcessorID.String(), "ProcessorID", "ProcessorID", 1), `&`, ``, 1) + `,`,
-		`RunID:` + fmt.Sprintf("%v", this.RunID) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Data) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Data{`,
-		`ChunkId:` + fmt.Sprintf("%v", this.ChunkId) + `,`,
-		`Type:` + fmt.Sprintf("%v", this.Type) + `,`,
-		`Data:` + fmt.Sprintf("%v", this.Data) + `,`,
-		`OutputChunkId:` + fmt.Sprintf("%v", this.OutputChunkId) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Data_Raw) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Data_Raw{`,
-		`Raw:` + strings.Replace(fmt.Sprintf("%v", this.Raw), "Any", "any.Any", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *Data_Fs) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&Data_Fs{`,
-		`Fs:` + strings.Replace(fmt.Sprintf("%v", this.Fs), "FilesystemReference", "FilesystemReference", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *DataSpec) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForIn := "[]*Data{"
-	for _, f := range this.In {
-		repeatedStringForIn += strings.Replace(f.String(), "Data", "Data", 1) + ","
-	}
-	repeatedStringForIn += "}"
-	repeatedStringForOut := "[]*Data{"
-	for _, f := range this.Out {
-		repeatedStringForOut += strings.Replace(f.String(), "Data", "Data", 1) + ","
-	}
-	repeatedStringForOut += "}"
-	s := strings.Join([]string{`&DataSpec{`,
-		`In:` + repeatedStringForIn + `,`,
-		`Out:` + repeatedStringForOut + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *FilesystemReference) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&FilesystemReference{`,
-		`Driver:` + fmt.Sprintf("%v", this.Driver) + `,`,
-		`Location:` + fmt.Sprintf("%v", this.Location) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *StateUpdate) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&StateUpdate{`,
-		`OldState:` + fmt.Sprintf("%v", this.OldState) + `,`,
-		`NewState:` + fmt.Sprintf("%v", this.NewState) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func valueToStringProcessor(v interface{}) string {
-	rv := reflect.ValueOf(v)
-	if rv.IsNil() {
-		return "nil"
-	}
-	pv := reflect.Indirect(rv).Interface()
-	return fmt.Sprintf("*%v", pv)
-}
 func (m *Processors) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2865,6 +2208,93 @@ func (m *Processors) Unmarshal(dAtA []byte) error {
 			}
 			m.Processors = append(m.Processors, Processor{})
 			if err := m.Processors[len(m.Processors)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProcessor(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProcessor
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProcessor
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Runs) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProcessor
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Runs: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Runs: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Runs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProcessor
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProcessor
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProcessor
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Runs = append(m.Runs, Run{})
+			if err := m.Runs[len(m.Runs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -3186,7 +2616,7 @@ func (m *Configuration) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Config == nil {
-				m.Config = &any.Any{}
+				m.Config = &types.Any{}
 			}
 			if err := m.Config.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -3833,7 +3263,7 @@ func (m *Data) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &any.Any{}
+			v := &types.Any{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
