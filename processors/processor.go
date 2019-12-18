@@ -1,4 +1,4 @@
-package executor
+package processors
 
 import (
 	"github.com/alexkreidler/wiz/api"
@@ -15,13 +15,13 @@ type Processor interface {
 	//Configure(config interface{}) error
 
 	//It will be in Syncing by default, and then for our simple implementation case, go into validating, running, and then success or failure
-	State() <-chan api.State
+	State() chan api.State
 
 	// This provides the raw data to the processor, either in FS form or raw form.
 	Run(data interface{})
 
 	//GetError returns the error which occured if it goes from validating to configured, running to configured or failed
-	GetError()
+	GetError() error
 
 	Metadata() api.Processor
 

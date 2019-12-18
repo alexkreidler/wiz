@@ -40,7 +40,8 @@ service ProcessorAPI {
     // GetRunData retrieves all of the data chunks associated with a Run
     rpc GetRunData (IndividualRunID) returns (DataSpec);
 
-    rpc AddData(AddDataRequest) returns (Data);
+    // Returns nothing on success, error if empty
+    rpc AddData(AddDataRequest) returns (google.protobuf.Empty);
 
     // ProvideData takes in any data serialized to a []byte and returns nothing on success. It returns an error if the Processor is not yet in a valid source state.
     // Depending on the type of data, this will transition from a Configured to either a Running or back to a Configured state, if the data is rejected. A warning will be sent to  This will transition to the validating state, and to a running state
@@ -84,9 +85,9 @@ message AddDataRequest {
 
 // ConfigureRequest requires a processor ID, Run ID, and the configuration to send
 message ConfigureRequest {
-    // ProcessorID processorID = 1;
+//    ProcessorID processorID = 1;
     // string runID = 2;
-    IndividualRunID runID = 1;
+    IndividualRunID ID = 1;
     Configuration config = 2;
 }
 
