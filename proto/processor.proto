@@ -63,23 +63,26 @@ message Runs {
     repeated Run runs = 1 [(gogoproto.nullable) = false];
 }
 
-message ProcessorID {
-    string ID = 1;
-}
 
 message Processor {
-    ProcessorID ID = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+//    ProcessorID ID = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string procID = 1;
     // human readable name
     string name = 2;
     string version = 3;
 }
 
+// No more one-level messages, causes reusability issues.
 message Configuration {
     google.protobuf.Any config = 3;
 }
 
+message ProcessorID {
+    string procID = 1;
+}
+
 message AddDataRequest {
-    IndividualRunID id = 1;
+    IndividualRunID ID = 1;
     Data data = 2;
 }
 
@@ -88,25 +91,26 @@ message ConfigureRequest {
 //    ProcessorID processorID = 1;
     // string runID = 2;
     IndividualRunID ID = 1;
-    Configuration config = 2;
+//    Configuration config = 2;
+    google.protobuf.Any config = 2;
 }
 
 // A run is globally unique, associated with configuration, and has a state
 message Run {
     string runID = 1;
-    Configuration config = 2;
+    google.protobuf.Any config = 2;
     State state = 3;
 }
 
 // IndividualRunRequest identifies one specific run on a processor
 message IndividualRunID {
-    ProcessorID processorID = 1 [(gogoproto.nullable) = false, (gogoproto.embed) = true];
+    string procID = 1; // [(gogoproto.nullable) = false, (gogoproto.embed) = true];
     string runID = 2;
 }
 
 
 message Data {
-    string chunk_id = 1;
+    string chunk_ID = 1;
     DataType type = 2;
     oneof data {
         // raw byte serialized input data. This is specified in data type and is usually RAW_JSON.
@@ -114,7 +118,7 @@ message Data {
         FilesystemReference fs = 4;
         // google.protobuf.Empty = 5;
     }
-    string output_chunk_id = 5;
+    string output_chunk_ID = 5;
 }
 
 // DataSpec represents all the chunks that the processor has both recieved and written

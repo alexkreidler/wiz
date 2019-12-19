@@ -2,10 +2,14 @@ package executor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors"
+	procApi "github.com/alexkreidler/wiz/processors/processor"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gogo/protobuf/types"
+	"log"
 )
 
 const Version = "0.1.0"
@@ -16,7 +20,7 @@ type runProcessor struct {
 	r api.Run
 
 	// p is the actual instance of the processor that has been configured
-	p processors.Processor
+	p procApi.Processor
 
 	// ds holds all of the processor's data
 	ds api.DataSpec
@@ -27,7 +31,7 @@ type ProcessorExecutor struct {
 	version string
 	// base maps the ID of the processor to the processor. These are all base, non-configured processors that are registered at startup
 	//Their Metadata functions are the source of all processor information
-	base map[string]processors.Processor
+	base map[string]procApi.Processor
 	//runMap is a map of processor IDs to runIDs and processors
 	runMap runProcMap
 }
@@ -35,7 +39,7 @@ type ProcessorExecutor struct {
 type runProcMap map[string]map[string]*runProcessor
 
 func (p ProcessorExecutor) GetAllProcessors(context.Context, *types.Empty) (*api.Processors, error) {
-	all := make([]api.Processor, len(p.base))
+	all := make([]api.Processor, 0)
 	for _, processor := range p.base {
 		all = append(all, processor.Metadata())
 	}
@@ -44,9 +48,9 @@ func (p ProcessorExecutor) GetAllProcessors(context.Context, *types.Empty) (*api
 
 // TODO: update to use new data access
 func (p ProcessorExecutor) GetProcessor(c context.Context, id *api.ProcessorID) (*api.Processor, error) {
-	processor, ok := p.base[id.ID]
+	processor, ok := p.base[id.ProcID]
 	if !ok {
-		return nil, fmt.Errorf("processor %s not found", id.ID)
+		return nil, fmt.Errorf("processor %s not found", id.ProcID)
 	} else {
 		p := processor.Metadata()
 		return &p, nil
@@ -54,9 +58,14 @@ func (p ProcessorExecutor) GetProcessor(c context.Context, id *api.ProcessorID) 
 }
 
 func (p ProcessorExecutor) GetRuns(c context.Context, id *api.ProcessorID) (*api.Runs, error) {
-	processor, ok := p.runMap[id.ID]
+	err := checkProcessorExists(p, id.ProcID)
+	if err != nil {
+		return nil, err
+	}
+	processor, ok := p.runMap[id.ProcID]
 	if !ok {
-		return nil, fmt.Errorf("either processor %s does not exist or no runs are registered", id.ID)
+		// no runs are registered
+		return &api.Runs{}, nil
 	} else {
 		all := make([]api.Run, len(processor))
 		for _, run := range processor {
@@ -67,7 +76,7 @@ func (p ProcessorExecutor) GetRuns(c context.Context, id *api.ProcessorID) (*api
 }
 
 func (p ProcessorExecutor) GetRun(c context.Context, req *api.IndividualRunID) (*api.Run, error) {
-	r, err := getRun(p, req.ID, req.RunID)
+	r, err := getRun(p, req.ProcID, req.RunID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,17 +114,17 @@ func getRun(p ProcessorExecutor, id string, runID string) (*runProcessor, error)
 }
 
 func (p ProcessorExecutor) GetConfig(c context.Context, id *api.IndividualRunID) (*api.Configuration, error) {
-	r, err := getRun(p, id.ID, id.RunID)
+	r, err := getRun(p, id.ProcID, id.RunID)
 	if err != nil {
 		return nil, err
 	}
-	return r.r.Config, nil
+	return &api.Configuration{r.r.Config}, nil
 }
 
 func (p ProcessorExecutor) Configure(c context.Context, req *api.ConfigureRequest) (*types.Empty, error) {
-	processorID := req.RunID.ID
-	runID := req.RunID.RunID
-	configuration := req.Config.Config
+	runID := req.ID.RunID
+	processorID := req.ID.ProcID
+	configuration := req.Config
 	//TODO: unmarshal config
 
 	baseProcessor, ok := p.base[processorID]
@@ -124,20 +133,30 @@ func (p ProcessorExecutor) Configure(c context.Context, req *api.ConfigureReques
 	}
 
 	if p.runMap[processorID] == nil {
-		return nil, fmt.Errorf("failed")
-		//base.concreteProcessors[processorID] = make(map[string]Processor)
+		//return nil, fmt.Errorf("failed")
+		log.Printf("proc %s did not have any runs, creating", processorID)
+		p.runMap[processorID] = make(map[string]*runProcessor)
 	}
-	processor, err := baseProcessor.New(configuration)
+
+	spew.Dump(configuration)
+
+	//The run won't exist here at this point, so we create it:
+	proc, err := baseProcessor.New(configuration)
 	if err != nil {
 		return nil, err
 	}
-	p.runMap[processorID][runID] = &runProcessor{p: processor, r: api.Run{
+	fmt.Println("got here")
+	rp := &runProcessor{p: proc, r: api.Run{
 		RunID: runID,
-		//TODO: think about storing the config in a deserialized format here for easy access. Then again, the processor's already configured and shouldn't need to be again
+		//TODO: think about storing the config in a deserialized format here for easy access. Then again, the proc's already configured and shouldn't need to be again
 		Config: req.Config,
 		State:  api.State_CONFIGURED,
 	}}
-	return nil, nil
+
+	spew.Dump(rp)
+
+	p.runMap[processorID][runID] = rp
+	return &types.Empty{}, nil
 }
 
 func (p ProcessorExecutor) GetRunState(*api.IndividualRunID, api.ProcessorAPI_GetRunStateServer) error {
@@ -145,25 +164,41 @@ func (p ProcessorExecutor) GetRunState(*api.IndividualRunID, api.ProcessorAPI_Ge
 }
 
 func (p ProcessorExecutor) GetRunData(c context.Context, id *api.IndividualRunID) (*api.DataSpec, error) {
-	r, err := getRun(p, id.ID, id.RunID)
+	r, err := getRun(p, id.ProcID, id.RunID)
 	if err != nil {
 		return nil, err
 	}
 	return &r.ds, nil
 }
 
-func (p ProcessorExecutor) AddData(c context.Context, req *api.AddDataRequest) (*api.Data, error) {
-	r, err := getRun(p, req.Id.ID, req.Id.RunID)
+func (p ProcessorExecutor) AddData(c context.Context, req *api.AddDataRequest) (*types.Empty, error) {
+	r, err := getRun(p, req.ID.ProcID, req.ID.RunID)
 	if err != nil {
 		return nil, err
 	}
 	//todo: make all these chunks concurrent
 	r.ds.In = append(r.ds.In, req.Data)
+	//switch req.Data.Data.
+	d, ok := req.Data.Data.(*api.Data_Raw)
+	if !ok {
+		return nil, fmt.Errorf("failed to read raw data")
+	}
+	val := (*d).Raw.Value
+	var data interface{}
+	spew.Dump(val)
+	err = json.Unmarshal(val, &data)
+	if err != nil {
+		return nil, err
+	}
+	//todo: unmarshall json
+	r.p.Run(data)
 	return nil, nil
 }
 
 func NewProcessorExecutor() ProcessorExecutor {
-	return ProcessorExecutor{version: Version, base: processors.DefaultProcessors, runMap: make(runProcMap)}
+	initProc := processors.ConfiguredProcessorRegistry().Processors
+	spew.Dump(initProc)
+	return ProcessorExecutor{version: Version, base: initProc, runMap: make(runProcMap)}
 }
 //
 //func buildConfig() *api.Configuration {

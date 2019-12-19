@@ -1,4 +1,5 @@
-package processors
+// This package provides the Processor interface which is implemented by all the other packages in the parent package
+package processor
 
 import (
 	"github.com/alexkreidler/wiz/api"

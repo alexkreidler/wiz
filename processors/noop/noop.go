@@ -2,17 +2,20 @@ package noop
 
 import (
 	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors"
+	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/davecgh/go-spew/spew"
 	"time"
 )
 
 type NoopProcessor struct {
-	state chan api.State
+	state    chan api.State
 	curState api.State
 }
 
-func (n NoopProcessor) New(config interface{}) (processors.Processor, error) {
-	return NoopProcessor{state: make(chan api.State), curState:api.State_CONFIGURED}, nil
+func (n NoopProcessor) New(config interface{}) (processor.Processor, error) {
+	spew.Dump("got:")
+	spew.Dump(config)
+	return NoopProcessor{state: make(chan api.State), curState: api.State_CONFIGURED}, nil
 }
 
 func (n NoopProcessor) State() chan api.State {
@@ -39,9 +42,8 @@ func (n NoopProcessor) GetError() error {
 
 func (n NoopProcessor) Metadata() api.Processor {
 	return api.Processor{
-		ProcessorID: api.ProcessorID{ID:"noop"},
-		Name:        "No Operation Processor",
-		Version:     "0.1.0",
+		ProcID:  "noop",
+		Name:    "No Operation Processor",
+		Version: "0.1.0",
 	}
 }
-
