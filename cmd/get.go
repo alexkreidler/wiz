@@ -17,6 +17,8 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -37,6 +39,11 @@ PACKAGE refers to the Wiz package to fetch: either be a package identifier from 
 		// fmt.Println("get called with", args, " outfile:", outfile)
 		packageName := args[0]
 		fmt.Println("Installing ", packageName)
+		f, err := ioutil.ReadFile(packageName)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	},
 	Args: cobra.MinimumNArgs(1),
 }
@@ -55,5 +62,5 @@ func init() {
 	// is called directly, e.g.:
 	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	getCmd.Flags().StringVarP(&outfile, "output", "o", "", "The output specification file (required)")
-	getCmd.MarkFlagRequired("output")
+	//getCmd.MarkFlagRequired("output")
 }

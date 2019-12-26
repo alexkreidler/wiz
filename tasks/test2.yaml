@@ -1,0 +1,17 @@
+name: download pipeline
+# 
+data:
+  urls:
+    - https://download.bls.gov/pub/time.series/la/la.seasonal
+    - https://download.bls.gov/pub/time.series/la/la.period
+spec:
+  sequential:
+    - name: dl
+      processor:
+        name: http
+        version: 1.0
+    - name: output
+    # simply outputs all files from the previous step
+      processor: 
+        name: file_out
+        version: 1.0

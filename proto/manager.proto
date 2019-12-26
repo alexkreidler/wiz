@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+package api;
+
+// TODO: handle errors idiomatically with: (For now we just return a null object)
+//import "google/rpc/status.proto";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// ProcessorAPI defines the Wiz Procesor API
+service ManagerAPI {
+
+//    rpc CreatePipeline(google.proto.Empty) returns google.proto.Empty;
+}

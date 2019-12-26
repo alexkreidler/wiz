@@ -1,18 +1,32 @@
 name: test pipeline
 # this data is passed to the first pipeline
+
+# this creates a type: input node that simply sends the data specified
 data:
-  url: https://download.bls.gov/pub/time.series/la/
-  files:
-    - la.seasonal
-    - la.period
+  # url: https://download.bls.gov/pub/time.series/la/
+  # files:
+  #   - la.seasonal
+  #   - la.period
+  urls:
+    - https://download.bls.gov/pub/time.series/la/la.seasonal
+    - https://download.bls.gov/pub/time.series/la/la.period
 spec:
   sequential:
+    # TODO: implement a file record splitter to allow formats like the data above
+    # - name: splitter
+    #   processor:
+    #     name: file_record_splitter
+    #     version: 1.0
+    #     configuration:
+          # $file:
+          #   loop: .files
+
+          # template:
+          #   url: $url/$file
     - name: dl
       processor:
         name: http
         version: 1.0
-        configuration:
-          url: http://google.com
       children:
         sequential:
           - name: decompress

@@ -1,7 +1,8 @@
 package local
 
 import (
-	"github.com/alexkreidler/wiz/executor"
+	"fmt"
+	"github.com/alexkreidler/wiz/environment"
 	"os"
 	"os/exec"
 	"strconv"
@@ -22,9 +23,14 @@ func (e Environment) Name() string {
 // No configuration necessary for the local environment
 
 // Maybe able to configure the port that the executor listens on
-func (e Environment) Configure(d interface{}) error {
+func (e *Environment) Configure(d interface{}) error {
 	//panic("implement me")
-	//e = d.(*Environment)
+	newEnv, ok := d.(Environment)
+	if !ok {
+		return fmt.Errorf("failed to convert configuration to environment")
+	}
+	*e = newEnv
+
 	return nil
 }
 
@@ -45,12 +51,12 @@ func (e Environment) StartExecutor(node string) error {
 	return c.Run()
 }
 
-func NewEnvironment() executor.Environment {
+func NewEnvironment() environment.Environment {
 	return Environment{Port: 9003}
 }
 
 func init() {
-	err := executor.RegisterEnvironment("local", NewEnvironment)
+	err := environment.RegisterEnvironment("local", NewEnvironment)
 	if err != nil {
 		panic(err)
 	} // .(executor.EnvironmentConstructor))
