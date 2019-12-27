@@ -18,7 +18,7 @@ type ProcessorRegistry struct {
 }
 
 func (p ProcessorRegistry) AddProcessor(name string, processor processor.Processor) {
-	p.Processors[name] = processor;
+	p.Processors[name] = processor
 }
 
 func ConfiguredProcessorRegistry() ProcessorRegistry {

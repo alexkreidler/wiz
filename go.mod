@@ -6,7 +6,6 @@ require (
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gogo/protobuf v1.3.1
-	github.com/golang/protobuf v1.3.2
 	github.com/gorilla/mux v1.7.3
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
