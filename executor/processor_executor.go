@@ -79,6 +79,7 @@ func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
 	if err != nil {
 		return nil, err
 	}
+	spew.Dump(r)
 	return &r.r, nil
 }
 
@@ -87,7 +88,7 @@ func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, 
 	if err != nil {
 		return nil, err
 	}
-	return &r.r.Configuration, nil
+	return &r.r.Config, nil
 }
 
 func (p ProcessorExecutor) Configure(procID, runID string, config api.Configuration) error {
@@ -108,11 +109,14 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 		return err
 	}
 	fmt.Println("got here")
-	rp := &runProcessor{p: proc, r: api.Run{
+	run := api.Run{
 		RunID: runID,
-		Configuration: config,
-		State:  api.StateCONFIGURED,
-	}}
+		Config: api.Configuration(config),
+		CurState:  api.State(api.StateCONFIGURED),
+	}
+	spew.Dump(run)
+	fmt.Printf("RUN: %#+v \n", run)
+	rp := &runProcessor{p: proc, r: run}
 
 	spew.Dump(rp)
 

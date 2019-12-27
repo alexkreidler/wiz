@@ -18,8 +18,8 @@ type Processors []Processor
 // Run is an instance of a processor associated with a task graph
 type Run struct {
 	RunID string
-	Configuration
-	State
+	Config Configuration // `json:"config"`
+	CurState State //`json:"state"`
 }
 // Runs is an unordered set of runs
 type Runs []Run

@@ -5,6 +5,7 @@ package server
 import (
 	"encoding/json"
 	"github.com/alexkreidler/wiz/api"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"log"
@@ -48,6 +49,7 @@ func NewServer(server api.ProcessorServer) Server {
 		procID := c.Param("procID")
 		runID := c.Param("runID")
 		p, err := server.GetRun(procID, runID)
+		spew.Dump(p)
 		if err != nil {
 			c.Error(err)
 		}
@@ -69,8 +71,9 @@ func NewServer(server api.ProcessorServer) Server {
 		runID := c.Param("runID")
 		var data interface{}
 		body, err := ioutil.ReadAll(c.Request.Body)
-		log.Println(string(body))
-		err = json.Unmarshal(body, data)
+
+		log.Println("recieved body configuration:", string(body))
+		err = json.Unmarshal(body, &data)
 		if err != nil {
 			c.Error(err)
 		}

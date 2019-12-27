@@ -3,7 +3,7 @@ package noop
 import (
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors/processor"
-	"github.com/davecgh/go-spew/spew"
+	"log"
 	"time"
 )
 
@@ -13,8 +13,7 @@ type NoopProcessor struct {
 }
 
 func (n NoopProcessor) New(config interface{}) (processor.Processor, error) {
-	spew.Dump("got:")
-	spew.Dump(config)
+	log.Println("Creating new", n.Metadata().Name, "processor with config", config)
 	return NoopProcessor{state: make(chan api.State), curState: api.StateCONFIGURED}, nil
 }
 
