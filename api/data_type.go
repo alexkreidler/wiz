@@ -1,6 +1,6 @@
 //go:generate go-enum -f=$GOFILE --marshal
 
-package processor
+package api
 
 // DataType represents the type of data chunk
 /*

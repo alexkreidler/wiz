@@ -1,14 +1,11 @@
 package executor
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors"
 	procApi "github.com/alexkreidler/wiz/processors/processor"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gogo/protobuf/types"
 	"log"
 )
 
@@ -26,7 +23,12 @@ type runProcessor struct {
 	ds api.DataSpec
 }
 
+type runProcMap map[string]map[string]*runProcessor
+
 //ProcessorExecutor implements the ProcessorAPIServer for builtin Golang Processors. It uses channels, maps, and concurrency to parallelize by chunks
+//It is designed so all operations can use a value receiver. The version an base processors don't need to be modified, but the specific runs do, which is why it is a map to pointers
+//can maps be modified with value receivers? yes they can, because maps, slices, and channels are inherently mutable
+//think about concurrency issues, e.g. will multiple requests result in consistent state -- map need a stronger concurrency primitive than a simple Map, e.g. locks
 type ProcessorExecutor struct {
 	version string
 	// base maps the ID of the processor to the processor. These are all base, non-configured processors that are registered at startup
@@ -36,171 +38,118 @@ type ProcessorExecutor struct {
 	runMap runProcMap
 }
 
-type runProcMap map[string]map[string]*runProcessor
-
-func (p ProcessorExecutor) GetAllProcessors(context.Context, *types.Empty) (*api.Processors, error) {
-	all := make([]api.Processor, 0)
+func (p ProcessorExecutor) GetAllProcessors() (*api.Processors, error) {
+	all := make(api.Processors,0)
 	for _, processor := range p.base {
 		all = append(all, processor.Metadata())
 	}
-	return &api.Processors{all}, nil
+	return &all, nil
 }
 
-// TODO: update to use new data access
-func (p ProcessorExecutor) GetProcessor(c context.Context, id *api.ProcessorID) (*api.Processor, error) {
-	processor, ok := p.base[id.ProcID]
+func (p ProcessorExecutor) GetProcessor(procID string) (*api.Processor, error) {
+	processor, ok := p.base[procID]
 	if !ok {
-		return nil, fmt.Errorf("processor %s not found", id.ProcID)
+		return nil, fmt.Errorf("processor %s not found", procID)
 	} else {
 		p := processor.Metadata()
 		return &p, nil
 	}
 }
 
-func (p ProcessorExecutor) GetRuns(c context.Context, id *api.ProcessorID) (*api.Runs, error) {
-	err := checkProcessorExists(p, id.ProcID)
+func (p ProcessorExecutor) GetRuns(procID string) (*api.Runs, error) {
+	err := checkProcessorExists(p, procID)
 	if err != nil {
 		return nil, err
 	}
-	processor, ok := p.runMap[id.ProcID]
+	processor, ok := p.runMap[procID]
 	if !ok {
 		// no runs are registered
 		return &api.Runs{}, nil
 	} else {
-		all := make([]api.Run, len(processor))
+		all := make(api.Runs, len(processor))
 		for _, run := range processor {
 			all = append(all, run.r)
 		}
-		return &api.Runs{Runs: all}, nil
+		return &all, nil
 	}
 }
 
-func (p ProcessorExecutor) GetRun(c context.Context, req *api.IndividualRunID) (*api.Run, error) {
-	r, err := getRun(p, req.ProcID, req.RunID)
+func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
+	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
 	}
 	return &r.r, nil
 }
 
-// Data access utilities
-func checkProcessorExists(p ProcessorExecutor, processorID string) error {
-	_, ok := p.base[processorID]
-	if !ok {
-		return fmt.Errorf("processor %s not found", processorID)
-	}
-	return nil
-}
-
-func chuckRunExists(p ProcessorExecutor, id string, runID string) error {
-	if err := checkProcessorExists(p, id); err != nil {
-		return err
-	}
-	_, ok := p.runMap[id][runID]
-	if !ok {
-		return fmt.Errorf("run %s not found", runID)
-	}
-	return nil
-}
-
-//getRun returns a pointer because the run, processor, and data need to be updated
-func getRun(p ProcessorExecutor, id string, runID string) (*runProcessor, error) {
-	err := chuckRunExists(p, id, runID)
+func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, error) {
+	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
 	}
-
-	return p.runMap[id][runID], nil
+	return &r.r.Configuration, nil
 }
 
-func (p ProcessorExecutor) GetConfig(c context.Context, id *api.IndividualRunID) (*api.Configuration, error) {
-	r, err := getRun(p, id.ProcID, id.RunID)
-	if err != nil {
-		return nil, err
-	}
-	return &api.Configuration{r.r.Config}, nil
-}
-
-func (p ProcessorExecutor) Configure(c context.Context, req *api.ConfigureRequest) (*types.Empty, error) {
-	runID := req.ID.RunID
-	processorID := req.ID.ProcID
-	configuration := req.Config
-	//TODO: unmarshal config
-
-	baseProcessor, ok := p.base[processorID]
+func (p ProcessorExecutor) Configure(procID, runID string, config api.Configuration) error {
+	baseProcessor, ok := p.base[procID]
 	if !ok {
-		return nil, fmt.Errorf("baseProcessor %s not found", processorID)
+		return fmt.Errorf("baseProcessor %s not found", procID)
 	}
 
-	if p.runMap[processorID] == nil {
+	if p.runMap[procID] == nil {
 		//return nil, fmt.Errorf("failed")
-		log.Printf("proc %s did not have any runs, creating", processorID)
-		p.runMap[processorID] = make(map[string]*runProcessor)
+		log.Printf("proc %s did not have any runs, creating", procID)
+		p.runMap[procID] = make(map[string]*runProcessor)
 	}
-
-	spew.Dump(configuration)
 
 	//The run won't exist here at this point, so we create it:
-	proc, err := baseProcessor.New(configuration)
+	proc, err := baseProcessor.New(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	fmt.Println("got here")
 	rp := &runProcessor{p: proc, r: api.Run{
 		RunID: runID,
-		//TODO: think about storing the config in a deserialized format here for easy access. Then again, the proc's already configured and shouldn't need to be again
-		Config: req.Config,
-		State:  api.State_CONFIGURED,
+		Configuration: config,
+		State:  api.StateCONFIGURED,
 	}}
 
 	spew.Dump(rp)
 
-	p.runMap[processorID][runID] = rp
-	return &types.Empty{}, nil
+	p.runMap[procID][runID] = rp
+	return nil
 }
 
-func (p ProcessorExecutor) GetRunState(*api.IndividualRunID, api.ProcessorAPI_GetRunStateServer) error {
-	panic("implement me")
-}
-
-func (p ProcessorExecutor) GetRunData(c context.Context, id *api.IndividualRunID) (*api.DataSpec, error) {
-	r, err := getRun(p, id.ProcID, id.RunID)
+func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, error) {
+	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
 	}
 	return &r.ds, nil
 }
 
-func (p ProcessorExecutor) AddData(c context.Context, req *api.AddDataRequest) (*types.Empty, error) {
-	r, err := getRun(p, req.ID.ProcID, req.ID.RunID)
+func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
+	r, err := getRun(p, procID, runID)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	data.State = api.DataChunkStateRUNNING
 	//todo: make all these chunks concurrent
-	r.ds.In = append(r.ds.In, req.Data)
-	//switch req.Data.Data.
-	d, ok := req.Data.Data.(*api.Data_Raw)
-	if !ok {
-		return nil, fmt.Errorf("failed to read raw data")
+	r.ds.In = append(r.ds.In, data)
+
+	switch data.Type {
+	case api.DataTypeRAW:
+		r.p.Run(data.RawData)
+		break
+	case api.DataTypeFILESYSTEMREF:
+		r.p.Run(data.FilesystemReference)
 	}
-	val := (*d).Raw.Value
-	var data interface{}
-	spew.Dump(val)
-	err = json.Unmarshal(val, &data)
-	if err != nil {
-		return nil, err
-	}
-	//todo: unmarshall json
-	r.p.Run(data)
-	return nil, nil
+	return nil
 }
+
 
 func NewProcessorExecutor() ProcessorExecutor {
 	initProc := processors.ConfiguredProcessorRegistry().Processors
 	spew.Dump(initProc)
 	return ProcessorExecutor{version: Version, base: initProc, runMap: make(runProcMap)}
 }
-//
-//func buildConfig() *api.Configuration {
-//	return &api.Configuration{Config: &types.Any{TypeUrl: "https://wiz-project.ml/configurtion", Value: []byte(`test`)}}
-//}
