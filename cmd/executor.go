@@ -16,13 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/executor"
-	"google.golang.org/grpc"
-	"log"
-	"net"
-
+	"github.com/alexkreidler/wiz/server"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 // executorCmd represents the executor command
@@ -36,19 +33,10 @@ var executorCmd = &cobra.Command{
 //This application is a tool to generate the needed files
 //to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//port = ":" + port
-		lis, err := net.Listen("tcp", port)
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-		log.Printf("Listening on %s", port)
-		s := grpc.NewServer()
+		log.Println("Starting server on port", port)
+		s := server.NewServer(executor.NewProcessorExecutor())
 
-		srv := executor.NewProcessorExecutor()
-		api.RegisterProcessorAPIServer(s, srv)
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-		}
+		s.Run(port)
 	},
 }
 
@@ -63,7 +51,7 @@ func init() {
 	// and all subcommands, e.g.:
 	// executorCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	executorCmd.Flags().StringVarP(&port, "port", "p", ":50051", "Sets the port that the executor serves the Processor API on")
+	executorCmd.Flags().StringVarP(&port, "port", "p", ":8080", "Sets the port that the executor serves the Processor API on")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

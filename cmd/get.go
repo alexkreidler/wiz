@@ -43,6 +43,7 @@ PACKAGE refers to the Wiz package to fetch: either be a package identifier from 
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Println(f)
 
 	},
 	Args: cobra.MinimumNArgs(1),

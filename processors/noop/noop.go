@@ -15,7 +15,7 @@ type NoopProcessor struct {
 func (n NoopProcessor) New(config interface{}) (processor.Processor, error) {
 	spew.Dump("got:")
 	spew.Dump(config)
-	return NoopProcessor{state: make(chan api.State), curState: api.State_CONFIGURED}, nil
+	return NoopProcessor{state: make(chan api.State), curState: api.StateCONFIGURED}, nil
 }
 
 func (n NoopProcessor) State() chan api.State {
@@ -29,11 +29,11 @@ func (n NoopProcessor) updateState(state api.State) {
 }
 
 func (n NoopProcessor) Run(data interface{}) {
-	n.updateState(api.State_RUNNING)
+	n.updateState(api.StateRUNNING)
 
 	//	DO work, maybe sleep for a bit
 	time.Sleep(2 * time.Second)
-	n.updateState(api.State_SUCCESS)
+	n.updateState(api.StateSUCCESS)
 }
 
 func (n NoopProcessor) GetError() error {
