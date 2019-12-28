@@ -12,23 +12,9 @@ import (
 
 const Version = "0.1.0"
 
-// Config is the executor configuration
-type Config struct {
-	MaxWorkers          int
-	SendDownstream      bool
-	// TODO: make API URL templating agnostic, refactor into server package
-	// e.g. Server.GetProc(procID, runID) will return /processors/procID/runs/runID
-	// this could be used both for generating endpoints and here, for passing outputs downstream
-	DownstreamLocations []struct {
-		Hostname string
-		ProcID   string
-		RunID    string
-	}
-}
-
 //runProcessor contains a run and a processor which is that run
 type runProcessor struct {
-	Config
+	baseProcessor procApi.ChunkProcessor
 
 	// runLock locks the run information (state specifically).
 	// TODO: think about locking configuration. currently we don't allow configuration changes
@@ -122,11 +108,19 @@ func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, 
 }
 
 func (p ProcessorExecutor) Configure(procID, runID string, config api.Configuration) error {
-
+	baseProcessor, ok := p.base[procID]
+	if !ok {
+		return fmt.Errorf("baseProcessor %s not found", procID)
+	}
 	if p.runMap[procID] == nil {
 		//return nil, fmt.Errorf("failed")
 		log.Printf("proc %s did not have any runs, creating", procID)
 		p.runMap[procID] = make(map[string]*runProcessor)
+	}
+
+	err := baseProcessor.Configure(config.Processor)
+	if err != nil {
+		return err
 	}
 
 	//The run won't exist here at this point, so we create it:
@@ -134,7 +128,7 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 		RunID:         runID,
 		Configuration: config,
 		CurrentState:  api.StateCONFIGURED,
-	}}
+	}, baseProcessor: baseProcessor}
 
 	p.runMap[procID][runID] = rp
 	return nil
@@ -163,12 +157,8 @@ func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
 	if err != nil {
 		return err
 	}
-	baseProcessor, ok := p.base[procID]
-	if !ok {
-		return fmt.Errorf("baseProcessor %s not found", procID)
-	}
 	data.State = api.DataChunkStateWAITING
-	go rManager(data, r, baseProcessor)
+	go rManager(data, r)
 	return nil
 }
 

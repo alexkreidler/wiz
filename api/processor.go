@@ -27,8 +27,6 @@ type Run struct {
 	RunID string
 	Configuration
 
-	ExpectedData
-
 	// Note: Embedding structs will automatically promote the child struct's functions,
 	// and since our State type is an enum that overrides the default Marshal and Unmarshal functions,
 	// it overwrites it for the parent type as well.
@@ -39,4 +37,8 @@ type Run struct {
 type Runs []Run
 
 // Configuration is a generic type for processor-specific configuration
-type Configuration interface{}
+type Configuration struct {
+	ExpectedData
+	ExecutorConfig
+	Processor interface{}
+}

@@ -2,7 +2,6 @@ package executor
 
 import (
 	"github.com/alexkreidler/wiz/api"
-	procApi "github.com/alexkreidler/wiz/processors/processor"
 	"log"
 	"sync/atomic"
 )
@@ -23,7 +22,7 @@ func createOutputDataChunk(d api.Data) api.Data {
 }
 
 // data is the data to run on, r is the runProcessor object, and baseProcessor is the configured ChunkProcessor that will be the base for the new spawned processor
-func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcessor) {
+func rManager(data api.Data, r *runProcessor) {
 	outputChunk := createOutputDataChunk(data)
 
 	r.dataLock.Lock()
@@ -32,7 +31,7 @@ func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcess
 	}
 
 	w := Worker{
-		p:   baseProcessor.New(),
+		p:   r.baseProcessor.New(),
 		in:  data,
 		out: outputChunk,
 	}
@@ -67,7 +66,7 @@ func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcess
 	r.workers[data.ChunkID].out.RawData = out
 	r.dataLock.Unlock()
 
-	if r.Config.SendDownstream {
+	if r.run.Configuration.ExecutorConfig.SendDownstream {
 	//	todo: send the output to the downstream processors
 	}
 	atomic.AddUint32(&r.numCompleted, 1)
