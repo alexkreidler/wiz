@@ -39,3 +39,15 @@ func main() {
 ```
 
 You could even do something like the Go pipelines pattern
+
+## Builtin Processors
+
+TODO:
+
+- [x] basic noop
+- [ ] custom http downloader with Accept Ranges support
+- [ ] aria2 downloader - expose as much config as possible
+- [ ] ftp/sftp
+- [ ] git
+- [ ] (un)archive
+- [ ] basic file mangement (move, copy, etc)
