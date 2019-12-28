@@ -15,39 +15,28 @@ type Processor struct {
 // Processors is an unordered set of processors
 type Processors []Processor
 
+// ExpectedData is the data expected by a Run
+// for now it is just the number of chunks, but in the future could contain a list of ChunkIDs
+// If ChunkIDs were hashes this could be a defacto form of externalized/internal state?
+type ExpectedData struct {
+	NumChunks int
+}
+
 // Run is an instance of a processor associated with a task graph
 type Run struct {
 	RunID string
-	Config Configuration // `json:"config"`
-	CurState State //`json:"state"`
+	Configuration
+
+	ExpectedData
+
+	// Note: Embedding structs will automatically promote the child struct's functions,
+	// and since our State type is an enum that overrides the default Marshal and Unmarshal functions,
+	// it overwrites it for the parent type as well.
+	// Remember, the CurrentState must be updated from the RunProcessor state to be fresh. TODO: think about these guarantees
+	CurrentState State
 }
 // Runs is an unordered set of runs
 type Runs []Run
 
 // Configuration is a generic type for processor-specific configuration
 type Configuration interface{}
-
-// Data is a data chunk
-// In the future we may extend this to include data streams
-type Data struct {
-	ChunkID string
-	Type DataType
-	State DataChunkState
-
-	RawData interface{}
-	FilesystemReference
-
-	OutputChunkID string
-}
-
-// DataSpec defines both the input and output data chunks in processor
-type DataSpec struct {
-	In []Data
-	Out []Data
-}
-
-// FilesystemReference is a reference to either a file or directory
-type FilesystemReference struct {
-	Driver string // the filesystem driver (e.g. NFS, local, ZFS, etc)
-	Location string // the actual file path location
-}

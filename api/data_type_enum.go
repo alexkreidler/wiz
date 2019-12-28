@@ -8,19 +8,70 @@ import (
 )
 
 const (
-	// DataTypeRAW is a DataType of type RAW
+	// DataFormatRAW is a DataFormat of type RAW
 	// raw generic data
-	DataTypeRAW DataType = iota + 1
-	// DataTypeFILESYSTEMREF is a DataType of type FILESYSTEM_REF
+	DataFormatRAW DataFormat = iota + 1
+	// DataFormatFILESYSTEMREF is a DataFormat of type FILESYSTEM_REF
 	// a reference to a file or folder accessible to the processor
-	DataTypeFILESYSTEMREF
+	DataFormatFILESYSTEMREF
 )
 
-const _DataTypeName = "RAWFILESYSTEM_REF"
+const _DataFormatName = "RAWFILESYSTEM_REF"
+
+var _DataFormatMap = map[DataFormat]string{
+	1: _DataFormatName[0:3],
+	2: _DataFormatName[3:17],
+}
+
+// String implements the Stringer interface.
+func (x DataFormat) String() string {
+	if str, ok := _DataFormatMap[x]; ok {
+		return str
+	}
+	return fmt.Sprintf("DataFormat(%d)", x)
+}
+
+var _DataFormatValue = map[string]DataFormat{
+	_DataFormatName[0:3]:  1,
+	_DataFormatName[3:17]: 2,
+}
+
+// ParseDataFormat attempts to convert a string to a DataFormat
+func ParseDataFormat(name string) (DataFormat, error) {
+	if x, ok := _DataFormatValue[name]; ok {
+		return x, nil
+	}
+	return DataFormat(0), fmt.Errorf("%s is not a valid DataFormat", name)
+}
+
+// MarshalText implements the text marshaller method
+func (x DataFormat) MarshalText() ([]byte, error) {
+	return []byte(x.String()), nil
+}
+
+// UnmarshalText implements the text unmarshaller method
+func (x *DataFormat) UnmarshalText(text []byte) error {
+	name := string(text)
+	tmp, err := ParseDataFormat(name)
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+const (
+	// DataTypeINPUT is a DataType of type INPUT
+	DataTypeINPUT DataType = iota + 1
+	// DataTypeOUTPUT is a DataType of type OUTPUT
+	DataTypeOUTPUT
+)
+
+const _DataTypeName = "INPUTOUTPUT"
 
 var _DataTypeMap = map[DataType]string{
-	1: _DataTypeName[0:3],
-	2: _DataTypeName[3:17],
+	1: _DataTypeName[0:5],
+	2: _DataTypeName[5:11],
 }
 
 // String implements the Stringer interface.
@@ -32,8 +83,8 @@ func (x DataType) String() string {
 }
 
 var _DataTypeValue = map[string]DataType{
-	_DataTypeName[0:3]:  1,
-	_DataTypeName[3:17]: 2,
+	_DataTypeName[0:5]:  1,
+	_DataTypeName[5:11]: 2,
 }
 
 // ParseDataType attempts to convert a string to a DataType

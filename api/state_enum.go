@@ -8,23 +8,35 @@ import (
 )
 
 const (
+	// DataChunkStateWAITING is a DataChunkState of type WAITING
+	// the processor is waiting for the chunk to arrive, either from an external or regular source
+	DataChunkStateWAITING DataChunkState = iota + 1
 	// DataChunkStateVALIDATING is a DataChunkState of type VALIDATING
 	// the processor is validating that the chunk can work with the current configuration
-	DataChunkStateVALIDATING DataChunkState = iota
+	DataChunkStateVALIDATING
 	// DataChunkStateDETERMINING is a DataChunkState of type DETERMINING
 	// the processor is determining the External State of the chunk
 	DataChunkStateDETERMINING
 	// DataChunkStateRUNNING is a DataChunkState of type RUNNING
 	// the processor is running on the chunk
 	DataChunkStateRUNNING
+	// DataChunkStateSUCCEEDED is a DataChunkState of type SUCCEEDED
+	// processor has successfully processed the data chunk
+	DataChunkStateSUCCEEDED
+	// DataChunkStateFAILED is a DataChunkState of type FAILED
+	// processor hit an error and terminated processing for the chunk.
+	DataChunkStateFAILED
 )
 
-const _DataChunkStateName = "VALIDATINGDETERMININGRUNNING"
+const _DataChunkStateName = "WAITINGVALIDATINGDETERMININGRUNNINGSUCCEEDEDFAILED"
 
 var _DataChunkStateMap = map[DataChunkState]string{
-	0: _DataChunkStateName[0:10],
-	1: _DataChunkStateName[10:21],
-	2: _DataChunkStateName[21:28],
+	1: _DataChunkStateName[0:7],
+	2: _DataChunkStateName[7:17],
+	3: _DataChunkStateName[17:28],
+	4: _DataChunkStateName[28:35],
+	5: _DataChunkStateName[35:44],
+	6: _DataChunkStateName[44:50],
 }
 
 // String implements the Stringer interface.
@@ -36,9 +48,12 @@ func (x DataChunkState) String() string {
 }
 
 var _DataChunkStateValue = map[string]DataChunkState{
-	_DataChunkStateName[0:10]:  0,
-	_DataChunkStateName[10:21]: 1,
-	_DataChunkStateName[21:28]: 2,
+	_DataChunkStateName[0:7]:   1,
+	_DataChunkStateName[7:17]:  2,
+	_DataChunkStateName[17:28]: 3,
+	_DataChunkStateName[28:35]: 4,
+	_DataChunkStateName[35:44]: 5,
+	_DataChunkStateName[44:50]: 6,
 }
 
 // ParseDataChunkState attempts to convert a string to a DataChunkState
@@ -72,28 +87,28 @@ const (
 	// processor has been configured successfully
 	StateCONFIGURED
 	// StateRUNNING is a State of type RUNNING
-	// processor has recieved and begun processing at least one chunk
+	// processor has received and begun processing at least one chunk
 	StateRUNNING
-	// StateSUCCESS is a State of type SUCCESS
+	// StateSUCCEEDED is a State of type SUCCEEDED
 	// processor has successfully processed all data chunks
-	StateSUCCESS
+	StateSUCCEEDED
 	// StateCOMPLETED is a State of type COMPLETED
 	// processor finished with at least one individual chunk failing but no fatal errors
 	StateCOMPLETED
-	// StateFAILURE is a State of type FAILURE
+	// StateFAILED is a State of type FAILED
 	// processor hit an irrecoverable error and terminated
-	StateFAILURE
+	StateFAILED
 )
 
-const _StateName = "UNINITIALIZEDCONFIGUREDRUNNINGSUCCESSCOMPLETEDFAILURE"
+const _StateName = "UNINITIALIZEDCONFIGUREDRUNNINGSUCCEEDEDCOMPLETEDFAILED"
 
 var _StateMap = map[State]string{
 	1: _StateName[0:13],
 	2: _StateName[13:23],
 	3: _StateName[23:30],
-	4: _StateName[30:37],
-	5: _StateName[37:46],
-	6: _StateName[46:53],
+	4: _StateName[30:39],
+	5: _StateName[39:48],
+	6: _StateName[48:54],
 }
 
 // String implements the Stringer interface.
@@ -108,9 +123,9 @@ var _StateValue = map[string]State{
 	_StateName[0:13]:  1,
 	_StateName[13:23]: 2,
 	_StateName[23:30]: 3,
-	_StateName[30:37]: 4,
-	_StateName[37:46]: 5,
-	_StateName[46:53]: 6,
+	_StateName[30:39]: 4,
+	_StateName[39:48]: 5,
+	_StateName[48:54]: 6,
 }
 
 // ParseState attempts to convert a string to a State

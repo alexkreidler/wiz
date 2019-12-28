@@ -7,20 +7,48 @@ import (
 	procApi "github.com/alexkreidler/wiz/processors/processor"
 	"github.com/davecgh/go-spew/spew"
 	"log"
+	"sync"
 )
 
 const Version = "0.1.0"
 
+// Config is the executor configuration
+type Config struct {
+	MaxWorkers          int
+	SendDownstream      bool
+	// TODO: make API URL templating agnostic, refactor into server package
+	// e.g. Server.GetProc(procID, runID) will return /processors/procID/runs/runID
+	// this could be used both for generating endpoints and here, for passing outputs downstream
+	DownstreamLocations []struct {
+		Hostname string
+		ProcID   string
+		RunID    string
+	}
+}
+
 //runProcessor contains a run and a processor which is that run
 type runProcessor struct {
-	// r is the metadata about the run for serialization
-	r api.Run
+	Config
 
-	// p is the actual instance of the processor that has been configured
-	p procApi.Processor
+	// runLock locks the run information (state specifically).
+	// TODO: think about locking configuration. currently we don't allow configuration changes
+	runLock sync.RWMutex
+	// run is the metadata about the run for serialization
+	run api.Run
 
-	// ds holds all of the processor's data
-	ds api.DataSpec
+	// dataLock locks the state of all the data chunks/workers
+	dataLock sync.RWMutex
+	// workers is a map from ChunkID to worker
+	workers map[string]*Worker
+
+	// wg is a WaitGroup to wait for all Running processors to finish
+	wg sync.WaitGroup
+}
+
+type Worker struct {
+	p   procApi.ChunkProcessor
+	in  api.Data
+	out api.Data
 }
 
 type runProcMap map[string]map[string]*runProcessor
@@ -33,13 +61,13 @@ type ProcessorExecutor struct {
 	version string
 	// base maps the ID of the processor to the processor. These are all base, non-configured processors that are registered at startup
 	//Their Metadata functions are the source of all processor information
-	base map[string]procApi.Processor
+	base map[string]procApi.ChunkProcessor
 	//runMap is a map of processor IDs to runIDs and processors
 	runMap runProcMap
 }
 
 func (p ProcessorExecutor) GetAllProcessors() (*api.Processors, error) {
-	all := make(api.Processors,0)
+	all := make(api.Processors, 0)
 	for _, processor := range p.base {
 		all = append(all, processor.Metadata())
 	}
@@ -68,7 +96,7 @@ func (p ProcessorExecutor) GetRuns(procID string) (*api.Runs, error) {
 	} else {
 		all := make(api.Runs, len(processor))
 		for _, run := range processor {
-			all = append(all, run.r)
+			all = append(all, run.run)
 		}
 		return &all, nil
 	}
@@ -79,8 +107,8 @@ func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
 	if err != nil {
 		return nil, err
 	}
-	spew.Dump(r)
-	return &r.r, nil
+
+	return &r.run, nil
 }
 
 func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, error) {
@@ -88,14 +116,10 @@ func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, 
 	if err != nil {
 		return nil, err
 	}
-	return &r.r.Config, nil
+	return &r.run.Configuration, nil
 }
 
 func (p ProcessorExecutor) Configure(procID, runID string, config api.Configuration) error {
-	baseProcessor, ok := p.base[procID]
-	if !ok {
-		return fmt.Errorf("baseProcessor %s not found", procID)
-	}
 
 	if p.runMap[procID] == nil {
 		//return nil, fmt.Errorf("failed")
@@ -104,21 +128,11 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 	}
 
 	//The run won't exist here at this point, so we create it:
-	proc, err := baseProcessor.New(config)
-	if err != nil {
-		return err
-	}
-	fmt.Println("got here")
-	run := api.Run{
-		RunID: runID,
-		Config: api.Configuration(config),
-		CurState:  api.State(api.StateCONFIGURED),
-	}
-	spew.Dump(run)
-	fmt.Printf("RUN: %#+v \n", run)
-	rp := &runProcessor{p: proc, r: run}
-
-	spew.Dump(rp)
+	rp := &runProcessor{run: api.Run{
+		RunID:         runID,
+		Configuration: config,
+		CurrentState:  api.StateCONFIGURED,
+	}}
 
 	p.runMap[procID][runID] = rp
 	return nil
@@ -137,20 +151,14 @@ func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
 	if err != nil {
 		return err
 	}
-	data.State = api.DataChunkStateRUNNING
-	//todo: make all these chunks concurrent
-	r.ds.In = append(r.ds.In, data)
-
-	switch data.Type {
-	case api.DataTypeRAW:
-		r.p.Run(data.RawData)
-		break
-	case api.DataTypeFILESYSTEMREF:
-		r.p.Run(data.FilesystemReference)
+	baseProcessor, ok := p.base[procID]
+	if !ok {
+		return fmt.Errorf("baseProcessor %s not found", procID)
 	}
+	data.State = api.DataChunkStateWAITING
+	go rManager(data, r, baseProcessor)
 	return nil
 }
-
 
 func NewProcessorExecutor() ProcessorExecutor {
 	initProc := processors.ConfiguredProcessorRegistry().Processors

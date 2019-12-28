@@ -49,7 +49,6 @@ func NewServer(server api.ProcessorServer) Server {
 		procID := c.Param("procID")
 		runID := c.Param("runID")
 		p, err := server.GetRun(procID, runID)
-		spew.Dump(p)
 		if err != nil {
 			c.Error(err)
 		}
@@ -96,11 +95,14 @@ func NewServer(server api.ProcessorServer) Server {
 		procID := c.Param("procID")
 		runID := c.Param("runID")
 		var data api.Data
-		err := c.BindJSON(data)
+		err := c.BindJSON(&data)
 		//c.MustBindWith()
 		if err != nil {
 			c.Error(err)
+			return
 		}
+		log.Println("successfully read data")
+		spew.Dump(data)
 		err = server.AddData(procID, runID, data)
 		if err != nil {
 			c.Error(err)
