@@ -25,7 +25,7 @@ type ExpectedData struct {
 // Run is an instance of a processor associated with a task graph
 type Run struct {
 	RunID string
-	Configuration
+	Configuration Configuration
 
 	// Note: Embedding structs will automatically promote the child struct's functions,
 	// and since our State type is an enum that overrides the default Marshal and Unmarshal functions,
@@ -38,7 +38,8 @@ type Runs []Run
 
 // Configuration is a generic type for processor-specific configuration
 type Configuration struct {
-	ExpectedData
-	ExecutorConfig
+	// Embeded structs have a weird JSON serialization issue
+	ExpectedData ExpectedData
+	ExecutorConfig ExecutorConfig
 	Processor interface{}
 }

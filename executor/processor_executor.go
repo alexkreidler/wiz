@@ -148,7 +148,7 @@ func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, erro
 		ds.In = append(ds.In,v.in)
 		ds.Out = append(ds.Out,v.out)
 	}
-	r.dataLock.Unlock()
+	r.dataLock.RUnlock()
 	return &ds, nil
 }
 
@@ -157,6 +157,7 @@ func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
 	if err != nil {
 		return err
 	}
+	setRunState(r, api.StateRUNNING)
 	data.State = api.DataChunkStateWAITING
 	go rManager(data, r)
 	return nil

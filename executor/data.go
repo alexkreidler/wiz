@@ -21,8 +21,11 @@ func createOutputDataChunk(d api.Data) api.Data {
 	return chunk
 }
 
+//rManager is a goroutine that transforms updates on the Processor's state into updates in the Executor's memory which can then respond to HTTP requests
+// TODO: reevaluate later for too much locking?
 // data is the data to run on, r is the runProcessor object, and baseProcessor is the configured ChunkProcessor that will be the base for the new spawned processor
 func rManager(data api.Data, r *runProcessor) {
+	log.Println("starting runManger")
 	outputChunk := createOutputDataChunk(data)
 
 	r.dataLock.Lock()
@@ -49,10 +52,12 @@ func rManager(data api.Data, r *runProcessor) {
 		log.Println("unsupported data type")
 		return
 	}
+	log.Println("Processor has started")
 
 	// handle state updates from the channel
 	// this range stmt requires that the processor close its channel
 	for state := range w.p.State() {
+		log.Println("state change", state)
 		r.dataLock.Lock()
 		r.workers[data.ChunkID].in.State = state
 		r.dataLock.Unlock()
@@ -63,6 +68,7 @@ func rManager(data api.Data, r *runProcessor) {
 
 	r.dataLock.Lock()
 	r.workers[data.ChunkID].out.Format = api.DataFormatRAW
+	r.workers[data.ChunkID].out.State = api.DataChunkStateSUCCEEDED
 	r.workers[data.ChunkID].out.RawData = out
 	r.dataLock.Unlock()
 
@@ -70,9 +76,15 @@ func rManager(data api.Data, r *runProcessor) {
 	//	todo: send the output to the downstream processors
 	}
 	atomic.AddUint32(&r.numCompleted, 1)
-	if r.numCompleted == r.run.ExpectedData.NumChunks {
+	if r.numCompleted == uint32(r.run.Configuration.ExpectedData.NumChunks) {
 		handleAllChunksCompleted(r)
 	}
+}
+
+func setRunState(r *runProcessor, state api.State) {
+	r.runLock.Lock()
+	r.run.CurrentState = state
+	r.runLock.Unlock()
 }
 
 //handleAllChunksCompleted gets called whenever a processor completes (aka all chunks are done) to recalculate the Run state
@@ -80,18 +92,15 @@ func handleAllChunksCompleted(r *runProcessor) {
 	r.dataLock.RLock()
 	for _, v := range r.workers {
 		if v.in.State == api.DataChunkStateFAILED {
-			r.runLock.Lock()
-			r.run.CurrentState = api.StateERRORED
-			r.runLock.Unlock()
+			setRunState(r, api.StateERRORED)
 			return
 		} else if v.in.State != api.DataChunkStateSUCCEEDED {
 			log.Println("error: expected all chunks to be succeeded, but", v.in.ChunkID, "is not")
 		}
 	}
+	r.dataLock.RUnlock()
 
 	log.Print("all chunks succeeded")
-	r.runLock.Lock()
-	r.run.CurrentState = api.StateSUCCEEDED
-	r.runLock.Unlock()
+	setRunState(r, api.StateSUCCEEDED)
 }
 

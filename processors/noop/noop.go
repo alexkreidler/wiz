@@ -43,12 +43,17 @@ func (n NoopProcessor) updateState(state api.DataChunkState) {
 
 }
 
+func (n NoopProcessor) done() {
+	close(n.state)
+}
+
 func (n NoopProcessor) Run(data interface{}) {
 	n.updateState(api.DataChunkStateRUNNING)
 
 	//	DO work, maybe sleep for a bit
-	time.Sleep(5 * time.Second)
+	time.Sleep(8 * time.Second)
 	n.updateState(api.DataChunkStateSUCCEEDED)
+	n.done()
 }
 
 func (n NoopProcessor) GetError() error {

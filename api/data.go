@@ -9,7 +9,7 @@ type Data struct {
 	State   DataChunkState
 
 	RawData interface{}
-	FilesystemReference
+	FilesystemReference FilesystemReference
 
 	// this is a reference to the opposing data chunk. If it is an input chunk this references the output.
 	// If it is an output chunk it references the input chunk
