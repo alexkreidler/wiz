@@ -4,6 +4,7 @@ import (
 	"github.com/alexkreidler/wiz/api"
 	procApi "github.com/alexkreidler/wiz/processors/processor"
 	"log"
+	"sync/atomic"
 )
 
 // createOutputDataChunk simply creates a default output data chunk given an input data chunk
@@ -23,7 +24,6 @@ func createOutputDataChunk(d api.Data) api.Data {
 
 // data is the data to run on, r is the runProcessor object, and baseProcessor is the configured ChunkProcessor that will be the base for the new spawned processor
 func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcessor) {
-
 	outputChunk := createOutputDataChunk(data)
 
 	r.dataLock.Lock()
@@ -44,7 +44,6 @@ func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcess
 	// Handle the different data formats: TODO figure out others
 	switch data.Format {
 	case api.DataFormatRAW:
-		r.wg.Add(1)
 		go w.p.Run(data)
 		break
 	default:
@@ -59,19 +58,41 @@ func rManager(data api.Data, r *runProcessor, baseProcessor procApi.ChunkProcess
 		r.workers[data.ChunkID].in.State = state
 		r.dataLock.Unlock()
 	}
-	// even if all processors report state Succeeded, they may not exit their goroutines, so we use a WaitGroup. TODO: think about this
-	r.wg.Wait()
-	handleProcDone(r)
+	// handle completion of this chunk
+	out := w.p.Output()
+	log.Println("chunk", w.in.ChunkID, "has completed. Got output:", out)
+
+	r.dataLock.Lock()
+	r.workers[data.ChunkID].out.Format = api.DataFormatRAW
+	r.workers[data.ChunkID].out.RawData = out
+	r.dataLock.Unlock()
+
+	if r.Config.SendDownstream {
+	//	todo: send the output to the downstream processors
+	}
+	atomic.AddUint32(&r.numCompleted, 1)
+	if r.numCompleted == r.run.ExpectedData.NumChunks {
+		handleAllChunksCompleted(r)
+	}
 }
 
-//handleProcDone gets called whenever a processor completes to recalculate the Run state
-func handleProcDone(r *runProcessor) {
-	//r.workers.
+//handleAllChunksCompleted gets called whenever a processor completes (aka all chunks are done) to recalculate the Run state
+func handleAllChunksCompleted(r *runProcessor) {
 	r.dataLock.RLock()
-	for k, v := range r.workers {
+	for _, v := range r.workers {
 		if v.in.State == api.DataChunkStateFAILED {
-			
+			r.runLock.Lock()
+			r.run.CurrentState = api.StateERRORED
+			r.runLock.Unlock()
+			return
+		} else if v.in.State != api.DataChunkStateSUCCEEDED {
+			log.Println("error: expected all chunks to be succeeded, but", v.in.ChunkID, "is not")
 		}
 	}
+
+	log.Print("all chunks succeeded")
+	r.runLock.Lock()
+	r.run.CurrentState = api.StateSUCCEEDED
+	r.runLock.Unlock()
 }
 

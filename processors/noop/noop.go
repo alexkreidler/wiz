@@ -1,7 +1,6 @@
 package noop
 
 import (
-	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors/processor"
 	"log"
@@ -9,40 +8,47 @@ import (
 )
 
 type NoopProcessor struct {
-	state    chan api.State
-	curState api.State
+	state    chan api.DataChunkState
+	curState api.DataChunkState
 }
 
-func (n NoopProcessor) New(config interface{}) (processor.Processor, error) {
-	log.Println("Creating new", n.Metadata().Name, "processor with config", config)
-	return NoopProcessor{state: make(chan api.State, 3), curState: api.StateCONFIGURED}, nil
+func (n NoopProcessor) Configure(config interface{}) error {
+	return nil
 }
 
-func (n NoopProcessor) State() chan api.State {
-	//n.state <- n.curState
+func (n NoopProcessor) New() processor.ChunkProcessor {
+	log.Println("Creating new", n.Metadata().Name, "processor")
+	return NoopProcessor{state: make(chan api.DataChunkState), curState: api.DataChunkStateWAITING}
+}
+
+func (n NoopProcessor) State() <-chan api.DataChunkState {
 	return n.state
 }
 
-func (n NoopProcessor) updateState(state api.State) {
-	//n.state <- state
+func (n NoopProcessor) Output() interface{} {
+	return map[string]string{"test":"output"}
+}
 
-	select {
-	case n.state <- state:
-		fmt.Println("sent message", state)
-	default:
-		fmt.Println("no message sent")
-	}
+func (n NoopProcessor) updateState(state api.DataChunkState) {
+	n.state <- state
+	//
+	//select {
+	//case n.state <- state:
+	//	fmt.Println("sent message", state)
+	//default:
+	//	fmt.Println("no message sent")
+	//}
 
 	n.curState = state
 
 }
 
 func (n NoopProcessor) Run(data interface{}) {
-	n.updateState(api.StateRUNNING)
+	n.updateState(api.DataChunkStateRUNNING)
 
 	//	DO work, maybe sleep for a bit
-	time.Sleep(200 * time.Millisecond)
-	n.updateState(api.StateSUCCESS)
+	time.Sleep(5 * time.Second)
+	n.updateState(api.DataChunkStateSUCCEEDED)
 }
 
 func (n NoopProcessor) GetError() error {

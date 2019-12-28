@@ -50,6 +50,9 @@ type ChunkProcessor interface {
 	// It should update the state appropriately
 	Run(data interface{})
 
+	// Output fetches the data output on successful completion
+	Output() interface{}
+
 	//GetError returns the error which occurred if it goes from running to failed
 	GetError() error
 }

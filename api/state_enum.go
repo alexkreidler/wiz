@@ -11,12 +11,6 @@ const (
 	// DataChunkStateWAITING is a DataChunkState of type WAITING
 	// the processor is waiting for the chunk to arrive, either from an external or regular source
 	DataChunkStateWAITING DataChunkState = iota + 1
-	// DataChunkStateVALIDATING is a DataChunkState of type VALIDATING
-	// the processor is validating that the chunk can work with the current configuration
-	DataChunkStateVALIDATING
-	// DataChunkStateDETERMINING is a DataChunkState of type DETERMINING
-	// the processor is determining the External State of the chunk
-	DataChunkStateDETERMINING
 	// DataChunkStateRUNNING is a DataChunkState of type RUNNING
 	// the processor is running on the chunk
 	DataChunkStateRUNNING
@@ -28,15 +22,13 @@ const (
 	DataChunkStateFAILED
 )
 
-const _DataChunkStateName = "WAITINGVALIDATINGDETERMININGRUNNINGSUCCEEDEDFAILED"
+const _DataChunkStateName = "WAITINGRUNNINGSUCCEEDEDFAILED"
 
 var _DataChunkStateMap = map[DataChunkState]string{
 	1: _DataChunkStateName[0:7],
-	2: _DataChunkStateName[7:17],
-	3: _DataChunkStateName[17:28],
-	4: _DataChunkStateName[28:35],
-	5: _DataChunkStateName[35:44],
-	6: _DataChunkStateName[44:50],
+	2: _DataChunkStateName[7:14],
+	3: _DataChunkStateName[14:23],
+	4: _DataChunkStateName[23:29],
 }
 
 // String implements the Stringer interface.
@@ -49,11 +41,9 @@ func (x DataChunkState) String() string {
 
 var _DataChunkStateValue = map[string]DataChunkState{
 	_DataChunkStateName[0:7]:   1,
-	_DataChunkStateName[7:17]:  2,
-	_DataChunkStateName[17:28]: 3,
-	_DataChunkStateName[28:35]: 4,
-	_DataChunkStateName[35:44]: 5,
-	_DataChunkStateName[44:50]: 6,
+	_DataChunkStateName[7:14]:  2,
+	_DataChunkStateName[14:23]: 3,
+	_DataChunkStateName[23:29]: 4,
 }
 
 // ParseDataChunkState attempts to convert a string to a DataChunkState
@@ -92,23 +82,19 @@ const (
 	// StateSUCCEEDED is a State of type SUCCEEDED
 	// processor has successfully processed all data chunks
 	StateSUCCEEDED
-	// StateCOMPLETED is a State of type COMPLETED
-	// processor finished with at least one individual chunk failing but no fatal errors
-	StateCOMPLETED
-	// StateFAILED is a State of type FAILED
-	// processor hit an irrecoverable error and terminated
-	StateFAILED
+	// StateERRORED is a State of type ERRORED
+	// processor finished with at least one individual chunk failing
+	StateERRORED
 )
 
-const _StateName = "UNINITIALIZEDCONFIGUREDRUNNINGSUCCEEDEDCOMPLETEDFAILED"
+const _StateName = "UNINITIALIZEDCONFIGUREDRUNNINGSUCCEEDEDERRORED"
 
 var _StateMap = map[State]string{
 	1: _StateName[0:13],
 	2: _StateName[13:23],
 	3: _StateName[23:30],
 	4: _StateName[30:39],
-	5: _StateName[39:48],
-	6: _StateName[48:54],
+	5: _StateName[39:46],
 }
 
 // String implements the Stringer interface.
@@ -124,8 +110,7 @@ var _StateValue = map[string]State{
 	_StateName[13:23]: 2,
 	_StateName[23:30]: 3,
 	_StateName[30:39]: 4,
-	_StateName[39:48]: 5,
-	_StateName[48:54]: 6,
+	_StateName[39:46]: 5,
 }
 
 // ParseState attempts to convert a string to a State

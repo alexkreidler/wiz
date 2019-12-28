@@ -19,7 +19,7 @@ type Processors []Processor
 // for now it is just the number of chunks, but in the future could contain a list of ChunkIDs
 // If ChunkIDs were hashes this could be a defacto form of externalized/internal state?
 type ExpectedData struct {
-	NumChunks int
+	NumChunks uint32 // a counter value
 }
 
 // Run is an instance of a processor associated with a task graph

@@ -11,13 +11,13 @@ import (
 //}
 
 
-type ProcessorMap map[string]processor.Processor
+type ProcessorMap map[string]processor.ChunkProcessor
 
 type ProcessorRegistry struct {
 	Processors ProcessorMap
 }
 
-func (p ProcessorRegistry) AddProcessor(name string, processor processor.Processor) {
+func (p ProcessorRegistry) AddProcessor(name string, processor processor.ChunkProcessor) {
 	p.Processors[name] = processor
 }
 

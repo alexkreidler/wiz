@@ -41,8 +41,10 @@ type runProcessor struct {
 	// workers is a map from ChunkID to worker
 	workers map[string]*Worker
 
-	// wg is a WaitGroup to wait for all Running processors to finish
-	wg sync.WaitGroup
+
+	// a WaitGroup doesn't make sense cause it needs the processor goroutine which we don't control to cal  Done. We could just wrap it?? in an anon goroutine
+
+	numCompleted uint32
 }
 
 type Worker struct {
@@ -143,7 +145,17 @@ func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, erro
 	if err != nil {
 		return nil, err
 	}
-	return &r.ds, nil
+	ds := api.DataSpec{
+		In:  make([]api.Data, 0),
+		Out: make([]api.Data, 0),
+	}
+	r.dataLock.RLock()
+	for _, v := range r.workers {
+		ds.In = append(ds.In,v.in)
+		ds.Out = append(ds.Out,v.out)
+	}
+	r.dataLock.Unlock()
+	return &ds, nil
 }
 
 func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
