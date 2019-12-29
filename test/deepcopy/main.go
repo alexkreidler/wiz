@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/mitchellh/mapstructure"
-	"github.com/mohae/deepcopy"
+	"github.com/alexkreidler/deepcopy"
 	"gopkg.in/src-d/go-git.v4"
 	"log"
 	"reflect"
