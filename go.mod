@@ -7,6 +7,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/gorilla/mux v1.7.3
+	github.com/hashicorp/go-getter v1.4.0
 	github.com/imdario/mergo v0.3.8
 	github.com/joeybloggs/go-download v2.1.0+incompatible
 	github.com/mitchellh/mapstructure v1.1.2

@@ -36,7 +36,7 @@ func (g *GitProcessor) State() <-chan api.DataChunkState {
 }
 
 func (g *GitProcessor) Output() interface{} {
-	return map[string]string{"Dir": g.dir}
+	return map[string]string{"OutputDir": g.dir}
 }
 
 func (g *GitProcessor) updateState(state api.DataChunkState) {

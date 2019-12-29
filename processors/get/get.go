@@ -1,21 +1,36 @@
-
+/*
+The get processor uses go-getter from Hashicorp to quickly and easily get data from many sources including Git, HTTP, S3, etc
+It takes in a simple string as input which contains a reference to the file and also any required configuration such as S3 access keys or the Git SHA
+*/
 package get
 
 import (
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors/processor"
+	gogetter "github.com/hashicorp/go-getter"
+	"github.com/imdario/mergo"
+	"github.com/mitchellh/mapstructure"
+	"io/ioutil"
 	"log"
-	"time"
 )
 
+type GoGetConfig struct {
+	// Source is the source to download. It can either be a file or a folder, and Go-Getter will fetch it with GetAny
+	// It can also include any go-getter configuration
+	Source string
+}
+
 type GetProcessor struct {
-	state    chan api.DataChunkState
-    config   interface{} //TODO: change this to your config type
+	state  chan api.DataChunkState
+	config GoGetConfig //TODO: change this to your config type
+	dir    string
 }
 
 func (p *GetProcessor) Configure(config interface{}) error {
-	p.config = config
-    return nil
+	opts := config.(*GoGetConfig)
+	p.config = *opts
+
+	return nil
 }
 
 func (p *GetProcessor) GetConfig() interface{} {
@@ -32,7 +47,7 @@ func (p *GetProcessor) State() <-chan api.DataChunkState {
 }
 
 func (p *GetProcessor) Output() interface{} {
-	return map[string]string{"test": "output"}
+	return map[string]string{"OutputDir": p.dir}
 }
 
 func (p *GetProcessor) updateState(state api.DataChunkState) {
@@ -44,12 +59,44 @@ func (p *GetProcessor) done() {
 }
 
 func (p *GetProcessor) Run(data interface{}) {
+	defer p.done()
 	p.updateState(api.DataChunkStateRUNNING)
 
-	// TODO: Add your code here
+	// First we decode the map into the correct structure
+	var opts GoGetConfig
+	log.Printf("got raw data: %#+v \n", data)
+	err := mapstructure.Decode(data, &opts)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Then we merge the config into the data
+	log.Printf("existing config: %#+v, new data: %#+v \n", p.config, opts)
+	err = mergo.Merge(&opts, p.config, func(config *mergo.Config) {
+		config.Overwrite = true
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	dir, err := ioutil.TempDir("", "go-get")
+	if err != nil {
+		log.Println(err)
+		p.updateState(api.DataChunkStateFAILED)
+		return
+	}
+	log.Println("created temp dir", dir)
+
+	// TODO: expose more options
+	err = gogetter.GetAny(dir, opts.Source)
+	if err != nil {
+		log.Println(err)
+		p.updateState(api.DataChunkStateFAILED)
+		return
+	}
+	p.dir = dir
 
 	p.updateState(api.DataChunkStateSUCCEEDED)
-	p.done()
 }
 
 func (p *GetProcessor) GetError() error {
@@ -59,7 +106,7 @@ func (p *GetProcessor) GetError() error {
 func (p *GetProcessor) Metadata() api.Processor {
 	return api.Processor{
 		ProcID:  "get",
-		Name:    "Go-Get (Hashicorp) Processor",
+		Name:    "Go-Getter (Hashicorp) Processor",
 		Version: "0.1.0",
 	}
 }

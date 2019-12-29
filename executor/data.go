@@ -68,7 +68,7 @@ func rManager(data api.Data, r *runProcessor) {
 
 	r.dataLock.Lock()
 	r.workers[data.ChunkID].out.Format = api.DataFormatRAW
-	r.workers[data.ChunkID].out.State = api.DataChunkStateSUCCEEDED
+	r.workers[data.ChunkID].out.State = r.workers[data.ChunkID].in.State
 	r.workers[data.ChunkID].out.RawData = out
 	r.dataLock.Unlock()
 

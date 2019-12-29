@@ -13,11 +13,14 @@ import (
 
 type <%= Name %>Processor struct {
 	state    chan api.DataChunkState
-    config   interface{} //TODO: change this to your config type
+    config   ConfigType //TODO: change this to your config type
 }
 
 func (p *<%= Name %>Processor) Configure(config interface{}) error {
-	p.config = config
+    // TODO: cast to your config type
+	opts := config.(*ConfigType)
+	p.config = *opts
+
     return nil
 }
 
@@ -47,12 +50,36 @@ func (p *<%= Name %>Processor) done() {
 }
 
 func (p *<%= Name %>Processor) Run(data interface{}) {
+	defer p.done()
 	p.updateState(api.DataChunkStateRUNNING)
+
+    // Remember to decode from the map[string]interface{} data to your config type
+    // First we decode the map into the correct structure
+    var opts ConfigType
+    log.Printf("got raw data: %#+v \n", data)
+    err := mapstructure.Decode(data, &opts)
+    if err != nil {
+        log.Println(err)
+    }
+
+    // Then we merge the config into the data
+    log.Printf("existing config: %#+v, new data: %#+v \n", p.config, opts)
+    err = mergo.Merge(&opts, p.config, func(config *mergo.Config) {
+        config.Overwrite = true
+    })
+    if err != nil {
+        log.Println(err)
+    }
+    // opts now contains the merged options
 
 	// TODO: Add your code here
 
+	if err != nil {
+	    p.updateState(api.DataChunkStateFAILED)
+	    return
+	}
+
 	p.updateState(api.DataChunkStateSUCCEEDED)
-	p.done()
 }
 
 func (p *<%= Name %>Processor) GetError() error {
