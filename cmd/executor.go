@@ -26,12 +26,12 @@ import (
 var executorCmd = &cobra.Command{
 	Use:   "executor",
 	Short: "Starts the Wiz Executor serving the Processor API",
-//	Long: `A longer description that spans multiple lines and likely contains examples
-//and usage of using your command. For example:
-//
-//Cobra is a CLI library for Go that empowers applications.
-//This application is a tool to generate the needed files
-//to quickly create a Cobra application.`,
+	//	Long: `A longer description that spans multiple lines and likely contains examples
+	//and usage of using your command. For example:
+	//
+	//Cobra is a CLI library for Go that empowers applications.
+	//This application is a tool to generate the needed files
+	//to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Println("Starting server on port", port)
 		s := server.NewServer(executor.NewProcessorExecutor())

@@ -1,6 +1,6 @@
 /*
 This package defines the Wiz Processor API
- */
+*/
 package api
 
 // Processor is a logical processor
@@ -24,7 +24,7 @@ type ExpectedData struct {
 
 // Run is an instance of a processor associated with a task graph
 type Run struct {
-	RunID string
+	RunID         string
 	Configuration Configuration
 
 	// Note: Embedding structs will automatically promote the child struct's functions,
@@ -33,13 +33,14 @@ type Run struct {
 	// Remember, the CurrentState must be updated from the RunProcessor state to be fresh. TODO: think about these guarantees
 	CurrentState State
 }
+
 // Runs is an unordered set of runs
 type Runs []Run
 
 // Configuration is a generic type for processor-specific configuration
 type Configuration struct {
 	// Embeded structs have a weird JSON serialization issue
-	ExpectedData ExpectedData
+	ExpectedData   ExpectedData
 	ExecutorConfig ExecutorConfig
-	Processor interface{}
+	Processor      interface{}
 }

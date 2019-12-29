@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Running pre-commit hook to format Go files"
+
 for file in $(git diff --cached --name-only --diff-filter=ACMRTUXB | grep "\.go")
 do
 	echo "(gofmt) $file"

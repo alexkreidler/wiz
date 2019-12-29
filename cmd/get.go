@@ -49,7 +49,6 @@ PACKAGE refers to the Wiz package to fetch: either be a package identifier from 
 	Args: cobra.MinimumNArgs(1),
 }
 
-
 func init() {
 	rootCmd.AddCommand(getCmd)
 

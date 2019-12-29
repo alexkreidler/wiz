@@ -29,7 +29,6 @@ type runProcessor struct {
 	// workers is a map from ChunkID to worker
 	workers map[string]*Worker
 
-
 	// a WaitGroup doesn't make sense cause it needs the processor goroutine which we don't control to cal  Done. We could just wrap it?? in an anon goroutine
 
 	numCompleted uint32
@@ -165,7 +164,7 @@ func configure(processor procApi.ChunkProcessor, userConfig interface{}) (interf
 
 	// First we need to copy the underlying struct
 
-	bc := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer:true})
+	bc := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer: true})
 
 	err := mapstructure.Decode(userConfig, &bc)
 	if err != nil {
@@ -187,8 +186,8 @@ func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, erro
 	}
 	r.dataLock.RLock()
 	for _, v := range r.workers {
-		ds.In = append(ds.In,v.in)
-		ds.Out = append(ds.Out,v.out)
+		ds.In = append(ds.In, v.in)
+		ds.Out = append(ds.Out, v.out)
 	}
 	r.dataLock.RUnlock()
 	return &ds, nil

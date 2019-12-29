@@ -3,7 +3,7 @@ Package manager represents the Wiz Manager library. It exposes a Go API, and is 
 
 1. running locally as part of the Wiz CLI, persisting to a local storage medium
 
-2. running as a long-running daemon that serves API requests from various Wiz CLIs (this needs auth in the future) 
+2. running as a long-running daemon that serves API requests from various Wiz CLIs (this needs auth in the future)
 
 For now, we are only implementing method 1
 */

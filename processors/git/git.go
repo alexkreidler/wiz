@@ -1,9 +1,9 @@
 package git
 
 import (
+	"github.com/alexkreidler/mergo"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors/processor"
-	"github.com/alexkreidler/mergo"
 	"github.com/mitchellh/mapstructure"
 	git "gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
@@ -13,7 +13,7 @@ import (
 type GitProcessor struct {
 	state  chan api.DataChunkState
 	config git.CloneOptions
-	dir string
+	dir    string
 }
 
 func (g *GitProcessor) Configure(config interface{}) error {

@@ -18,7 +18,7 @@ func NewServer(server api.ProcessorServer) Server {
 	// logger and recovery (crash-free) middleware
 	router := gin.Default()
 
-	// Basic GET requests 
+	// Basic GET requests
 	router.GET("/processors", func(c *gin.Context) {
 		p, err := server.GetAllProcessors()
 		if err != nil {

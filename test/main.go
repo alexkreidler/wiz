@@ -14,12 +14,12 @@ func GetConfig() interface{} {
 
 func main() {
 	baseConfig := GetConfig()
-	opts := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer:true})
+	opts := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer: true})
 
 	//opts = opts.(git.CloneOptions)
 
 	userConfig := map[string]interface{}{
-		"Depth": 1,
+		"Depth":        1,
 		"SingleBranch": true,
 	}
 

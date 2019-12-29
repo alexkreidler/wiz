@@ -32,18 +32,17 @@ func createPrimitiveObjects(t reflect.Type) reflect.Value {
 }
 
 var specializedIndividualMethods = map[string]string{
-	"GET": "Get",
-	"POST": "Update",
+	"GET":    "Get",
+	"POST":   "Update",
 	"DELETE": "Delete",
 }
 var specializedResourceMethods = map[string]string{
-	"GET": "GetAll",
+	"GET":  "GetAll",
 	"POST": "Create",
 }
 
 func (s *Server) Configure(rm taguk.ResourceMap) {
 	s.Resources = rm
-
 
 	for name, res := range rm {
 		sr := s.Router.PathPrefix("/" + name).Subrouter()
@@ -58,7 +57,6 @@ func (s *Server) Configure(rm taguk.ResourceMap) {
 				http.Error(writer, `{"error":"provided action is invalid"}`, 400)
 				return
 			}
-
 
 			if n, err := strconv.ParseInt(id, 10, 64); err == nil {
 				vs := a.Func.Call([]reflect.Value{createPrimitiveObjects(a.Base), reflect.ValueOf(n)})
@@ -171,8 +169,8 @@ func (s *Server) Serve() {
 	listener := hostname + ":" + p
 
 	s.Server = &http.Server{
-		Handler:      s.Router,
-		Addr:         listener,
+		Handler: s.Router,
+		Addr:    listener,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -180,4 +178,3 @@ func (s *Server) Serve() {
 
 	log.Fatal(s.Server.ListenAndServe())
 }
-

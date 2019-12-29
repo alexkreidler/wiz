@@ -13,7 +13,7 @@ type Manager struct {
 
 // State represents the manager state. It needs to be serializable to a file
 type State struct {
-	Pipelines    map[string]tasks.Pipeline
+	Pipelines map[string]tasks.Pipeline
 	//Environments map[string]executor.SerializableEnv
 }
 
@@ -28,7 +28,6 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 	}
 	log.Println("Pipeline ", p.Name, "is valid, creating...")
 	//l.State.Pipelines[p.Name] = p
-
 
 	return nil
 }

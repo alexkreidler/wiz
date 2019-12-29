@@ -18,44 +18,44 @@ func TestCRUD(t *testing.T) {
 	r := s.Router
 
 	testCases := []struct {
-		desc	string
+		desc   string
 		method string
-		path string
+		path   string
 	}{
 		{
-			desc: "Create Branch",
+			desc:   "Create Branch",
 			method: "POST",
-			path: "/branch",
+			path:   "/branch",
 		},
 		{
-			desc: "Get All Branches",
+			desc:   "Get All Branches",
 			method: "GET",
-			path: "/branch",
+			path:   "/branch",
 		},
 		{
-			desc: "Read Single Branch",
+			desc:   "Read Single Branch",
 			method: "GET",
-			path: "/branch/1",
+			path:   "/branch/1",
 		},
 		{
-			desc: "Update Single Branch",
+			desc:   "Update Single Branch",
 			method: "POST",
-			path: "/branch/1",
+			path:   "/branch/1",
 		},
 		{
-			desc: "Delete Single Branch",
+			desc:   "Delete Single Branch",
 			method: "DELETE",
-			path: "/branch/1",
+			path:   "/branch/1",
 		},
 	}
 	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {		
+		t.Run(tC.desc, func(t *testing.T) {
 			req, err := http.NewRequest(tC.method, tC.path, nil)
 			test.Ok(t, err)
 
 			rr := httptest.NewRecorder()
 			r.ServeHTTP(rr, req)
-		
+
 			// Check the status code is what we expect.
 			if status := rr.Code; status != http.StatusOK {
 				t.Errorf("handler returned wrong status code: got %v want %v",

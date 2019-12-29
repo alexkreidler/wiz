@@ -16,7 +16,6 @@ func (n NoopProcessor) Configure(config interface{}) error {
 	return nil
 }
 
-
 func (n NoopProcessor) GetConfig() interface{} {
 	return nil
 }
@@ -31,7 +30,7 @@ func (n NoopProcessor) State() <-chan api.DataChunkState {
 }
 
 func (n NoopProcessor) Output() interface{} {
-	return map[string]string{"test":"output"}
+	return map[string]string{"test": "output"}
 }
 
 func (n NoopProcessor) updateState(state api.DataChunkState) {

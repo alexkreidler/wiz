@@ -2,15 +2,14 @@ package processors
 
 import (
 	"github.com/alexkreidler/wiz/processors/git"
-	"github.com/alexkreidler/wiz/processors/processor"
 	"github.com/alexkreidler/wiz/processors/noop"
+	"github.com/alexkreidler/wiz/processors/processor"
 )
 
 //
 //var DefaultProcessors = map[string]Processor{
 //	"noop": noop.NoopProcessor{},
 //}
-
 
 type ProcessorMap map[string]processor.ChunkProcessor
 

@@ -5,7 +5,6 @@ import (
 	"strings"
 )
 
-
 // Server represents a taguk server
 type Server struct {
 	Resources ResourceMap
@@ -13,6 +12,7 @@ type Server struct {
 
 // ResourceMap is a map of resources
 type ResourceMap map[string]Resource
+
 // ActionMap is a map of actions
 type ActionMap map[string]Action
 
@@ -24,18 +24,21 @@ type CustomServer interface {
 	Serve()
 	//Serve(listener string)
 }
+
 // Resource is a logical object/resource in the API
 type Resource struct {
-	Name string
+	Name    string
 	Version string
-	r interface{}
+	r       interface{}
 	Actions ActionMap
 }
+
 // Item is an instance of a resource
 type Item struct {
 	ID int64
-	i interface{}
+	i  interface{}
 }
+
 // Action is some method that can be performed on either a resource or an item
 type Action struct {
 	Name string
@@ -92,18 +95,18 @@ func (s *Server) AddResource(r interface{}) {
 		v = v.Elem()
 	}
 	t := v.Type()
-	
+
 	rName := t.Name()
 
-	res := Resource{Name:rName, Version:"0.1.0", r: r}
+	res := Resource{Name: rName, Version: "0.1.0", r: r}
 
 	for i := 0; i < t.NumMethod(); i++ {
 		m := t.Method(i)
 
 		action := Action{
-			Name:   m.Name,
-			Method: m,
-			Base: getBaseValue(m.Func.Type()),
+			Name:       m.Name,
+			Method:     m,
+			Base:       getBaseValue(m.Func.Type()),
 			Individual: hasIDArgument(m.Func.Type()),
 		}
 		if res.Actions == nil {
@@ -112,7 +115,7 @@ func (s *Server) AddResource(r interface{}) {
 		res.Actions[strings.ToLower(m.Name)] = action
 	}
 	//TODO: don't hack this, actually use the json struct field name to json key decoding code
-    //https://golang.org/src/encoding/json/encode.go?s=6471:6514#L148
+	//https://golang.org/src/encoding/json/encode.go?s=6471:6514#L148
 	s.Resources[FunctionNameToActionMap(rName)] = res
 }
 
@@ -132,4 +135,3 @@ func (s *Server) AddResource(r interface{}) {
 //	srv.Configure(s.resources)
 //	srv.Serve(listener)
 //}
-

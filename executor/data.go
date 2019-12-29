@@ -73,7 +73,7 @@ func rManager(data api.Data, r *runProcessor) {
 	r.dataLock.Unlock()
 
 	if r.run.Configuration.ExecutorConfig.SendDownstream {
-	//	todo: send the output to the downstream processors
+		//	todo: send the output to the downstream processors
 	}
 	atomic.AddUint32(&r.numCompleted, 1)
 	if r.numCompleted == uint32(r.run.Configuration.ExpectedData.NumChunks) {
@@ -103,4 +103,3 @@ func handleAllChunksCompleted(r *runProcessor) {
 	log.Print("all chunks succeeded")
 	setRunState(r, api.StateSUCCEEDED)
 }
-

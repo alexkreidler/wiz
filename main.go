@@ -6,5 +6,5 @@ package main
 import "github.com/alexkreidler/wiz/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }

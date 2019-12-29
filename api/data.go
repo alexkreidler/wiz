@@ -8,7 +8,7 @@ type Data struct {
 	Type    DataType
 	State   DataChunkState
 
-	RawData interface{}
+	RawData             interface{}
 	FilesystemReference FilesystemReference
 
 	// this is a reference to the opposing data chunk. If it is an input chunk this references the output.
@@ -21,12 +21,12 @@ type Data struct {
 
 // DataSpec defines both the input and output data chunks in processor
 type DataSpec struct {
-	In []Data
+	In  []Data
 	Out []Data
 }
 
 // FilesystemReference is a reference to either a file or directory
 type FilesystemReference struct {
-	Driver string // the filesystem driver (e.g. NFS, local, ZFS, etc)
+	Driver   string // the filesystem driver (e.g. NFS, local, ZFS, etc)
 	Location string // the actual file path location
 }

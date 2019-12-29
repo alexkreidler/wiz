@@ -25,7 +25,6 @@ func TestTasksDeserialization(t *testing.T) {
 	//fmt.Printf("%#v", p)
 	spew.Dump(p)
 
-
 	out, err := yaml.Marshal(p)
 	if err != nil {
 		t.Fatal(err)

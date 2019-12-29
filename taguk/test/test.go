@@ -36,7 +36,6 @@ func (b Branch) Get(id int64) Branch {
 	}
 }
 
-
 func (b Branch) NoArgs() Branch {
 	return Branch{
 		Name:     "test",
