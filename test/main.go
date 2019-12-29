@@ -1,59 +1,35 @@
 package main
 
 import (
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"os"
-	"time"
-
-	"github.com/cavaliercoder/grab"
+	"github.com/mitchellh/mapstructure"
+	"github.com/mohae/deepcopy"
+	"gopkg.in/src-d/go-git.v4"
+	"log"
+	"reflect"
 )
 
+func GetConfig() interface{} {
+	return git.CloneOptions{}
+}
+
 func main() {
-	// create client
-	client := grab.NewClient()
-	req, _ := grab.NewRequest(".", "http://ipv4.download.thinkbroadband.com/1GB.zip")
+	baseConfig := GetConfig()
+	opts := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer:true})
 
-	// start download
-	fmt.Printf("Downloading %v...\n", req.URL())
-	resp := client.DoBatch(6, req)
-	r := (<-resp)
-	//r.HTTPResponse.H
-	spew.Dump(r.HTTPResponse)
-	fmt.Printf("  %v\n", r.HTTPResponse.Status)
+	//opts = opts.(git.CloneOptions)
 
-	// start UI loop
-	t := time.NewTicker(500 * time.Millisecond)
-	defer t.Stop()
-
-Loop:
-	for {
-		select {
-		case <-t.C:
-			fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
-				r.BytesComplete(),
-				r.Size,
-				100*r.Progress())
-
-		case <-r.Done:
-			// download is complete
-			break Loop
-		}
+	userConfig := map[string]interface{}{
+		"Depth": 1,
+		"SingleBranch": true,
 	}
 
-	// check for errors
-	if err := (<-resp).Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "Download failed: %v\n", err)
-		os.Exit(1)
+	log.Printf("%#+v", opts)
+	v := reflect.ValueOf(opts).Elem() //.Elem()
+	log.Println(v.CanSet(), v.Kind())
+
+	err := mapstructure.Decode(userConfig, &opts)
+	if err != nil {
+		log.Println(err)
 	}
-
-	fmt.Printf("Download saved to ./%v \n", (<-resp).Filename)
-
-	// Output:
-	// Downloading http://www.golang-book.com/public/pdf/gobook.pdf...
-	//   200 OK
-	//   transferred 42970 / 2893557 bytes (1.49%)
-	//   transferred 1207474 / 2893557 bytes (41.73%)
-	//   transferred 2758210 / 2893557 bytes (95.32%)
-	// Download saved to ./gobook.pdf
+	log.Printf("%#+v", opts)
 }

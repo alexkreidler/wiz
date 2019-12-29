@@ -2,10 +2,12 @@ package executor
 
 import (
 	"fmt"
+	"github.com/alexkreidler/deepcopy"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors"
 	procApi "github.com/alexkreidler/wiz/processors/processor"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/mitchellh/mapstructure"
 	"log"
 	"sync"
 )
@@ -99,12 +101,19 @@ func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
 	return &r.run, nil
 }
 
+//GetConfig must be called on an existing run
 func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, error) {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
 	}
-	r.baseProcessor.GetConfig()
+	//var baseConfig interface{}
+	// checks if the run has any processor configuration, else fetches default configuration from processor itself
+	//if r.run.Configuration.Processor == nil {
+	//	baseConfig = r.baseProcessor.GetConfig()
+	//	log.Printf("Got base configuration: %#+v", baseConfig)
+	//	r.run.Configuration.Processor = baseConfig
+	//}
 	return &r.run.Configuration, nil
 }
 
@@ -119,7 +128,9 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 		p.runMap[procID] = make(map[string]*runProcessor)
 	}
 
-	err := baseProcessor.Configure(config.Processor)
+	procConfig, err := configure(baseProcessor, config.Processor)
+	config.Processor = procConfig
+	//err := baseProcessor.Configure(config.Processor)
 	if err != nil {
 		return err
 	}
@@ -133,6 +144,36 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 
 	p.runMap[procID][runID] = rp
 	return nil
+}
+
+func configure(processor procApi.ChunkProcessor, userConfig interface{}) (interface{}, error) {
+	baseConfig := processor.GetConfig()
+	log.Printf("Got base configuration: %#+v", baseConfig)
+	log.Printf("Got user config: %#+v", userConfig)
+
+	//baseConfig is a struct that contains the default configuration
+
+	//userConfig is a map that contains the user configuration
+
+	// this function abstracts the merging functionality so it is the same for all projects
+	// It will Configure the Processor with the same type struct options as it got from GetConfig() (aka the default config)
+
+	//Goals: take the interface{} baseConfig which contains a struct{} options
+	// and decode a map[string]interface{} into that
+
+	// See test/main.go for a standalone example of this
+
+	// First we need to copy the underlying struct
+
+	bc := deepcopy.Copy(baseConfig, deepcopy.Options{ReturnPointer:true})
+
+	err := mapstructure.Decode(userConfig, &bc)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Printf("New config to apply: %#+v", bc)
+	return bc, processor.Configure(bc)
 }
 
 func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, error) {

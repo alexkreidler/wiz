@@ -14,6 +14,7 @@ type Processor interface {
 	Configure(config interface{}) error
 
 	// GetConfig returns the current configuration
+	// It must return a pointer
 	GetConfig() interface{}
 
 	// Configure allows for reconfiguration of the processor, but it should provide a New method that does it automatically?
@@ -51,6 +52,8 @@ type ChunkProcessor interface {
 	// It should run the entirety of the processor's task/operation synchronously
 	// Expect this function to be called as a new goroutine
 	// It should update the state appropriately
+
+	// TODO: figure out if the data/merging with config should be abstracted out like we did with default configs and GetConfig above
 	Run(data interface{})
 
 	// Output fetches the data output on successful completion
