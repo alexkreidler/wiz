@@ -47,7 +47,7 @@ func (p *GetProcessor) State() <-chan api.DataChunkState {
 }
 
 func (p *GetProcessor) Output() interface{} {
-	return map[string]string{"OutputDir": p.dir}
+	return map[string]string{"Dir": p.dir}
 }
 
 func (p *GetProcessor) updateState(state api.DataChunkState) {

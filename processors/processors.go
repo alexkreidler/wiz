@@ -3,14 +3,10 @@ package processors
 import (
 	"github.com/alexkreidler/wiz/processors/get"
 	"github.com/alexkreidler/wiz/processors/git"
+	"github.com/alexkreidler/wiz/processors/ls"
 	"github.com/alexkreidler/wiz/processors/noop"
 	"github.com/alexkreidler/wiz/processors/processor"
 )
-
-//
-//var DefaultProcessors = map[string]Processor{
-//	"noop": noop.NoopProcessor{},
-//}
 
 type ProcessorMap map[string]processor.ChunkProcessor
 
@@ -27,5 +23,6 @@ func ConfiguredProcessorRegistry() ProcessorRegistry {
 	p.AddProcessor("noop", noop.NoopProcessor{})
 	p.AddProcessor("git", &git.GitProcessor{})
 	p.AddProcessor("get", &get.GetProcessor{})
+	p.AddProcessor("ls", &ls.LsProcessor{})
 	return p
 }
