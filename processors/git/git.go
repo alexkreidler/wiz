@@ -41,7 +41,6 @@ func (g *GitProcessor) Output() interface{} {
 
 func (g *GitProcessor) updateState(state api.DataChunkState) {
 	g.state <- state
-
 }
 
 func (g *GitProcessor) done() {
