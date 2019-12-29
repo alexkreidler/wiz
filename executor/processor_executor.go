@@ -104,6 +104,7 @@ func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, 
 	if err != nil {
 		return nil, err
 	}
+	r.baseProcessor.GetConfig()
 	return &r.run.Configuration, nil
 }
 

@@ -25,6 +25,6 @@ func (p ProcessorRegistry) AddProcessor(name string, processor processor.ChunkPr
 func ConfiguredProcessorRegistry() ProcessorRegistry {
 	p := ProcessorRegistry{make(ProcessorMap)}
 	p.AddProcessor("noop", noop.NoopProcessor{})
-	p.AddProcessor("git", git.GitProcessor{})
+	p.AddProcessor("git", &git.GitProcessor{})
 	return p
 }

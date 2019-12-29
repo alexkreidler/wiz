@@ -16,6 +16,11 @@ func (n NoopProcessor) Configure(config interface{}) error {
 	return nil
 }
 
+
+func (n NoopProcessor) GetConfig() interface{} {
+	return nil
+}
+
 func (n NoopProcessor) New() processor.ChunkProcessor {
 	log.Println("Creating new", n.Metadata().Name, "processor")
 	return NoopProcessor{state: make(chan api.DataChunkState), curState: api.DataChunkStateWAITING}

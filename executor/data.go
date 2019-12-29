@@ -46,7 +46,7 @@ func rManager(data api.Data, r *runProcessor) {
 	// Handle the different data formats: TODO figure out others
 	switch data.Format {
 	case api.DataFormatRAW:
-		go w.p.Run(data)
+		go w.p.Run(data.RawData)
 		break
 	default:
 		log.Println("unsupported data type")

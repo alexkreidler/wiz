@@ -13,6 +13,9 @@ type Processor interface {
 	// This should not depend on any previously set configuration or data
 	Configure(config interface{}) error
 
+	// GetConfig returns the current configuration
+	GetConfig() interface{}
+
 	// Configure allows for reconfiguration of the processor, but it should provide a New method that does it automatically?
 	//Configure(config interface{}) error
 
