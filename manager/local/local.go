@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/client"
+	"github.com/alexkreidler/wiz/utils/gutils"
+	"gonum.org/v1/gonum/graph"
 
 	"github.com/alexkreidler/wiz/environment"
 	"github.com/alexkreidler/wiz/environment/local"
@@ -16,7 +18,6 @@ import (
 
 	"github.com/alexkreidler/wiz/tasks"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/segmentio/ksuid"
 )
 
 type Manager struct {
@@ -99,13 +100,16 @@ func (l *Manager) maybeStartLocalEnv() error {
 	return nil
 }
 
-func setupProcessor(l Manager, p tasks.ProcessorNode) error {
+// RN it goes many Processors --> many downstream locations, etc
+// TODO: think about centralizing this into a data structure that is easier to reason about
+
+func setupProcessor(l Manager, pipeline tasks.Pipeline, node tasks.ProcessorNode) error {
 	e := l.Environments[l.CurrentEnvironment]
 	if e.Host == "" {
 		return fmt.Errorf("failed, invalid host")
 	}
 
-	id := p.Processor.Name
+	id := node.Processor.ID
 	if id == "" {
 		// We skip the root node
 		return nil
@@ -121,28 +125,48 @@ func setupProcessor(l Manager, p tasks.ProcessorNode) error {
 		return err
 	}
 
-	runID := ksuid.New().String()
-	log.Printf("Creating run %s for processor %s", runID, id)
+	log.Printf("Creating run %s for processor %s (%s)", node.RunID, node.Name, id)
+
+	//_ = api.Configuration{}
+
+	downstreamLocs := make([]api.DownstreamDataLocation, 0)
+
+	gutils.IterateChildNodes(pipeline.Graph.From(node.ID()), func(n graph.Node) {
+		log.Println("got node", n.ID())
+		procNode, ok := n.(*tasks.ProcessorNode)
+		if !ok {
+			log.Println("failed to cast")
+		}
+		log.Println("child node", procNode.Name)
+		// TODO: think about which of these procNode.procesor things should be exposed vs private
+		// Maybe add a function in the tasks package which returns the DownstreamDataLocation for a given procNode
+
+		// This assumes that all RunIDs have been assigned in advance
+		downstreamLocs = append(downstreamLocs, api.DownstreamDataLocation{Hostname: e.Host, ProcID: procNode.Processor.ID, RunID: procNode.RunID})
+	})
+
+	log.Println("About to configure with downstreams:", downstreamLocs)
 
 	// POST /proc/id/run/id/config
 	// Configure with Downstream True
-	return c.Configure(id, runID, api.Configuration{
+	return c.Configure(id, node.RunID, api.Configuration{
 		ExpectedData: api.ExpectedData{
 			NumChunks: 1,
 		},
 		ExecutorConfig: api.ExecutorConfig{
-			SendDownstream: true,
-			//DownstreamLocations: TODO
+			SendDownstream:      true,
+			DownstreamLocations: downstreamLocs,
 		},
-		Processor: p.Processor.Configuration,
+		Processor: node.Processor.Configuration,
 	})
+	return nil
 }
 
-func cpyM(m Manager) func(p tasks.ProcessorNode) error {
-	return func(p tasks.ProcessorNode) error {
-		return setupProcessor(m, p)
-	}
-}
+//func cpyM(m Manager) func(p tasks.ProcessorNode) error {
+//	return func(p tasks.ProcessorNode) error {
+//		return setupProcessor(m, p)
+//	}
+//}
 
 func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error {
 	// TODO: read state from file
@@ -161,13 +185,18 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 
 	spew.Dump(p.Spec)
 	log.Println("Pipeline", localPipeline.Name, "is valid, creating...")
+	log.Println("Assigning runIDs to processors")
+
+	localPipeline.AssignRunIDs()
 
 	err = l.maybeStartLocalEnv()
 	if err != nil {
 		return err
 	}
 
-	err = localPipeline.Walk(cpyM(*l))
+	err = localPipeline.Walk(func(n tasks.ProcessorNode) error {
+		return setupProcessor(*l, p, n)
+	})
 	if err != nil {
 		log.Println(err)
 	}

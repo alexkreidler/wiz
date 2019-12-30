@@ -29,3 +29,15 @@ The WTF does not (at this time) prescribe how logs, metrics, or any instrumentat
 1. time taken for each processor
 2. types of data used, size of data input/output
 3. metrics from the execution environment such as CPU and memory usage to use in more advanced heuristics to schedule tasks.
+
+## Internals
+
+Key Choice: Moved from ProcessorNode to *ProcessorNode implementing the graph.Node interface.
+
+Now we can access it with `n *ProcessorNode := p.Graph.Node(id)` allowing modifications from any APIs including traversal.
+
+## IDs
+
+We use KSUIDs of the format: `1Vh9QAjN9Hh1CoRYg0RHbW1fCZp` after careful evaluation of all UUID formats.
+
+It has a simple + powerful go library, 128 bits of randomness (slightly more than RFC 4122 UUIDv4) and time-locality resolution of 1 second.

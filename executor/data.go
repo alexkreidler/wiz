@@ -2,6 +2,9 @@ package executor
 
 import (
 	"github.com/alexkreidler/wiz/api"
+	"github.com/alexkreidler/wiz/client"
+	"github.com/imdario/mergo"
+	"github.com/segmentio/ksuid"
 	"log"
 	"sync/atomic"
 )
@@ -70,15 +73,34 @@ func rManager(data api.Data, r *runProcessor) {
 	r.workers[data.ChunkID].out.Format = api.DataFormatRAW
 	r.workers[data.ChunkID].out.State = r.workers[data.ChunkID].in.State
 	r.workers[data.ChunkID].out.RawData = out
+	prevDataChunk := r.workers[data.ChunkID].out
 	r.dataLock.Unlock()
 
 	if r.run.Configuration.ExecutorConfig.SendDownstream {
-		//	todo: send the output to the downstream processors
+		for _, downstream := range r.run.Configuration.ExecutorConfig.DownstreamLocations {
+			err := sendToDownstream(prevDataChunk, downstream)
+			log.Printf("failed to send chunk %s downstream: %v", prevDataChunk.ChunkID, err)
+		}
 	}
 	atomic.AddUint32(&r.numCompleted, 1)
 	if r.numCompleted == uint32(r.run.Configuration.ExpectedData.NumChunks) {
 		handleAllChunksCompleted(r)
 	}
+}
+
+func sendToDownstream(prevDataChunk api.Data, downstream api.DownstreamDataLocation) error {
+	c := client.NewClient(downstream.Hostname)
+
+	newOutputID := ksuid.New().String()
+	// The previous output now becomes the input, so we need to generate a new output ID
+	// In the future we may add provenance builtin to record every chunk that it has progressed from
+	newDataChunk := api.Data{Type: api.DataTypeINPUT, State: api.DataChunkStateWAITING, AssociatedChunkID: newOutputID}
+
+	err := mergo.Merge(&newDataChunk, prevDataChunk)
+	if err != nil {
+		return err
+	}
+	return c.AddData(downstream.ProcID, downstream.ProcID, newDataChunk)
 }
 
 func setRunState(r *runProcessor, state api.State) {

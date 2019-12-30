@@ -23,28 +23,28 @@ spec:
 
           # template:
           #   url: $url/$file
-    - name: dl
+    - name: download
       processor:
-        name: http
+        id: noop
         version: 1.0
         type: output
       children:
         sequential:
           - name: decompress
             processor:
-              name: extract
+              id: noop
               version: 1.0
-          - name: t
+          - name: output
             processor:
-              name: test
+              id: noop
               version: 1.0
         parallel:
-          - name: test
+          - name: testp
             processor:
-              name: test
+              id: noop
               version: 1.0
-          - name: test2
+          - name: testp2
             processor:
-              name: test
+              id: noop
               version: 1.0
               type: output

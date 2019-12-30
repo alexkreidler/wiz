@@ -8,9 +8,9 @@ spec:
   sequential:
     - name: dl
       processor:
-        name: get
+        id: get
         version: 1.0 # version matching isn't implemented yet
     - name: list output
       description: should list the output of the previous step
       processor:
-        name: ls
+        id: ls

@@ -11,13 +11,18 @@ import (
 )
 
 type Client struct {
-	BaseUrl string
+	Scheme  string
+	Host    string
+	baseUrl string
 	Client  http.Client
 }
 
-func NewClient(baseUrl string) Client {
+func NewClient(host string) Client {
+	h := "http://"
 	return Client{
-		BaseUrl: baseUrl,
+		Host:    host,
+		Scheme:  h,
+		baseUrl: h + host,
 		Client: http.Client{
 			Timeout: 5 * time.Second,
 		},
@@ -26,7 +31,7 @@ func NewClient(baseUrl string) Client {
 
 // below is so repetitive --> codegen?
 func (c Client) GetAllProcessors() (*api.Processors, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllProcessors"]))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllProcessors"]))
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +47,7 @@ func (c Client) GetAllProcessors() (*api.Processors, error) {
 }
 
 func (c Client) GetProcessor(procID string) (*api.Processor, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetProcessor"], procID))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetProcessor"], procID))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +63,7 @@ func (c Client) GetProcessor(procID string) (*api.Processor, error) {
 }
 
 func (c Client) GetAllRuns(procID string) (*api.Runs, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllRuns"], procID))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllRuns"], procID))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +79,7 @@ func (c Client) GetAllRuns(procID string) (*api.Runs, error) {
 }
 
 func (c Client) GetRun(procID, runID string) (*api.Run, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetRun"], procID, runID))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetRun"], procID, runID))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +95,7 @@ func (c Client) GetRun(procID, runID string) (*api.Run, error) {
 }
 
 func (c Client) GetConfig(procID, runID string) (*api.Configuration, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetConfig"], procID, runID))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetConfig"], procID, runID))
 	if err != nil {
 		return nil, err
 	}
@@ -112,13 +117,13 @@ func (c Client) Configure(procID, runID string, config api.Configuration) error 
 	}
 
 	// TODO: maybe check return type?
-	_, err = c.Client.Post(fmt.Sprintf(api.ProcessorAPIEndpoints["Configure"], procID, runID), "application/json", bytes.NewReader(body))
+	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["Configure"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
 }
 
 func (c Client) GetData(procID, runID string) (*api.DataSpec, error) {
-	resp, err := c.Client.Get(fmt.Sprintf(api.ProcessorAPIEndpoints["GetData"]))
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetData"]))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +145,7 @@ func (c Client) AddData(procID, runID string, data api.Data) error {
 	}
 
 	// TODO: maybe check return type?
-	_, err = c.Client.Post(fmt.Sprintf(api.ProcessorAPIEndpoints["AddData"], procID, runID), "application/json", bytes.NewReader(body))
+	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["AddData"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
 }

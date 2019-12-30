@@ -69,7 +69,7 @@ func TestTasksGraphVisualization(t *testing.T) {
 
 	//fmt.Printf("%#v", p)
 	//spew.Dump(p)
-	out, err := dot.Marshal(p.g, "test graph", "", "")
+	out, err := dot.Marshal(p.Graph, "test graph", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestTasksGraphVisualization(t *testing.T) {
 func TestTasksSerialization(t *testing.T) {
 	p := Pipeline{
 		Name:     "test",
-		g:        nil,
+		Graph:    nil,
 		rootNode: nil,
 		Spec: PipelineSpec{
 			Sequential: Sequential{

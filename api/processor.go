@@ -8,7 +8,7 @@ package api
 type Processor struct {
 	// ProcID is the uniquely identifiable Processor ID
 	ProcID string
-	// Name is the human readable name
+	// ID is the human readable name
 	Name    string
 	Version string
 }
