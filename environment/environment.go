@@ -18,7 +18,8 @@ type Environment interface {
 	// StartExecutor starts the Wiz Executor binary on the given node. TODO: figure out scheduling and what nodes actually mean.
 	// For now as we're only implementing the local executor this can be anything
 	// Additionally, start executor should fork the process or do anything necessary so the executor continues to run
-	StartExecutor(node string) error
+	// It can optionally return details about the started executor such as PID or Pod ID
+	StartExecutor(node string) (interface{}, error)
 }
 
 //SerializableEnv is a snapshot of the environment's state at a given time.
@@ -34,4 +35,8 @@ type SerializableEnv struct {
 
 	// Configuration contains the current state of the environment's configuration
 	Configuration interface{}
+
+	// State is the state of the environment, e.g. what objects are actually applied/the real executor
+	// This usually is a k8s Pod ID or a local process ID/PID
+	State interface{}
 }

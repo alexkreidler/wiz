@@ -24,12 +24,13 @@ func (e Environment) Name() string {
 
 // No configuration necessary for the local environment
 func checkPortAvailable(port uint32) bool {
+	//log.Println("checking port", port)
 	l, err := net.Listen("tcp", ":"+strconv.FormatUint(uint64(port), 10))
-	defer l.Close()
-
+	// check error before defer, b/c on err, l will be nil
 	if err != nil {
 		return false
 	}
+	defer l.Close()
 
 	return true
 }
@@ -61,17 +62,18 @@ func (e Environment) IsValidConfiguration() bool {
 	return true
 }
 
-func (e Environment) StartExecutor(node string) error {
+// StartExecutor starts a local Wiz Executor and returns the process ID (pid)
+func (e Environment) StartExecutor(node string) (interface{}, error) {
 	c := exec.Command("wiz", "executor", "--port", ":"+strconv.FormatUint(uint64(e.Port), 10))
 
 	err := c.Start()
 	if err != nil {
 		log.Println("failed to start Wiz Executor", err)
-		return err
+		return nil, err
 	}
 
 	log.Println("started command", c)
-	return nil
+	return c.Process, nil
 }
 
 func (e Environment) Describe() environment.SerializableEnv {

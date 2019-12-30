@@ -3,8 +3,8 @@ package executor
 import (
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/client"
+	"github.com/alexkreidler/wiz/utils"
 	"github.com/imdario/mergo"
-	"github.com/segmentio/ksuid"
 	"log"
 	"sync/atomic"
 )
@@ -91,7 +91,7 @@ func rManager(data api.Data, r *runProcessor) {
 func sendToDownstream(prevDataChunk api.Data, downstream api.DownstreamDataLocation) error {
 	c := client.NewClient(downstream.Hostname)
 
-	newOutputID := ksuid.New().String()
+	newOutputID := utils.GenID()
 	// The previous output now becomes the input, so we need to generate a new output ID
 	// In the future we may add provenance builtin to record every chunk that it has progressed from
 	newDataChunk := api.Data{Type: api.DataTypeINPUT, State: api.DataChunkStateWAITING, AssociatedChunkID: newOutputID}

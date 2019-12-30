@@ -2,8 +2,8 @@ package tasks
 
 import (
 	"fmt"
+	"github.com/alexkreidler/wiz/utils"
 	"github.com/alexkreidler/wiz/utils/gutils"
-	"github.com/segmentio/ksuid"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/traverse"
@@ -17,7 +17,7 @@ type TaskGraph interface {
 // Pipeline represents one Wiz Tasks Framework pipeline
 type Pipeline struct {
 	Name     string
-	Graph    TaskGraph
+	Graph    TaskGraph `json:"-"`
 	rootNode graph.Node
 	Data     interface{}
 	Spec     PipelineSpec
@@ -26,7 +26,7 @@ type Pipeline struct {
 // PipelineSpec defines how a pipeline should be structured/serialized
 type PipelineSpec Children
 
-type Sequential []ProcessorNode
+type Sequential []*ProcessorNode
 
 type Parallel Sequential //map[string]ProcessorNode
 
@@ -70,36 +70,34 @@ func NewPipeline(name string) *Pipeline {
 	return &p
 }
 
-func processorParallel(g graph.DirectedBuilder, parentNode graph.Node, p ProcessorNode) {
+func processorParallel(g graph.DirectedBuilder, parentNode graph.Node, p *ProcessorNode) {
 	// uses the node ID allocations from the regular node, but then sets to an ID in our custom node
 	n := g.NewNode()
 	id := n.ID()
 
-	node := &p
-	node.id = id
+	p.id = id
 
-	g.AddNode(node)
-	e := g.NewEdge(parentNode, node)
+	g.AddNode(p)
+	e := g.NewEdge(parentNode, p)
 	g.SetEdge(e)
 
-	processChildren(g, p, node)
+	processChildren(g, p, p)
 }
-func processorSequential(g graph.DirectedBuilder, previousNode graph.Node, p ProcessorNode) graph.Node {
+func processorSequential(g graph.DirectedBuilder, previousNode graph.Node, p *ProcessorNode) graph.Node {
 	n := g.NewNode()
 	id := n.ID()
 
-	node := &p
-	node.id = id
+	p.id = id
 
-	g.AddNode(node)
-	e := g.NewEdge(previousNode, node)
+	g.AddNode(p)
+	e := g.NewEdge(previousNode, p)
 	g.SetEdge(e)
 
-	processChildren(g, p, node)
-	return node
+	processChildren(g, p, p)
+	return p
 }
 
-func processChildren(builder graph.DirectedBuilder, c ProcessorNode, currentNode graph.Node) {
+func processChildren(builder graph.DirectedBuilder, c *ProcessorNode, currentNode graph.Node) {
 	prev := currentNode
 	for _, proc := range c.Children.Sequential {
 		prev = processorSequential(builder, prev, proc)
@@ -119,15 +117,6 @@ func (p *Pipeline) UpdateFromSpec() {
 		processorParallel(p.Graph, p.rootNode, proc)
 	}
 }
-
-//func (p Pipeline) IterateChildNodes(f func(p ProcessorNode) interface{}) {
-//	for _, proc := range p.Spec.Sequential {
-//		f(proc)
-//	}
-//	for _, proc := range p.Spec.Parallel {
-//		f(proc)
-//	}
-//}
 
 var castError = fmt.Errorf("failed to cast on node")
 
@@ -195,7 +184,7 @@ func (p *Pipeline) AssignRunIDs() {
 				log.Println("failed to cast")
 			}
 
-			runID := ksuid.New().String()
+			runID := utils.GenID()
 			log.Printf("Assigning RunID %s for processor %s (%d)", runID, procNode.Name, n.ID())
 			procNode.RunID = runID
 		}

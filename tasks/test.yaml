@@ -28,6 +28,8 @@ spec:
         id: noop
         version: 1.0
         type: output
+        configuration:
+          test: test
       children:
         sequential:
           - name: decompress

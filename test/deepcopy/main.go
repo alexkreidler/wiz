@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"github.com/alexkreidler/deepcopy"
+	"github.com/mitchellh/mapstructure"
 	"gopkg.in/src-d/go-git.v4"
 	"log"
 	"reflect"

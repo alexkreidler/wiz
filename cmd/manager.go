@@ -36,7 +36,7 @@ var resetCmd = &cobra.Command{Use: "reset", Short: "Reset the manager's state", 
 		log.Fatal(err)
 	}
 
-	m := local.NewManager(file)
+	m := local.NewManager(local.Options{StorageLocation: file})
 	m.ResetState()
 }}
 

@@ -17,9 +17,9 @@ func main() {
 		Concurrency: func(size int64) int {
 			return 0
 		},
-		Proxy:       nil,
-		Client:      nil,
-		Request:     nil,
+		Proxy:   nil,
+		Client:  nil,
+		Request: nil,
 	})
 	if err != nil {
 		log.Fatal(err)
