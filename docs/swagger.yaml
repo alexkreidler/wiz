@@ -1,42 +1,310 @@
-swagger: "2.0"
+basePath: /
+definitions:
+  api.Configuration:
+    properties:
+      ExecutorConfig:
+        $ref: '#/definitions/api.ExecutorConfig'
+        type: object
+      ExpectedData:
+        $ref: '#/definitions/api.ExpectedData'
+        description: Embeded structs have a weird JSON serialization issue
+        type: object
+      Processor:
+        type: object
+    type: object
+  api.Data:
+    properties:
+      AssociatedChunkID:
+        description: |-
+          this is a reference to the opposing data chunk. If it is an input chunk this references the output.
+          If it is an output chunk it references the input chunk
+        type: string
+      ChunkID:
+        type: string
+      FilesystemReference:
+        $ref: '#/definitions/api.FilesystemReference'
+        type: object
+      Format:
+        type: integer
+      RawData:
+        type: object
+      State:
+        type: integer
+      Type:
+        type: integer
+    type: object
+  api.DataSpec:
+    properties:
+      In:
+        items:
+          $ref: '#/definitions/api.Data'
+        type: array
+      Out:
+        items:
+          $ref: '#/definitions/api.Data'
+        type: array
+    type: object
+  api.ExecutorConfig:
+    properties:
+      DownstreamLocations:
+        description: |-
+          TODO: make API URL templating agnostic, refactor into server package
+          e.g. Server.GetProc(procID, runID) will return /processors/procID/runs/runID
+          this could be used both for generating endpoints and here, for passing outputs downstream
+        items:
+          properties:
+            Hostname:
+              type: string
+            ProcID:
+              type: string
+            RunID:
+              type: string
+          type: object
+        type: array
+      MaxWorkers:
+        type: integer
+      SendDownstream:
+        type: boolean
+    type: object
+  api.ExpectedData:
+    properties:
+      NumChunks:
+        description: a counter value
+        type: integer
+    type: object
+  api.FilesystemReference:
+    properties:
+      Driver:
+        description: the filesystem driver (e.g. NFS, local, ZFS, etc)
+        type: string
+      Location:
+        description: the actual file path location
+        type: string
+    type: object
+  api.Processor:
+    properties:
+      Name:
+        description: Name is the human readable name
+        type: string
+      ProcID:
+        description: ProcID is the uniquely identifiable Processor ID
+        type: string
+      Version:
+        type: string
+    type: object
+  api.Processors:
+    items:
+      $ref: '#/definitions/api.Processor'
+    type: array
+  api.Run:
+    properties:
+      Configuration:
+        $ref: '#/definitions/api.Configuration'
+        type: object
+      CurrentState:
+        description: |-
+          Note: Embedding structs will automatically promote the child struct's functions,
+          and since our State type is an enum that overrides the default Marshal and Unmarshal functions,
+          it overwrites it for the parent type as well.
+          Remember, the CurrentState must be updated from the RunProcessor state to be fresh. TODO: think about these guarantees
+        type: integer
+      RunID:
+        type: string
+    type: object
+  api.Runs:
+    items:
+      $ref: '#/definitions/api.Run'
+    type: array
+  server.Empty:
+    type: object
+host: localhost:8080
 info:
-description: "handles all interaction between Wiz Executor and Wiz Manager"
-version: "1.0.0"
-title: "Wiz Executor API"
-license:
-name: "Apache 2.0"
-url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "localhost:9003"
-basePath: "/v1"
-# tags:
-# - name: "pet"
-#   description: "Everything about your Pets"
-#   externalDocs:
-#     description: "Find out more"
-#     url: "http://swagger.io"
-# - name: "store"
-#   description: "Access to Petstore orders"
-# - name: "user"
-#   description: "Operations about user"
-#   externalDocs:
-#     description: "Find out more about our store"
-#     url: "http://swagger.io"
-schemes:
-# - "https"
-- "http"
+  contact: {}
+  description: This is the HTTP + JSON + REST version of the Wiz Processor API.
+  license:
+    name: Apache 2.0
+  title: Wiz Processor API
+  version: "1.0"
 paths:
-/processors:
-get:
-summary: "Lists the available processots"
-responses:
-200:
-description: "Got processors"
-/processors/{processorName}:
-get:
-summary: "Lists the available processots"
-responses:
-200:
-description: "Got processors"
-parameters:
-processorName:
-description: the name of the processor to request
+  /processors:
+    get:
+      consumes:
+      - application/json
+      operationId: GetAllProcessors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Processors'
+      summary: Retrieves all processors
+  /processors/{id}:
+    get:
+      consumes:
+      - application/json
+      operationId: GetProcessor
+      parameters:
+      - description: Processor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Processor'
+      summary: Retrieves a single processor
+  /processors/{procID}/runs:
+    get:
+      consumes:
+      - application/json
+      operationId: GetAllRuns
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Runs'
+      summary: Retrieves all runs
+  /processors/{procID}/runs/{runID}:
+    get:
+      consumes:
+      - application/json
+      operationId: GetRun
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      - description: Run ID
+        in: path
+        name: runID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Run'
+      summary: Retrieves a single run
+  /processors/{procID}/runs/{runID}/config:
+    get:
+      consumes:
+      - application/json
+      operationId: GetConfig
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      - description: Run ID
+        in: path
+        name: runID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Configuration'
+      summary: Retrieves a single run's configuration
+    post:
+      consumes:
+      - application/json
+      operationId: Configure
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      - description: Run ID
+        in: path
+        name: runID
+        required: true
+        type: string
+      - description: Configuration to set
+        in: body
+        name: configuration
+        required: true
+        schema:
+          $ref: '#/definitions/api.Configuration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Sets a single run's configuration
+  /processors/{procID}/runs/{runID}/data:
+    get:
+      consumes:
+      - application/json
+      operationId: GetData
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      - description: Run ID
+        in: path
+        name: runID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DataSpec'
+      summary: Gets data to the run
+    post:
+      consumes:
+      - application/json
+      operationId: AddData
+      parameters:
+      - description: Processor ID
+        in: path
+        name: procID
+        required: true
+        type: string
+      - description: Run ID
+        in: path
+        name: runID
+        required: true
+        type: string
+      - description: Data to add
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/api.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Adds data from the run
+swagger: "2.0"

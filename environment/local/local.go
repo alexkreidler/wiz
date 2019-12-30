@@ -63,11 +63,14 @@ func (e Environment) IsValidConfiguration() bool {
 
 func (e Environment) StartExecutor(node string) error {
 	c := exec.Command("wiz", "executor", "--port", ":"+strconv.FormatUint(uint64(e.Port), 10))
-	log.Println("starting command:", c)
+	err := c.Start()
+	if err != nil {
+		log.Println("failed with err", err)
+		return err
+	}
+	log.Println("started command", c)
 
-	//c.Stdout = os.Stdout
-
-	return c.Start()
+	return nil
 }
 
 func (e Environment) Describe() environment.SerializableEnv {
@@ -75,6 +78,7 @@ func (e Environment) Describe() environment.SerializableEnv {
 	return environment.SerializableEnv{
 		EnvironmentID: "local",
 		Description:   "Local Environment (" + host + ")",
+		Host:          "localhost:" + strconv.FormatUint(uint64(e.Port), 10),
 		Configuration: e,
 	}
 }

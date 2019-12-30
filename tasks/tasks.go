@@ -121,7 +121,7 @@ var castError = fmt.Errorf("failed to cast on node")
 func (p Pipeline) Walk(f func(p ProcessorNode) error) (err error) {
 	defer func() {
 		//	handles both failure to cast to processorNode and any user-function errors
-		err = recover().(error)
+		//err = recover().(error)
 	}()
 	trav := traverse.BreadthFirst{
 		Visit: func(node graph.Node) {

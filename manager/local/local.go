@@ -1,14 +1,21 @@
 package local
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/alexkreidler/wiz/client"
+	"github.com/alexkreidler/wiz/client/operations"
 	"github.com/alexkreidler/wiz/environment"
 	"github.com/alexkreidler/wiz/environment/local"
+	"github.com/alexkreidler/wiz/models"
 	"github.com/alexkreidler/wiz/tasks"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/segmentio/ksuid"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 )
 
 type Manager struct {
@@ -30,6 +37,14 @@ type State struct {
 	CurrentEnvironment string
 }
 
+//func fileExists(filename string) bool {
+//	info, err := os.Stat(filename)
+//	if os.IsNotExist(err) {
+//		return false
+//	}
+//	return !info.IsDir()
+//}
+
 func (l *Manager) readState() error {
 	f, err := ioutil.ReadFile(l.storageLocation)
 	if err != nil {
@@ -38,12 +53,29 @@ func (l *Manager) readState() error {
 	return json.Unmarshal(f, &l.State)
 }
 
+func ensureDir(fileName string) {
+	dirName := filepath.Dir(fileName)
+	if _, serr := os.Stat(dirName); serr != nil {
+		merr := os.MkdirAll(dirName, os.ModePerm)
+		if merr != nil {
+			panic(merr)
+		}
+	}
+}
+
 func (l *Manager) writeState() error {
 	dat, err := json.Marshal(l.State)
 	if err != nil {
 		return err
 	}
+
+	ensureDir(l.storageLocation)
+
 	return ioutil.WriteFile(l.storageLocation, dat, 0644)
+}
+
+func (l *Manager) ResetState() error {
+	return os.Remove(l.storageLocation)
 }
 
 // Starts the local executor if it hasn't been started already
@@ -66,9 +98,36 @@ func (l *Manager) maybeStartLocalEnv() error {
 	return nil
 }
 
-func (l *Manager) setupProcessor(p tasks.ProcessorNode) error {
+func setupProcessor(l Manager, p tasks.ProcessorNode) error {
 	e := l.Environments[l.CurrentEnvironment]
-	//endpoint := e.Endpoint
+	if e.Host == "" {
+		return fmt.Errorf("failed, invalid host")
+	}
+
+	// Setup HTTP client
+
+	id := p.Processor.Name
+	if id == "" {
+		// We skip the root node
+		return nil
+	}
+
+	// GET /processor/id
+	// Make sure its found, return error
+
+	runID := ksuid.New().String()
+	log.Printf("Creating run %s for processor %s", runID, id)
+
+	// POST /proc/id/run/id/config
+	// Configure with Downstream True
+
+	return nil
+}
+
+func cpyM(m Manager) func(p tasks.ProcessorNode) error {
+	return func(p tasks.ProcessorNode) error {
+		return setupProcessor(m, p)
+	}
 }
 
 func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error {
@@ -85,17 +144,19 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 	if err != nil {
 		return err
 	}
+
+	spew.Dump(p.Spec)
 	log.Println("Pipeline", localPipeline.Name, "is valid, creating...")
 
 	err = l.maybeStartLocalEnv()
 	if err != nil {
 		return err
 	}
-	spew.Dump(l)
 
-	localPipeline.Walk(func(p tasks.ProcessorNode) error {
-		return l.setupProcessor(p)
-	})
+	err = localPipeline.Walk(cpyM(*l))
+	if err != nil {
+		log.Println(err)
+	}
 
 	return nil
 }

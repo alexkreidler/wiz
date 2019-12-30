@@ -29,8 +29,8 @@ type SerializableEnv struct {
 	// e.g. local hostname or k8s namespace
 	Description string
 
-	//Endpoint contains a valid Processor API endpoint. This can be generated from configuration or similar but must be available
-	Endpoint string
+	//Host references a host with a valid Processor API endpoint. This can be generated from configuration or similar but must be available
+	Host string
 
 	// Configuration contains the current state of the environment's configuration
 	Configuration interface{}

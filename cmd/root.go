@@ -32,3 +32,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func init() {
+	rootCmd.PersistentFlags().StringP("manager", "m", "~/.wiz/manager.json", "Sets the local manager state file location")
+}

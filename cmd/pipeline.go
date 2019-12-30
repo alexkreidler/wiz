@@ -18,6 +18,7 @@ package cmd
 import (
 	"github.com/alexkreidler/wiz/manager/local"
 	"github.com/alexkreidler/wiz/tasks"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -49,7 +50,11 @@ var createCmd = &cobra.Command{
 
 		p.Spec.Sequential[0].Processor.Type = "input"
 		//spew.Dump(p)
-		m := local.NewManager("/wiz/default-manager.json")
+		file, err := homedir.Expand(cmd.Flag("manager").Value.String())
+		if err != nil {
+			log.Fatal(err)
+		}
+		m := local.NewManager(file)
 		err = m.CreatePipeline(*p, "local")
 		if err != nil {
 			log.Fatal(err)

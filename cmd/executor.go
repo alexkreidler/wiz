@@ -40,6 +40,7 @@ var executorCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("hit error:", err)
 		}
+		log.Println("done, shutting down")
 	},
 }
 

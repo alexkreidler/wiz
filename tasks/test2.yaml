@@ -8,10 +8,9 @@ spec:
   sequential:
     - name: dl
       processor:
-        name: http
-        version: 1.0
-    - name: output
-    # simply outputs all files from the previous step
-      processor: 
-        name: file_out
-        version: 1.0
+        name: get
+        version: 1.0 # version matching isn't implemented yet
+    - name: list output
+      description: should list the output of the previous step
+      processor:
+        name: ls
