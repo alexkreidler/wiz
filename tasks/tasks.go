@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/traverse"
 )
+
+type TaskGraph interface {
+	graph.DirectedBuilder
+}
 
 // Pipeline represents one Wiz Tasks Framework pipeline
 type Pipeline struct {
 	Name     string
-	g        graph.DirectedBuilder
+	g        TaskGraph
 	rootNode graph.Node
 	Data     interface{}
 	Spec     PipelineSpec
@@ -23,17 +28,17 @@ type Sequential []ProcessorNode
 type Parallel Sequential //map[string]ProcessorNode
 
 type Children struct {
-	Sequential
-	Parallel
+	Sequential Sequential
+	Parallel   Parallel
 }
 
 // ProcessorNode represents a single ETL processor in the pipeline
 // TODO: deal with data merging
 type ProcessorNode struct {
-	id   int64
-	Name string
-	Processor
-	Children
+	id        int64
+	Name      string
+	Processor Processor
+	Children  Children
 }
 
 func (p ProcessorNode) ID() int64 {
@@ -81,10 +86,10 @@ func processorSequential(g graph.DirectedBuilder, previousNode graph.Node, p Pro
 
 func processChildren(builder graph.DirectedBuilder, c ProcessorNode, currentNode graph.Node) {
 	prev := currentNode
-	for _, proc := range c.Sequential {
+	for _, proc := range c.Children.Sequential {
 		prev = processorSequential(builder, prev, proc)
 	}
-	for _, proc := range c.Parallel {
+	for _, proc := range c.Children.Parallel {
 		processorParallel(builder, currentNode, proc)
 	}
 }
@@ -100,32 +105,64 @@ func (p *Pipeline) UpdateFromSpec() {
 	}
 }
 
-func (p Pipeline) Iterate(f func(p ProcessorNode)) {
-	for _, proc := range p.Spec.Sequential {
-		f(proc)
+//func (p Pipeline) Iterate(f func(p ProcessorNode) interface{}) {
+//	for _, proc := range p.Spec.Sequential {
+//		f(proc)
+//	}
+//	for _, proc := range p.Spec.Parallel {
+//		f(proc)
+//	}
+//}
+
+var castError = fmt.Errorf("failed to cast on node")
+
+// Walk does a breadth-first traversal of the pipeline's graph starting at the root node
+// interrupts and return any errors that occur
+func (p Pipeline) Walk(f func(p ProcessorNode) error) (err error) {
+	defer func() {
+		//	handles both failure to cast to processorNode and any user-function errors
+		err = recover().(error)
+	}()
+	trav := traverse.BreadthFirst{
+		Visit: func(node graph.Node) {
+			proc, ok := node.(ProcessorNode)
+			if !ok {
+				panic(castError)
+			}
+			err := f(proc)
+			if err != nil {
+				panic(err)
+			}
+		},
+		Traverse: nil,
 	}
-	for _, proc := range p.Spec.Parallel {
-		f(proc)
-	}
+	trav.Walk(p.g, p.rootNode, nil)
+	return nil
 }
 
 func hasOneTypeOf(p Pipeline, t string) bool {
-	p.Iterate(func(p ProcessorNode) {
-		if p.Type == t {
-			return
+	for _, proc := range p.Spec.Sequential {
+		if proc.Processor.Type == t {
+			return true
 		}
-	})
+	}
+	for _, proc := range p.Spec.Parallel {
+		if proc.Processor.Type == t {
+			return true
+		}
+	}
 	return false
 }
 
 // CheckValidity ensures that the pipeline has 1. an input 2. input data and 3. an output and returns an error if it doesn't. Returns nil if OK
+// Do we even need this?
 func (p Pipeline) CheckValidity() error {
-	if !hasOneTypeOf(p, "input") {
-		return fmt.Errorf("pipeline %s does not have an input node", p.Name)
-	}
-	if !hasOneTypeOf(p, "output") {
-		return fmt.Errorf("pipeline %s does not have an output node", p.Name)
-	}
+	//if !hasOneTypeOf(p, "input") {
+	//	return fmt.Errorf("pipeline %s does not have an input node", p.Name)
+	//}
+	//if !hasOneTypeOf(p, "output") {
+	//	return fmt.Errorf("pipeline %s does not have an output node", p.Name)
+	//}
 
 	if p.Data == nil {
 		return fmt.Errorf("pipeline %s does not have any input data", p.Name)

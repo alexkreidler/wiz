@@ -27,6 +27,7 @@ spec:
       processor:
         name: http
         version: 1.0
+        type: output
       children:
         sequential:
           - name: decompress
@@ -46,3 +47,4 @@ spec:
             processor:
               name: test
               version: 1.0
+              type: output

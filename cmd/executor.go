@@ -36,7 +36,10 @@ var executorCmd = &cobra.Command{
 		log.Println("Starting server on port", port)
 		s := server.NewServer(executor.NewProcessorExecutor())
 
-		s.Run(port)
+		err := s.Run(port)
+		if err != nil {
+			log.Fatal("hit error:", err)
+		}
 	},
 }
 

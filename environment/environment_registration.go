@@ -2,6 +2,7 @@ package environment
 
 import "fmt"
 
+//TODO: figure all this out
 var Environments map[string]EnvironmentConstructor
 
 type EnvironmentConstructor = func() Environment

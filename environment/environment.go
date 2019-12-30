@@ -12,17 +12,25 @@ type Environment interface {
 	// IsValidConfiguration returns true if the current configuration is valid and a connection to the environment can be established
 	IsValidConfiguration() bool
 
+	// Describe returns information about the environment that can be serialized
+	Describe() SerializableEnv
+
 	// StartExecutor starts the Wiz Executor binary on the given node. TODO: figure out scheduling and what nodes actually mean.
 	// For now as we're only implementing the local executor this can be anything
+	// Additionally, start executor should fork the process or do anything necessary so the executor continues to run
 	StartExecutor(node string) error
 }
 
+//SerializableEnv is a snapshot of the environment's state at a given time.
 type SerializableEnv struct {
 	// Name is the canonical name of the Environment, hardcoded in each implementation
-	Name string
+	EnvironmentID string
 	// Description is a human readable description that may include dynamic information from the configuration:
 	// e.g. local hostname or k8s namespace
 	Description string
+
+	//Endpoint contains a valid Processor API endpoint. This can be generated from configuration or similar but must be available
+	Endpoint string
 
 	// Configuration contains the current state of the environment's configuration
 	Configuration interface{}
