@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"github.com/alexkreidler/wiz/executor"
 	"github.com/alexkreidler/wiz/server"
 	"github.com/spf13/cobra"
@@ -64,9 +65,8 @@ var executorCmd = &cobra.Command{
 
 		err := s.Run(port)
 		if err != nil {
-			log.Fatal("hit error:", err)
+			fmt.Println(err)
 		}
-		log.Println("done, shutting down")
 	},
 }
 

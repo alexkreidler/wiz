@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/client"
+	"github.com/alexkreidler/wiz/environment"
+	"github.com/alexkreidler/wiz/environment/local"
 	"github.com/alexkreidler/wiz/utils/gutils"
 	"github.com/segmentio/ksuid"
 	"gonum.org/v1/gonum/graph"
-
-	"github.com/alexkreidler/wiz/environment"
-	"github.com/alexkreidler/wiz/environment/local"
+	"time"
 
 	"io/ioutil"
 	"log"
@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 
 	"github.com/alexkreidler/wiz/tasks"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type Manager struct {
@@ -97,6 +96,9 @@ func (l *Manager) maybeStartLocalEnv() error {
 		l.CurrentEnvironment = "local"
 
 		e.StartExecutor("")
+
+		// Give the executor some time to start up and bind.
+		time.Sleep(500 * time.Millisecond)
 	}
 	return nil
 }
@@ -178,7 +180,7 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 		return err
 	}
 
-	spew.Dump(p.Spec)
+	//spew.Dump(p.Spec)
 	log.Println("Pipeline", localPipeline.Name, "is valid, creating...")
 	log.Println("Assigning runIDs to processors")
 

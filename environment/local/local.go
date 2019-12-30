@@ -23,9 +23,9 @@ func (e Environment) Name() string {
 }
 
 // No configuration necessary for the local environment
-
 func checkPortAvailable(port uint32) bool {
-	_, err := net.Listen("tcp", ":"+strconv.FormatUint(uint64(port), 10))
+	l, err := net.Listen("tcp", ":"+strconv.FormatUint(uint64(port), 10))
+	defer l.Close()
 
 	if err != nil {
 		return false
@@ -63,13 +63,14 @@ func (e Environment) IsValidConfiguration() bool {
 
 func (e Environment) StartExecutor(node string) error {
 	c := exec.Command("wiz", "executor", "--port", ":"+strconv.FormatUint(uint64(e.Port), 10))
+
 	err := c.Start()
 	if err != nil {
-		log.Println("failed with err", err)
+		log.Println("failed to start Wiz Executor", err)
 		return err
 	}
-	log.Println("started command", c)
 
+	log.Println("started command", c)
 	return nil
 }
 
