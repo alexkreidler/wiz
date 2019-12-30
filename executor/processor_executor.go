@@ -6,7 +6,6 @@ import (
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/processors"
 	procApi "github.com/alexkreidler/wiz/processors/processor"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/mitchellh/mapstructure"
 	"log"
 	"sync"
@@ -73,7 +72,7 @@ func (p ProcessorExecutor) GetProcessor(procID string) (*api.Processor, error) {
 	}
 }
 
-func (p ProcessorExecutor) GetRuns(procID string) (*api.Runs, error) {
+func (p ProcessorExecutor) GetAllRuns(procID string) (*api.Runs, error) {
 	err := checkProcessorExists(p, procID)
 	if err != nil {
 		return nil, err
@@ -175,7 +174,7 @@ func configure(processor procApi.ChunkProcessor, userConfig interface{}) (interf
 	return bc, processor.Configure(bc)
 }
 
-func (p ProcessorExecutor) GetRunData(procID, runID string) (*api.DataSpec, error) {
+func (p ProcessorExecutor) GetData(procID, runID string) (*api.DataSpec, error) {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
@@ -206,6 +205,6 @@ func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
 
 func NewProcessorExecutor() ProcessorExecutor {
 	initProc := processors.ConfiguredProcessorRegistry().Processors
-	spew.Dump(initProc)
+	//spew.Dump(initProc)
 	return ProcessorExecutor{version: Version, base: initProc, runMap: make(runProcMap)}
 }

@@ -20,7 +20,18 @@ import (
 	"github.com/alexkreidler/wiz/server"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
+	"os/exec"
 )
+
+func remove(l []string, item string) []string {
+	for i, other := range l {
+		if other == item {
+			return append(l[:i], l[i+1:]...)
+		}
+	}
+	return l
+}
 
 // executorCmd represents the executor command
 var executorCmd = &cobra.Command{
@@ -33,6 +44,21 @@ var executorCmd = &cobra.Command{
 	//This application is a tool to generate the needed files
 	//to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if daemon {
+			args := remove(os.Args, "-d")
+
+			c := exec.Command(args[0], args[1:]...)
+			//c.Stdout = os.Stdout
+			err := c.Start()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			log.Println("Started daemon with command:", c, ". Running on PID", c.Process.Pid)
+
+			return
+		}
+
 		log.Println("Starting server on port", port)
 		s := server.NewServer(executor.NewProcessorExecutor())
 
@@ -45,6 +71,7 @@ var executorCmd = &cobra.Command{
 }
 
 var port string
+var daemon bool
 
 func init() {
 	rootCmd.AddCommand(executorCmd)
@@ -56,6 +83,7 @@ func init() {
 	// executorCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	executorCmd.Flags().StringVarP(&port, "port", "p", ":8080", "Sets the port that the executor serves the Processor API on")
+	executorCmd.Flags().BoolVarP(&daemon, "daemon", "d", false, "If enabled, runs the executor as a daemon, simply spawns as a separate process.")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -1,21 +1,22 @@
 package local
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/client"
-	"github.com/alexkreidler/wiz/client/operations"
+
 	"github.com/alexkreidler/wiz/environment"
 	"github.com/alexkreidler/wiz/environment/local"
-	"github.com/alexkreidler/wiz/models"
-	"github.com/alexkreidler/wiz/tasks"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/segmentio/ksuid"
+
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/alexkreidler/wiz/tasks"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/segmentio/ksuid"
 )
 
 type Manager struct {
@@ -104,24 +105,37 @@ func setupProcessor(l Manager, p tasks.ProcessorNode) error {
 		return fmt.Errorf("failed, invalid host")
 	}
 
-	// Setup HTTP client
-
 	id := p.Processor.Name
 	if id == "" {
 		// We skip the root node
 		return nil
 	}
 
+	// Setup HTTP client
+	c := client.NewClient(e.Host)
+
 	// GET /processor/id
 	// Make sure its found, return error
+	_, err := c.GetProcessor(id)
+	if err != nil {
+		return err
+	}
 
 	runID := ksuid.New().String()
 	log.Printf("Creating run %s for processor %s", runID, id)
 
 	// POST /proc/id/run/id/config
 	// Configure with Downstream True
-
-	return nil
+	return c.Configure(id, runID, api.Configuration{
+		ExpectedData: api.ExpectedData{
+			NumChunks: 1,
+		},
+		ExecutorConfig: api.ExecutorConfig{
+			SendDownstream: true,
+			//DownstreamLocations: TODO
+		},
+		Processor: p.Processor.Configuration,
+	})
 }
 
 func cpyM(m Manager) func(p tasks.ProcessorNode) error {
