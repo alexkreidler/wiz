@@ -3,13 +3,11 @@ package tasks
 import (
 	"fmt"
 	"github.com/alexkreidler/wiz/utils/gutils"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/segmentio/ksuid"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/traverse"
 	"log"
-	"reflect"
 )
 
 type TaskGraph interface {
@@ -40,10 +38,17 @@ type Children struct {
 // ProcessorNode represents a single ETL processor in the pipeline
 // TODO: deal with data merging
 type ProcessorNode struct {
-	id   int64
+	id int64
+	// The public name of the node
 	Name string
+
+	// Whether the node should receive the initial data specified in the pipeline. By default, this only gets enabled for the direct children of the root node.
+	GetsInitialData bool
+
+	// The assigned runID that this processor instance gets
+	RunID string
+
 	// ProcID is in .Processor.ID
-	RunID     string
 	Processor Processor
 	Children  Children
 }
@@ -128,10 +133,12 @@ var castError = fmt.Errorf("failed to cast on node")
 
 // Walk does a breadth-first traversal of the pipeline's graph starting at the root node
 // interrupts and return any errors that occur
+// TODO: could just replace with IterateChildren(p.Nodes). I guess BFS can have some specific use-cases, not really for us though
 func (p Pipeline) Walk(f func(p ProcessorNode) error) (err error) {
 	defer func() {
 		//	handles both failure to cast to processorNode and any user-function errors
 		//err = recover().(error)
+		//	TODO: is this idiomatic?
 	}()
 	trav := traverse.BreadthFirst{
 		Visit: func(node graph.Node) {
@@ -181,14 +188,9 @@ func (p Pipeline) CheckValidity() error {
 }
 
 func (p *Pipeline) AssignRunIDs() {
-	x := p.Graph.Nodes()
-	log.Println(reflect.ValueOf(x).Type())
-	spew.Dump(p.Graph)
-	gutils.IterateChildNodes(x, func(n graph.Node) {
+	gutils.IterateChildNodes(p.Graph.Nodes(), func(n graph.Node) {
 		if n.ID() != 0 {
-			node := p.Graph.Node(n.ID())
-
-			procNode, ok := node.(*ProcessorNode)
+			procNode, ok := n.(*ProcessorNode)
 			if !ok {
 				log.Println("failed to cast")
 			}
@@ -197,5 +199,16 @@ func (p *Pipeline) AssignRunIDs() {
 			log.Printf("Assigning RunID %s for processor %s (%d)", runID, procNode.Name, n.ID())
 			procNode.RunID = runID
 		}
+	})
+}
+
+func (p *Pipeline) UpdateInitialDataFlags() {
+	gutils.IterateChildNodes(p.Graph.From(0), func(n graph.Node) {
+		procNode, ok := n.(*ProcessorNode)
+		if !ok {
+			log.Println("failed to cast")
+		}
+		log.Printf("Setting GetsInitialData true for processor %s (%d)", procNode.Name, n.ID())
+		procNode.GetsInitialData = true
 	})
 }

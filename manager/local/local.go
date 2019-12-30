@@ -6,6 +6,7 @@ import (
 	"github.com/alexkreidler/wiz/api"
 	"github.com/alexkreidler/wiz/client"
 	"github.com/alexkreidler/wiz/utils/gutils"
+	"github.com/segmentio/ksuid"
 	"gonum.org/v1/gonum/graph"
 
 	"github.com/alexkreidler/wiz/environment"
@@ -162,12 +163,6 @@ func setupProcessor(l Manager, pipeline tasks.Pipeline, node tasks.ProcessorNode
 	return nil
 }
 
-//func cpyM(m Manager) func(p tasks.ProcessorNode) error {
-//	return func(p tasks.ProcessorNode) error {
-//		return setupProcessor(m, p)
-//	}
-//}
-
 func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error {
 	// TODO: read state from file
 	l.readState()
@@ -188,12 +183,14 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 	log.Println("Assigning runIDs to processors")
 
 	localPipeline.AssignRunIDs()
+	localPipeline.UpdateInitialDataFlags()
 
 	err = l.maybeStartLocalEnv()
 	if err != nil {
 		return err
 	}
 
+	// First we setup all the nodes
 	err = localPipeline.Walk(func(n tasks.ProcessorNode) error {
 		return setupProcessor(*l, p, n)
 	})
@@ -201,6 +198,49 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 		log.Println(err)
 	}
 
+	// And then we provide the initial data to the nodes that need it
+
+	// In the future we may do these in two steps, but its here to avoid a situation where the processor tries to send data to a downstream that is not yet configured
+	err = localPipeline.Walk(func(n tasks.ProcessorNode) error {
+		return provideInitialData(*l, p, n)
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	return nil
+}
+
+func provideInitialData(manager Manager, p tasks.Pipeline, n tasks.ProcessorNode) error {
+	e := manager.Environments[manager.CurrentEnvironment]
+	if e.Host == "" {
+		return fmt.Errorf("failed, invalid host")
+	}
+
+	id := n.Processor.ID
+	if id == "" {
+		// We skip the root node
+		return nil
+	}
+
+	if n.GetsInitialData {
+		// Setup HTTP client
+		c := client.NewClient(e.Host)
+
+		chunkID := ksuid.New().String()
+
+		log.Printf("Providing initial data to node %s (%s) with Chunk ID: %s", n.Name, n.Processor.ID, chunkID)
+
+		return c.AddData(n.Processor.ID, n.RunID, api.Data{
+			ChunkID:             chunkID,
+			Format:              api.DataFormatRAW,
+			Type:                api.DataTypeINPUT,
+			State:               api.DataChunkStateWAITING,
+			RawData:             p.Data,
+			FilesystemReference: api.FilesystemReference{},
+			AssociatedChunkID:   ksuid.New().String(),
+		})
+	}
 	return nil
 }
 

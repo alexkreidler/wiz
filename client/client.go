@@ -2,13 +2,19 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
+	"log"
+
+	//"encoding/json"
+
 	"fmt"
 	"github.com/alexkreidler/wiz/api"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Client struct {
 	Scheme  string
@@ -116,7 +122,7 @@ func (c Client) Configure(procID, runID string, config api.Configuration) error 
 		return err
 	}
 
-	// TODO: maybe check return type?
+	// TODO: maybe check response header type?
 	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["Configure"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
@@ -143,8 +149,9 @@ func (c Client) AddData(procID, runID string, data api.Data) error {
 	if err != nil {
 		return err
 	}
+	log.Println("Preparing to send add data request", procID, runID, string(body))
 
-	// TODO: maybe check return type?
+	// TODO: maybe check response header type?
 	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["AddData"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
