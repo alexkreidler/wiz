@@ -8,7 +8,7 @@ import (
 	//"encoding/json"
 
 	"fmt"
-	"github.com/alexkreidler/wiz/api"
+	"github.com/alexkreidler/wiz/api/processors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -36,8 +36,8 @@ func NewClient(host string) Client {
 }
 
 // below is so repetitive --> codegen?
-func (c Client) GetAllProcessors() (*api.Processors, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllProcessors"]))
+func (c Client) GetAllProcessors() (*processors.Processors, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetAllProcessors"]))
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +46,14 @@ func (c Client) GetAllProcessors() (*api.Processors, error) {
 		return nil, err
 	}
 
-	var result api.Processors
+	var result processors.Processors
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) GetProcessor(procID string) (*api.Processor, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetProcessor"], procID))
+func (c Client) GetProcessor(procID string) (*processors.Processor, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetProcessor"], procID))
 	if err != nil {
 		return nil, err
 	}
@@ -62,14 +62,14 @@ func (c Client) GetProcessor(procID string) (*api.Processor, error) {
 		return nil, err
 	}
 
-	var result api.Processor
+	var result processors.Processor
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) GetAllRuns(procID string) (*api.Runs, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetAllRuns"], procID))
+func (c Client) GetAllRuns(procID string) (*processors.Runs, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetAllRuns"], procID))
 	if err != nil {
 		return nil, err
 	}
@@ -78,14 +78,14 @@ func (c Client) GetAllRuns(procID string) (*api.Runs, error) {
 		return nil, err
 	}
 
-	var result api.Runs
+	var result processors.Runs
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) GetRun(procID, runID string) (*api.Run, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetRun"], procID, runID))
+func (c Client) GetRun(procID, runID string) (*processors.Run, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetRun"], procID, runID))
 	if err != nil {
 		return nil, err
 	}
@@ -94,14 +94,14 @@ func (c Client) GetRun(procID, runID string) (*api.Run, error) {
 		return nil, err
 	}
 
-	var result api.Run
+	var result processors.Run
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) GetConfig(procID, runID string) (*api.Configuration, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetConfig"], procID, runID))
+func (c Client) GetConfig(procID, runID string) (*processors.Configuration, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetConfig"], procID, runID))
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +110,13 @@ func (c Client) GetConfig(procID, runID string) (*api.Configuration, error) {
 		return nil, err
 	}
 
-	var result api.Configuration
+	var result processors.Configuration
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) Configure(procID, runID string, config api.Configuration) error {
+func (c Client) Configure(procID, runID string, config processors.Configuration) error {
 	log.Println("Configuring", procID, runID)
 	body, err := json.Marshal(config)
 	if err != nil {
@@ -124,13 +124,13 @@ func (c Client) Configure(procID, runID string, config api.Configuration) error 
 	}
 
 	// TODO: maybe check response header type?
-	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["Configure"], procID, runID), "application/json", bytes.NewReader(body))
+	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(processors.ProcessorAPIEndpoints["Configure"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
 }
 
-func (c Client) GetData(procID, runID string) (*api.DataSpec, error) {
-	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(api.ProcessorAPIEndpoints["GetData"]))
+func (c Client) GetData(procID, runID string) (*processors.DataSpec, error) {
+	resp, err := c.Client.Get(c.baseUrl + fmt.Sprintf(processors.ProcessorAPIEndpoints["GetData"]))
 	if err != nil {
 		return nil, err
 	}
@@ -139,13 +139,13 @@ func (c Client) GetData(procID, runID string) (*api.DataSpec, error) {
 		return nil, err
 	}
 
-	var result api.DataSpec
+	var result processors.DataSpec
 	json.Unmarshal(data, &result)
 
 	return &result, nil
 }
 
-func (c Client) AddData(procID, runID string, data api.Data) error {
+func (c Client) AddData(procID, runID string, data processors.Data) error {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -153,7 +153,7 @@ func (c Client) AddData(procID, runID string, data api.Data) error {
 	log.Println("Preparing to send add data request", procID, runID, string(body))
 
 	// TODO: maybe check response header type?
-	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(api.ProcessorAPIEndpoints["AddData"], procID, runID), "application/json", bytes.NewReader(body))
+	_, err = c.Client.Post(c.baseUrl+fmt.Sprintf(processors.ProcessorAPIEndpoints["AddData"], procID, runID), "application/json", bytes.NewReader(body))
 
 	return err
 }

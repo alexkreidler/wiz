@@ -1,14 +1,14 @@
 package noop
 
 import (
-	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/api/processors"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"log"
 	"time"
 )
 
 type NoopProcessor struct {
-	state chan api.DataChunkState
+	state chan processors.DataChunkState
 	data  interface{}
 }
 
@@ -20,12 +20,12 @@ func (n *NoopProcessor) GetConfig() interface{} {
 	return nil
 }
 
-func (n *NoopProcessor) New() processor.ChunkProcessor {
+func (n *NoopProcessor) New() simpleprocessor.ChunkProcessor {
 	log.Println("Creating new", n.Metadata().Name, "processor")
-	return &NoopProcessor{state: make(chan api.DataChunkState)}
+	return &NoopProcessor{state: make(chan processors.DataChunkState)}
 }
 
-func (n *NoopProcessor) State() <-chan api.DataChunkState {
+func (n *NoopProcessor) State() <-chan processors.DataChunkState {
 	return n.state
 }
 
@@ -33,7 +33,7 @@ func (n *NoopProcessor) Output() interface{} {
 	return n.data
 }
 
-func (n *NoopProcessor) updateState(state api.DataChunkState) {
+func (n *NoopProcessor) updateState(state processors.DataChunkState) {
 	n.state <- state
 }
 
@@ -42,14 +42,14 @@ func (n *NoopProcessor) done() {
 }
 
 func (n *NoopProcessor) Run(data interface{}) {
-	n.updateState(api.DataChunkStateRUNNING)
+	n.updateState(processors.DataChunkStateRUNNING)
 
 	// Setting data on one potential thread, getting on another?? no-- because Output() is only called after state is succeeded. No mutex needed!
 	n.data = data
 	//	DO work, maybe sleep for a bit
 	time.Sleep(8 * time.Second)
 
-	n.updateState(api.DataChunkStateSUCCEEDED)
+	n.updateState(processors.DataChunkStateSUCCEEDED)
 	n.done()
 }
 
@@ -57,8 +57,8 @@ func (n *NoopProcessor) GetError() error {
 	return nil
 }
 
-func (n *NoopProcessor) Metadata() api.Processor {
-	return api.Processor{
+func (n *NoopProcessor) Metadata() processors.Processor {
+	return processors.Processor{
 		ProcID:  "noop",
 		Name:    "No Operation Processor",
 		Version: "0.1.0",

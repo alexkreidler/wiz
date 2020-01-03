@@ -23,51 +23,30 @@ type Pipeline struct {
 	Spec     PipelineSpec
 }
 
-// PipelineSpec defines how a pipeline should be structured/serialized
-type PipelineSpec Children
-
-type Sequential []*ProcessorNode
-
-type Parallel Sequential //map[string]ProcessorNode
-
-type Children struct {
-	Sequential Sequential
-	Parallel   Parallel
-}
-
-// ProcessorNode represents a single ETL processor in the pipeline
-// TODO: deal with data merging
-type ProcessorNode struct {
-	id int64
-	// The public name of the node
-	Name string
-
-	// Whether the node should receive the initial data specified in the pipeline. By default, this only gets enabled for the direct children of the root node.
-	GetsInitialData bool
-
-	// The assigned runID that this processor instance gets
-	RunID string
-
-	// ProcID is in .Processor.ID
-	Processor Processor
-	Children  Children
-}
-
-func (p *ProcessorNode) ID() int64 {
-	return p.id
-}
-
-func (p *ProcessorNode) DOTID() string {
-	return p.Name
-}
-
 func NewPipeline(name string) *Pipeline {
 	p := Pipeline{Name: name, Graph: simple.NewDirectedGraph()}
 
-	// In our graph we make sure that the ID of rootNode is 0. Useful
-	p.rootNode = &ProcessorNode{id: 0, Name: name + " Pipeline: Root Node"}
-	p.Graph.AddNode(p.rootNode)
+	p.addRootNode(name + " root node")
 	return &p
+}
+
+
+func (p *Pipeline) setupRequired() {
+	if p.Graph == nil {
+		p.Graph = simple.NewDirectedGraph()
+	}
+	if p.Name == "" {
+		p.Name = "unnamed"
+	}
+	p.addRootNode(p.Name + " root node")
+}
+
+func (p *Pipeline) addRootNode(name string) {
+	if p.rootNode == nil {
+		// In our graph we make sure that the ID of rootNode is 0. Useful
+		p.rootNode = &ProcessorNode{id: 0, Name: name}
+		p.Graph.AddNode(p.rootNode)
+	}
 }
 
 func processorParallel(g graph.DirectedBuilder, parentNode graph.Node, p *ProcessorNode) {
@@ -109,6 +88,7 @@ func processChildren(builder graph.DirectedBuilder, c *ProcessorNode, currentNod
 
 // UpdateFromSpec recursively builds the internal graph representation of the task graph
 func (p *Pipeline) UpdateFromSpec() {
+	p.setupRequired()
 	prev := p.rootNode
 	for _, proc := range p.Spec.Sequential {
 		prev = processorSequential(p.Graph, prev, proc)

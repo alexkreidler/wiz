@@ -1,20 +1,20 @@
-package processors
+package registration
 
 import (
 	"github.com/alexkreidler/wiz/processors/get"
 	"github.com/alexkreidler/wiz/processors/git"
 	"github.com/alexkreidler/wiz/processors/ls"
 	"github.com/alexkreidler/wiz/processors/noop"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 )
 
-type ProcessorMap map[string]processor.ChunkProcessor
+type ProcessorMap map[string]simpleprocessor.ChunkProcessor
 
 type ProcessorRegistry struct {
 	Processors ProcessorMap
 }
 
-func (p ProcessorRegistry) AddProcessor(name string, processor processor.ChunkProcessor) {
+func (p ProcessorRegistry) AddProcessor(name string, processor simpleprocessor.ChunkProcessor) {
 	p.Processors[name] = processor
 }
 

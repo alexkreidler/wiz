@@ -2,7 +2,7 @@
 This package defines the Wiz Processor API
 TODO: maybe think about moving this to a separate package as we are going to add many different API types
 */
-package api
+package processors
 
 // Processor is a logical processor
 type Processor struct {

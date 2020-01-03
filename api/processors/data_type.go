@@ -1,6 +1,6 @@
 //go:generate go-enum -f=$GOFILE --marshal
 
-package api
+package processors
 
 // DataFormat represents the format of data chunk, either raw JSON data or a filesystem reference
 /*

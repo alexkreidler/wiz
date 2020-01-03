@@ -6,7 +6,7 @@ package <%= name %>
 
 import (
 	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"log"
 	"time"
 )
@@ -28,7 +28,7 @@ func (p *<%= Name %>Processor) GetConfig() interface{} {
 	return p.config
 }
 
-func (p *<%= Name %>Processor) New() processor.ChunkProcessor {
+func (p *<%= Name %>Processor) New() simpleprocessor.ChunkProcessor {
 	log.Println("Creating new", p.Metadata().Name, "processor")
 	return &<%= Name %>Processor{state: make(chan api.DataChunkState)}
 }

@@ -5,8 +5,8 @@ It takes in a simple string as input which contains a reference to the file and 
 package get
 
 import (
-	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/api/processors"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	gogetter "github.com/hashicorp/go-getter"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
@@ -21,7 +21,7 @@ type GoGetConfig struct {
 }
 
 type GetProcessor struct {
-	state  chan api.DataChunkState
+	state  chan processors.DataChunkState
 	config GoGetConfig //TODO: change this to your config type
 	dir    string
 }
@@ -37,12 +37,12 @@ func (p *GetProcessor) GetConfig() interface{} {
 	return p.config
 }
 
-func (p *GetProcessor) New() processor.ChunkProcessor {
+func (p *GetProcessor) New() simpleprocessor.ChunkProcessor {
 	log.Println("Creating new", p.Metadata().Name, "processor")
-	return &GetProcessor{state: make(chan api.DataChunkState)}
+	return &GetProcessor{state: make(chan processors.DataChunkState)}
 }
 
-func (p *GetProcessor) State() <-chan api.DataChunkState {
+func (p *GetProcessor) State() <-chan processors.DataChunkState {
 	return p.state
 }
 
@@ -50,7 +50,7 @@ func (p *GetProcessor) Output() interface{} {
 	return map[string]string{"Dir": p.dir}
 }
 
-func (p *GetProcessor) updateState(state api.DataChunkState) {
+func (p *GetProcessor) updateState(state processors.DataChunkState) {
 	p.state <- state
 }
 
@@ -60,7 +60,7 @@ func (p *GetProcessor) done() {
 
 func (p *GetProcessor) Run(data interface{}) {
 	defer p.done()
-	p.updateState(api.DataChunkStateRUNNING)
+	p.updateState(processors.DataChunkStateRUNNING)
 
 	// First we decode the map into the correct structure
 	var opts GoGetConfig
@@ -82,7 +82,7 @@ func (p *GetProcessor) Run(data interface{}) {
 	dir, err := ioutil.TempDir("", "go-get")
 	if err != nil {
 		log.Println(err)
-		p.updateState(api.DataChunkStateFAILED)
+		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}
 	log.Println("created temp dir", dir)
@@ -91,20 +91,20 @@ func (p *GetProcessor) Run(data interface{}) {
 	err = gogetter.GetAny(dir, opts.Source)
 	if err != nil {
 		log.Println(err)
-		p.updateState(api.DataChunkStateFAILED)
+		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}
 	p.dir = dir
 
-	p.updateState(api.DataChunkStateSUCCEEDED)
+	p.updateState(processors.DataChunkStateSUCCEEDED)
 }
 
 func (p *GetProcessor) GetError() error {
 	return nil
 }
 
-func (p *GetProcessor) Metadata() api.Processor {
-	return api.Processor{
+func (p *GetProcessor) Metadata() processors.Processor {
+	return processors.Processor{
 		ProcID:  "get",
 		Name:    "Go-Getter (Hashicorp) Processor",
 		Version: "0.1.0",

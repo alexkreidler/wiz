@@ -1,6 +1,6 @@
 //go:generate go-enum -f=$GOFILE --marshal
 
-package api
+package processors
 
 // State represents the state of the processor
 /*

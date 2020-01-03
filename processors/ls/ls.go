@@ -2,8 +2,8 @@
 package ls
 
 import (
-	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/api/processors"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"log"
@@ -20,7 +20,7 @@ type FileInfo struct {
 }
 
 type LsProcessor struct {
-	state chan api.DataChunkState
+	state chan processors.DataChunkState
 	files []FileInfo
 }
 
@@ -32,12 +32,12 @@ func (p *LsProcessor) GetConfig() interface{} {
 	return nil
 }
 
-func (p *LsProcessor) New() processor.ChunkProcessor {
+func (p *LsProcessor) New() simpleprocessor.ChunkProcessor {
 	log.Println("Creating new", p.Metadata().Name, "processor")
-	return &LsProcessor{state: make(chan api.DataChunkState)}
+	return &LsProcessor{state: make(chan processors.DataChunkState)}
 }
 
-func (p *LsProcessor) State() <-chan api.DataChunkState {
+func (p *LsProcessor) State() <-chan processors.DataChunkState {
 	return p.state
 }
 
@@ -45,7 +45,7 @@ func (p *LsProcessor) Output() interface{} {
 	return p.files
 }
 
-func (p *LsProcessor) updateState(state api.DataChunkState) {
+func (p *LsProcessor) updateState(state processors.DataChunkState) {
 	p.state <- state
 }
 
@@ -55,7 +55,7 @@ func (p *LsProcessor) done() {
 
 func (p *LsProcessor) Run(data interface{}) {
 	defer p.done()
-	p.updateState(api.DataChunkStateRUNNING)
+	p.updateState(processors.DataChunkStateRUNNING)
 
 	// Remember to decode from the map[string]interface{} data to your config type
 	// First we decode the map into the correct structure
@@ -90,19 +90,19 @@ func (p *LsProcessor) Run(data interface{}) {
 	// TODO: Add your code here
 
 	if err != nil {
-		p.updateState(api.DataChunkStateFAILED)
+		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}
 
-	p.updateState(api.DataChunkStateSUCCEEDED)
+	p.updateState(processors.DataChunkStateSUCCEEDED)
 }
 
 func (p *LsProcessor) GetError() error {
 	return nil
 }
 
-func (p *LsProcessor) Metadata() api.Processor {
-	return api.Processor{
+func (p *LsProcessor) Metadata() processors.Processor {
+	return processors.Processor{
 		ProcID:  "ls",
 		Name:    "List File Processor",
 		Version: "0.1.0",

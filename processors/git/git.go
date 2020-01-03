@@ -1,8 +1,8 @@
 package git
 
 import (
-	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/api/processors"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
 	git "gopkg.in/src-d/go-git.v4"
@@ -11,7 +11,7 @@ import (
 )
 
 type GitProcessor struct {
-	state  chan api.DataChunkState
+	state  chan processors.DataChunkState
 	config git.CloneOptions
 	dir    string
 }
@@ -26,12 +26,12 @@ func (g *GitProcessor) GetConfig() interface{} {
 	return g.config
 }
 
-func (g *GitProcessor) New() processor.ChunkProcessor {
+func (g *GitProcessor) New() simpleprocessor.ChunkProcessor {
 	log.Println("Creating new", g.Metadata().Name, "processor")
-	return &GitProcessor{state: make(chan api.DataChunkState)}
+	return &GitProcessor{state: make(chan processors.DataChunkState)}
 }
 
-func (g *GitProcessor) State() <-chan api.DataChunkState {
+func (g *GitProcessor) State() <-chan processors.DataChunkState {
 	return g.state
 }
 
@@ -39,7 +39,7 @@ func (g *GitProcessor) Output() interface{} {
 	return map[string]string{"Dir": g.dir}
 }
 
-func (g *GitProcessor) updateState(state api.DataChunkState) {
+func (g *GitProcessor) updateState(state processors.DataChunkState) {
 	g.state <- state
 }
 
@@ -48,7 +48,7 @@ func (g *GitProcessor) done() {
 }
 
 func (g *GitProcessor) Run(data interface{}) {
-	g.updateState(api.DataChunkStateRUNNING)
+	g.updateState(processors.DataChunkStateRUNNING)
 
 	// First we decode the map into the correct structure
 	var opts git.CloneOptions
@@ -81,7 +81,7 @@ func (g *GitProcessor) Run(data interface{}) {
 	log.Println("cloned repository")
 	g.dir = dir
 
-	g.updateState(api.DataChunkStateSUCCEEDED)
+	g.updateState(processors.DataChunkStateSUCCEEDED)
 	g.done()
 }
 
@@ -89,8 +89,8 @@ func (g *GitProcessor) GetError() error {
 	return nil
 }
 
-func (g *GitProcessor) Metadata() api.Processor {
-	return api.Processor{
+func (g *GitProcessor) Metadata() processors.Processor {
+	return processors.Processor{
 		ProcID:  "git",
 		Name:    "git Clone Processor",
 		Version: "0.1.0",

@@ -1,4 +1,4 @@
-package api
+package processors
 
 // ProcessorAPI is the server API for the Wiz Processor API.
 type ProcessorAPI interface {

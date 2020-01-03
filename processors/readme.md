@@ -18,7 +18,7 @@ package processors
 import (
 	"fmt"
 
-	"github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 )
 
 func main() {

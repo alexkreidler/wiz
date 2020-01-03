@@ -2,7 +2,7 @@ package local
 
 import (
 	"fmt"
-	"github.com/alexkreidler/wiz/api"
+	"github.com/alexkreidler/wiz/api/processors"
 	"github.com/alexkreidler/wiz/client"
 	"github.com/alexkreidler/wiz/environment"
 	"github.com/alexkreidler/wiz/environment/local"
@@ -208,9 +208,9 @@ func setupProcessor(l Manager, pipeline tasks.Pipeline, node tasks.ProcessorNode
 
 	log.Printf("Creating run %s for processor %s (%s)", node.RunID, node.Name, id)
 
-	//_ = api.Configuration{}
+	//_ = processors.Configuration{}
 
-	downstreamLocs := make([]api.DownstreamDataLocation, 0)
+	downstreamLocs := make([]processors.DownstreamDataLocation, 0)
 
 	gutils.IterateChildNodes(pipeline.Graph.From(node.ID()), func(n graph.Node) {
 		log.Println("got node", n.ID())
@@ -223,24 +223,23 @@ func setupProcessor(l Manager, pipeline tasks.Pipeline, node tasks.ProcessorNode
 		// Maybe add a function in the tasks package which returns the DownstreamDataLocation for a given procNode
 
 		// This assumes that all RunIDs have been assigned in advance
-		downstreamLocs = append(downstreamLocs, api.DownstreamDataLocation{Hostname: e.Host, ProcID: procNode.Processor.ID, RunID: procNode.RunID})
+		downstreamLocs = append(downstreamLocs, processors.DownstreamDataLocation{Hostname: e.Host, ProcID: procNode.Processor.ID, RunID: procNode.RunID})
 	})
 
 	log.Println("About to configure with downstreams:", downstreamLocs)
 
 	// POST /proc/id/run/id/config
 	// Configure with Downstream True
-	return c.Configure(id, node.RunID, api.Configuration{
-		ExpectedData: api.ExpectedData{
+	return c.Configure(id, node.RunID, processors.Configuration{
+		ExpectedData: processors.ExpectedData{
 			NumChunks: 1,
 		},
-		ExecutorConfig: api.ExecutorConfig{
+		ExecutorConfig: processors.ExecutorConfig{
 			SendDownstream:      true,
 			DownstreamLocations: downstreamLocs,
 		},
 		Processor: node.Processor.Configuration,
 	})
-	return nil
 }
 
 func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error {
@@ -325,13 +324,13 @@ func provideInitialData(manager Manager, p tasks.Pipeline, n tasks.ProcessorNode
 
 		log.Printf("Providing initial data to node %s (%s) with Chunk ID: %s", n.Name, n.Processor.ID, chunkID)
 
-		return c.AddData(n.Processor.ID, n.RunID, api.Data{
+		return c.AddData(n.Processor.ID, n.RunID, processors.Data{
 			ChunkID:             chunkID,
-			Format:              api.DataFormatRAW,
-			Type:                api.DataTypeINPUT,
-			State:               api.DataChunkStateWAITING,
+			Format:              processors.DataFormatRAW,
+			Type:                processors.DataTypeINPUT,
+			State:               processors.DataChunkStateWAITING,
 			RawData:             p.Data,
-			FilesystemReference: api.FilesystemReference{},
+			FilesystemReference: processors.FilesystemReference{},
 			AssociatedChunkID:   utils.GenID(),
 		})
 	}

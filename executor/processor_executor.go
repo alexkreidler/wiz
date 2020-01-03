@@ -3,9 +3,9 @@ package executor
 import (
 	"fmt"
 	"github.com/alexkreidler/deepcopy"
-	"github.com/alexkreidler/wiz/api"
-	"github.com/alexkreidler/wiz/processors"
-	procApi "github.com/alexkreidler/wiz/processors/processor"
+	"github.com/alexkreidler/wiz/api/processors"
+	"github.com/alexkreidler/wiz/processors/registration"
+	procApi "github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"github.com/mitchellh/mapstructure"
 	"log"
 	"sync"
@@ -21,7 +21,7 @@ type runProcessor struct {
 	// TODO: think about locking configuration. currently we don't allow configuration changes
 	runLock sync.RWMutex
 	// run is the metadata about the run for serialization
-	run api.Run
+	run processors.Run
 
 	// dataLock locks the state of all the data chunks/workers
 	dataLock sync.RWMutex
@@ -35,8 +35,8 @@ type runProcessor struct {
 
 type Worker struct {
 	p   procApi.ChunkProcessor
-	in  api.Data
-	out api.Data
+	in  processors.Data
+	out processors.Data
 }
 
 type runProcMap map[string]map[string]*runProcessor
@@ -56,15 +56,15 @@ type ProcessorExecutor struct {
 
 // TODO: figure out how to configure logging for the processor executor
 
-func (p ProcessorExecutor) GetAllProcessors() (*api.Processors, error) {
-	all := make(api.Processors, 0)
+func (p ProcessorExecutor) GetAllProcessors() (*processors.Processors, error) {
+	all := make(processors.Processors, 0)
 	for _, processor := range p.base {
 		all = append(all, processor.Metadata())
 	}
 	return &all, nil
 }
 
-func (p ProcessorExecutor) GetProcessor(procID string) (*api.Processor, error) {
+func (p ProcessorExecutor) GetProcessor(procID string) (*processors.Processor, error) {
 	processor, ok := p.base[procID]
 	if !ok {
 		return nil, fmt.Errorf("processor %s not found", procID)
@@ -74,7 +74,7 @@ func (p ProcessorExecutor) GetProcessor(procID string) (*api.Processor, error) {
 	}
 }
 
-func (p ProcessorExecutor) GetAllRuns(procID string) (*api.Runs, error) {
+func (p ProcessorExecutor) GetAllRuns(procID string) (*processors.Runs, error) {
 	err := checkProcessorExists(p, procID)
 	if err != nil {
 		return nil, err
@@ -82,9 +82,9 @@ func (p ProcessorExecutor) GetAllRuns(procID string) (*api.Runs, error) {
 	processor, ok := p.runMap[procID]
 	if !ok {
 		// no runs are registered
-		return &api.Runs{}, nil
+		return &processors.Runs{}, nil
 	} else {
-		all := make(api.Runs, len(processor))
+		all := make(processors.Runs, len(processor))
 		n := 0
 		for _, run := range processor {
 			all[n] = run.run
@@ -94,7 +94,7 @@ func (p ProcessorExecutor) GetAllRuns(procID string) (*api.Runs, error) {
 	}
 }
 
-func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
+func (p ProcessorExecutor) GetRun(procID, runID string) (*processors.Run, error) {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (p ProcessorExecutor) GetRun(procID, runID string) (*api.Run, error) {
 }
 
 //GetConfig must be called on an existing run
-func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, error) {
+func (p ProcessorExecutor) GetConfig(procID, runID string) (*processors.Configuration, error) {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (p ProcessorExecutor) GetConfig(procID, runID string) (*api.Configuration, 
 	return &r.run.Configuration, nil
 }
 
-func (p ProcessorExecutor) Configure(procID, runID string, config api.Configuration) error {
+func (p ProcessorExecutor) Configure(procID, runID string, config processors.Configuration) error {
 	baseProcessor, ok := p.base[procID]
 	if !ok {
 		return fmt.Errorf("baseProcessor %s not found", procID)
@@ -138,10 +138,10 @@ func (p ProcessorExecutor) Configure(procID, runID string, config api.Configurat
 	}
 
 	//The run won't exist here at this point, so we create it:
-	rp := &runProcessor{run: api.Run{
+	rp := &runProcessor{run: processors.Run{
 		RunID:         runID,
 		Configuration: config,
-		CurrentState:  api.StateCONFIGURED,
+		CurrentState:  processors.StateCONFIGURED,
 	}, baseProcessor: baseProcessor}
 
 	p.runMap[procID][runID] = rp
@@ -178,14 +178,14 @@ func configure(processor procApi.ChunkProcessor, userConfig interface{}) (interf
 	return bc, processor.Configure(bc)
 }
 
-func (p ProcessorExecutor) GetData(procID, runID string) (*api.DataSpec, error) {
+func (p ProcessorExecutor) GetData(procID, runID string) (*processors.DataSpec, error) {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return nil, err
 	}
-	ds := api.DataSpec{
-		In:  make([]api.Data, 0),
-		Out: make([]api.Data, 0),
+	ds := processors.DataSpec{
+		In:  make([]processors.Data, 0),
+		Out: make([]processors.Data, 0),
 	}
 	r.dataLock.RLock()
 	for _, v := range r.workers {
@@ -196,19 +196,19 @@ func (p ProcessorExecutor) GetData(procID, runID string) (*api.DataSpec, error) 
 	return &ds, nil
 }
 
-func (p ProcessorExecutor) AddData(procID, runID string, data api.Data) error {
+func (p ProcessorExecutor) AddData(procID, runID string, data processors.Data) error {
 	r, err := getRun(p, procID, runID)
 	if err != nil {
 		return err
 	}
-	setRunState(r, api.StateRUNNING)
-	data.State = api.DataChunkStateWAITING
+	setRunState(r, processors.StateRUNNING)
+	data.State = processors.DataChunkStateWAITING
 	go rManager(data, r)
 	return nil
 }
 
 func NewProcessorExecutor() ProcessorExecutor {
-	initProc := processors.ConfiguredProcessorRegistry().Processors
+	initProc := registration.ConfiguredProcessorRegistry().Processors
 	//spew.Dump(initProc)
 	return ProcessorExecutor{version: Version, base: initProc, runMap: make(runProcMap)}
 }

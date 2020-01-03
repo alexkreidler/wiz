@@ -1,7 +1,7 @@
 package executor
 
 import (
-	"github.com/alexkreidler/wiz/api"
+	"github.com/alexkreidler/wiz/api/processors"
 	"github.com/alexkreidler/wiz/client"
 	"github.com/alexkreidler/wiz/utils"
 	"github.com/imdario/mergo"
@@ -10,14 +10,14 @@ import (
 )
 
 // createOutputDataChunk simply creates a default output data chunk given an input data chunk
-func createOutputDataChunk(d api.Data) api.Data {
-	chunk := api.Data{
+func createOutputDataChunk(d processors.Data) processors.Data {
+	chunk := processors.Data{
 		ChunkID:             d.AssociatedChunkID,
 		Format:              0, // the format should change, it should be set by the output of the processor
-		Type:                api.DataTypeOUTPUT,
-		State:               api.DataChunkStateWAITING,
+		Type:                processors.DataTypeOUTPUT,
+		State:               processors.DataChunkStateWAITING,
 		RawData:             nil,
-		FilesystemReference: api.FilesystemReference{},
+		FilesystemReference: processors.FilesystemReference{},
 		AssociatedChunkID:   d.ChunkID,
 	}
 
@@ -27,7 +27,7 @@ func createOutputDataChunk(d api.Data) api.Data {
 //rManager is a goroutine that transforms updates on the Processor's state into updates in the Executor's memory which can then respond to HTTP requests
 // TODO: reevaluate later for too much locking?
 // data is the data to run on, r is the runProcessor object, and baseProcessor is the configured ChunkProcessor that will be the base for the new spawned processor
-func rManager(data api.Data, r *runProcessor) {
+func rManager(data processors.Data, r *runProcessor) {
 	log.Println("starting runManger")
 	outputChunk := createOutputDataChunk(data)
 
@@ -48,7 +48,7 @@ func rManager(data api.Data, r *runProcessor) {
 
 	// Handle the different data formats: TODO figure out others
 	switch data.Format {
-	case api.DataFormatRAW:
+	case processors.DataFormatRAW:
 		go w.p.Run(data.RawData)
 		break
 	default:
@@ -70,7 +70,7 @@ func rManager(data api.Data, r *runProcessor) {
 	log.Println("chunk", w.in.ChunkID, "has completed. Got output:", out)
 
 	r.dataLock.Lock()
-	r.workers[data.ChunkID].out.Format = api.DataFormatRAW
+	r.workers[data.ChunkID].out.Format = processors.DataFormatRAW
 	r.workers[data.ChunkID].out.State = r.workers[data.ChunkID].in.State
 	r.workers[data.ChunkID].out.RawData = out
 	prevDataChunk := r.workers[data.ChunkID].out
@@ -88,13 +88,13 @@ func rManager(data api.Data, r *runProcessor) {
 	}
 }
 
-func sendToDownstream(prevDataChunk api.Data, downstream api.DownstreamDataLocation) error {
+func sendToDownstream(prevDataChunk processors.Data, downstream processors.DownstreamDataLocation) error {
 	c := client.NewClient(downstream.Hostname)
 
 	newOutputID := utils.GenID()
 	// The previous output now becomes the input, so we need to generate a new output ID
 	// In the future we may add provenance builtin to record every chunk that it has progressed from
-	newDataChunk := api.Data{Type: api.DataTypeINPUT, State: api.DataChunkStateWAITING, AssociatedChunkID: newOutputID}
+	newDataChunk := processors.Data{Type: processors.DataTypeINPUT, State: processors.DataChunkStateWAITING, AssociatedChunkID: newOutputID}
 
 	err := mergo.Merge(&newDataChunk, prevDataChunk)
 	if err != nil {
@@ -103,7 +103,7 @@ func sendToDownstream(prevDataChunk api.Data, downstream api.DownstreamDataLocat
 	return c.AddData(downstream.ProcID, downstream.ProcID, newDataChunk)
 }
 
-func setRunState(r *runProcessor, state api.State) {
+func setRunState(r *runProcessor, state processors.State) {
 	r.runLock.Lock()
 	r.run.CurrentState = state
 	r.runLock.Unlock()
@@ -113,15 +113,15 @@ func setRunState(r *runProcessor, state api.State) {
 func handleAllChunksCompleted(r *runProcessor) {
 	r.dataLock.RLock()
 	for _, v := range r.workers {
-		if v.in.State == api.DataChunkStateFAILED {
-			setRunState(r, api.StateERRORED)
+		if v.in.State == processors.DataChunkStateFAILED {
+			setRunState(r, processors.StateERRORED)
 			return
-		} else if v.in.State != api.DataChunkStateSUCCEEDED {
+		} else if v.in.State != processors.DataChunkStateSUCCEEDED {
 			log.Println("error: expected all chunks to be succeeded, but", v.in.ChunkID, "is not")
 		}
 	}
 	r.dataLock.RUnlock()
 
 	log.Print("all chunks succeeded")
-	setRunState(r, api.StateSUCCEEDED)
+	setRunState(r, processors.StateSUCCEEDED)
 }

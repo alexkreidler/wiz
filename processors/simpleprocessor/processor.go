@@ -1,8 +1,8 @@
 // This package provides the Processor interface which is implemented by all the other packages in the parent package
-package processor
+package simpleprocessor
 
 import (
-	"github.com/alexkreidler/wiz/api"
+	"github.com/alexkreidler/wiz/api/processors"
 )
 
 //Processor is a simple system for Go builtin processors. It should abstract away Runs, etc and only need configuration and data
@@ -20,7 +20,7 @@ type Processor interface {
 	// Configure allows for reconfiguration of the processor, but it should provide a New method that does it automatically?
 	//Configure(config interface{}) error
 
-	Metadata() api.Processor
+	Metadata() processors.Processor
 
 	//The processor should automatically shutdown any resources used by it upon the
 	//sending of the Succeeded or Failed states? it will be GCd automatically
@@ -43,7 +43,7 @@ type ChunkProcessor interface {
 	// In the future, DataChunkState may be a struct that contains metadata like progress (e.g. download progress). This is a #1 reason to use channels, for allowing rich state updates
 	// If the state is only a sequence from Waiting to Validating to Determining to Running to a terminated state, then we can simply have functions which represent these things
 	// and run them synchronously, having a manager update the higher up state
-	State() <-chan api.DataChunkState
+	State() <-chan processors.DataChunkState
 
 	//we may simply use functions
 	//Validate(data)

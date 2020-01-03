@@ -42,7 +42,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Processors"
+                            "$ref": "#/definitions/processors.Processors"
                         }
                     }
                 }
@@ -71,7 +71,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Processor"
+                            "$ref": "#/definitions/processors.Processor"
                         }
                     }
                 }
@@ -100,7 +100,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Runs"
+                            "$ref": "#/definitions/processors.Runs"
                         }
                     }
                 }
@@ -136,7 +136,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Run"
+                            "$ref": "#/definitions/processors.Run"
                         }
                     }
                 }
@@ -172,7 +172,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Configuration"
+                            "$ref": "#/definitions/processors.Configuration"
                         }
                     }
                 }
@@ -207,7 +207,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Configuration"
+                            "$ref": "#/definitions/processors.Configuration"
                         }
                     }
                 ],
@@ -251,7 +251,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.DataSpec"
+                            "$ref": "#/definitions/processors.DataSpec"
                         }
                     }
                 }
@@ -286,7 +286,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Data"
+                            "$ref": "#/definitions/processors.Data"
                         }
                     }
                 ],
@@ -302,24 +302,24 @@ var doc = `{
         }
     },
     "definitions": {
-        "api.Configuration": {
+        "processors.Configuration": {
             "type": "object",
             "properties": {
                 "ExecutorConfig": {
                     "type": "object",
-                    "$ref": "#/definitions/api.ExecutorConfig"
+                    "$ref": "#/definitions/processors.ExecutorConfig"
                 },
                 "ExpectedData": {
                     "description": "Embeded structs have a weird JSON serialization issue",
                     "type": "object",
-                    "$ref": "#/definitions/api.ExpectedData"
+                    "$ref": "#/definitions/processors.ExpectedData"
                 },
                 "Processor": {
                     "type": "object"
                 }
             }
         },
-        "api.Data": {
+        "processors.Data": {
             "type": "object",
             "properties": {
                 "AssociatedChunkID": {
@@ -331,7 +331,7 @@ var doc = `{
                 },
                 "FilesystemReference": {
                     "type": "object",
-                    "$ref": "#/definitions/api.FilesystemReference"
+                    "$ref": "#/definitions/processors.FilesystemReference"
                 },
                 "Format": {
                     "type": "integer"
@@ -347,24 +347,24 @@ var doc = `{
                 }
             }
         },
-        "api.DataSpec": {
+        "processors.DataSpec": {
             "type": "object",
             "properties": {
                 "In": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.Data"
+                        "$ref": "#/definitions/processors.Data"
                     }
                 },
                 "Out": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.Data"
+                        "$ref": "#/definitions/processors.Data"
                     }
                 }
             }
         },
-        "api.ExecutorConfig": {
+        "processors.ExecutorConfig": {
             "type": "object",
             "properties": {
                 "DownstreamLocations": {
@@ -393,7 +393,7 @@ var doc = `{
                 }
             }
         },
-        "api.ExpectedData": {
+        "processors.ExpectedData": {
             "type": "object",
             "properties": {
                 "NumChunks": {
@@ -402,7 +402,7 @@ var doc = `{
                 }
             }
         },
-        "api.FilesystemReference": {
+        "processors.FilesystemReference": {
             "type": "object",
             "properties": {
                 "Driver": {
@@ -415,7 +415,7 @@ var doc = `{
                 }
             }
         },
-        "api.Processor": {
+        "processors.Processor": {
             "type": "object",
             "properties": {
                 "Name": {
@@ -431,18 +431,18 @@ var doc = `{
                 }
             }
         },
-        "api.Processors": {
+        "processors.Processors": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/api.Processor"
+                "$ref": "#/definitions/processors.Processor"
             }
         },
-        "api.Run": {
+        "processors.Run": {
             "type": "object",
             "properties": {
                 "Configuration": {
                     "type": "object",
-                    "$ref": "#/definitions/api.Configuration"
+                    "$ref": "#/definitions/processors.Configuration"
                 },
                 "CurrentState": {
                     "description": "Note: Embedding structs will automatically promote the child struct's functions,\nand since our State type is an enum that overrides the default Marshal and Unmarshal functions,\nit overwrites it for the parent type as well.\nRemember, the CurrentState must be updated from the RunProcessor state to be fresh. TODO: think about these guarantees",
@@ -453,10 +453,10 @@ var doc = `{
                 }
             }
         },
-        "api.Runs": {
+        "processors.Runs": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/api.Run"
+                "$ref": "#/definitions/processors.Run"
             }
         },
         "server.Empty": {

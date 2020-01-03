@@ -30,5 +30,4 @@ require (
 	gonum.org/v1/gonum v0.6.1
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.2.7
-	zombiezen.com/go/capnproto2 v2.18.0+incompatible
 )
