@@ -117,6 +117,7 @@ func (c Client) GetConfig(procID, runID string) (*api.Configuration, error) {
 }
 
 func (c Client) Configure(procID, runID string, config api.Configuration) error {
+	log.Println("Configuring", procID, runID)
 	body, err := json.Marshal(config)
 	if err != nil {
 		return err

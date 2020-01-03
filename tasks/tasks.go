@@ -176,7 +176,7 @@ func (p Pipeline) CheckValidity() error {
 	return nil
 }
 
-func (p *Pipeline) AssignRunIDs() {
+func (p *Pipeline) AssignRunIDs(overwrite bool) {
 	gutils.IterateChildNodes(p.Graph.Nodes(), func(n graph.Node) {
 		if n.ID() != 0 {
 			procNode, ok := n.(*ProcessorNode)
@@ -186,6 +186,11 @@ func (p *Pipeline) AssignRunIDs() {
 
 			runID := utils.GenID()
 			log.Printf("Assigning RunID %s for processor %s (%d)", runID, procNode.Name, n.ID())
+
+			// don't overwrite if it already exists
+			if procNode.RunID != "" && !overwrite {
+				return
+			}
 			procNode.RunID = runID
 		}
 	})

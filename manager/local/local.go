@@ -30,9 +30,16 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 type Options struct {
 	// RestartExecutor restarts the local Wiz Executor even if it is already running. Useful for development
 	RestartExecutor bool
-
+	
 	// the location that the local manager persists state to
 	StorageLocation string
+
+	// DEBUG options:
+
+	// PreserveRunIDs allows existing RunIDs in the spec to be used
+	PreserveRunIDs bool
+	// OverwritePipelines allows the manager to overwrite an existing pipleline
+	OverwritePipelines bool
 }
 
 type Manager struct {
@@ -250,7 +257,7 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 
 	log.Println("Creating pipeline:", p.Name)
 
-	if _, ok := l.State.Pipelines[p.Name]; ok {
+	if _, ok := l.State.Pipelines[p.Name]; ok && !l.Options.OverwritePipelines {
 		return fmt.Errorf("pipeline already exists")
 	}
 	localPipeline := &p
@@ -263,7 +270,7 @@ func (l *Manager) CreatePipeline(p tasks.Pipeline, environmentName string) error
 	log.Println("Pipeline", localPipeline.Name, "is valid, creating...")
 	log.Println("Assigning runIDs to processors")
 
-	localPipeline.AssignRunIDs()
+	localPipeline.AssignRunIDs(l.Options.PreserveRunIDs)
 	localPipeline.UpdateInitialDataFlags()
 
 	a := *localPipeline

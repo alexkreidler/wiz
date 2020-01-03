@@ -54,6 +54,8 @@ type ProcessorExecutor struct {
 	runMap runProcMap
 }
 
+// TODO: figure out how to configure logging for the processor executor
+
 func (p ProcessorExecutor) GetAllProcessors() (*api.Processors, error) {
 	all := make(api.Processors, 0)
 	for _, processor := range p.base {
@@ -83,8 +85,10 @@ func (p ProcessorExecutor) GetAllRuns(procID string) (*api.Runs, error) {
 		return &api.Runs{}, nil
 	} else {
 		all := make(api.Runs, len(processor))
+		n := 0
 		for _, run := range processor {
-			all = append(all, run.run)
+			all[n] = run.run
+			n++
 		}
 		return &all, nil
 	}

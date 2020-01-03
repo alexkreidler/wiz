@@ -54,7 +54,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart})
+		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart, PreserveRunIDs: debug, OverwritePipelines: debug})
 		err = m.CreatePipeline(*p, "local")
 		if err != nil {
 			log.Fatal(err)
@@ -63,9 +63,12 @@ var createCmd = &cobra.Command{
 }
 
 var restart bool
+var debug bool
 
 func init() {
 	createCmd.Flags().BoolVarP(&restart, "restart", "r", false, "Determines whether to restart the Wiz Executor each time")
+	
+	createCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Enables debug features: don't overwrite RunIDs, allows the manager to overwrite existing pipelines")
 
 	pipelineCmd.AddCommand(createCmd)
 
