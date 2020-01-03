@@ -5,7 +5,7 @@ import (
 	"github.com/alexkreidler/deepcopy"
 	"github.com/alexkreidler/wiz/api/processors"
 	"github.com/alexkreidler/wiz/processors/registration"
-	procApi "github.com/alexkreidler/wiz/processors/simpleprocessor"
+	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 	"github.com/mitchellh/mapstructure"
 	"log"
 	"sync"
@@ -15,7 +15,7 @@ const Version = "0.1.0"
 
 //runProcessor contains a run and a processor which is that run
 type runProcessor struct {
-	baseProcessor procApi.ChunkProcessor
+	baseProcessor simpleprocessor.ChunkProcessor
 
 	// runLock locks the run information (state specifically).
 	// TODO: think about locking configuration. currently we don't allow configuration changes
@@ -34,7 +34,7 @@ type runProcessor struct {
 }
 
 type Worker struct {
-	p   procApi.ChunkProcessor
+	p   simpleprocessor.ChunkProcessor
 	in  processors.Data
 	out processors.Data
 }
@@ -49,7 +49,7 @@ type ProcessorExecutor struct {
 	version string
 	// base maps the ID of the processor to the processor. These are all base, non-configured processors that are registered at startup
 	//Their Metadata functions are the source of all processor information
-	base map[string]procApi.ChunkProcessor
+	base map[string]simpleprocessor.ChunkProcessor
 	//runMap is a map of processor IDs to runIDs and processors
 	runMap runProcMap
 }
@@ -148,7 +148,7 @@ func (p ProcessorExecutor) Configure(procID, runID string, config processors.Con
 	return nil
 }
 
-func configure(processor procApi.ChunkProcessor, userConfig interface{}) (interface{}, error) {
+func configure(processor simpleprocessor.ChunkProcessor, userConfig interface{}) (interface{}, error) {
 	baseConfig := processor.GetConfig()
 	log.Printf("Got base configuration: %#+v", baseConfig)
 	log.Printf("Got user config: %#+v", userConfig)

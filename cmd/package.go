@@ -27,8 +27,8 @@ import (
 
 // packageCmd represents the pipeline command
 var packageCmd = &cobra.Command{
-	Use:   "pipeline",
-	Short: "Manage your pipeline resources",
+	Use:   "package",
+	Short: "Manage Wiz packages",
 }
 
 var installCmd = &cobra.Command{
@@ -42,10 +42,10 @@ var installCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("failed to read spec file", err)
 		}
-		p := packages.Package{}
+		p := &packages.Package{}
 		err = yaml.Unmarshal(f, p)
 		if err != nil {
-			log.Fatal("invalid spec file", err)
+			log.Fatal("invalid spec file: ", err)
 		}
 
 		pipeline := p.Source
@@ -56,7 +56,7 @@ var installCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart, PreserveRunIDs: debug, OverwritePipelines: debug})
+		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart, PreserveRunIDs: debug, OverwritePipelines: debug, UseExistingExecutor: debug, ExecutorPort: 8080})
 		err = m.CreatePipeline(pipeline, "local")
 		if err != nil {
 			log.Fatal(err)

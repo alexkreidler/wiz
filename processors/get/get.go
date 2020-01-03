@@ -10,8 +10,10 @@ import (
 	gogetter "github.com/hashicorp/go-getter"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type GoGetConfig struct {
@@ -47,7 +49,7 @@ func (p *GetProcessor) State() <-chan processors.DataChunkState {
 }
 
 func (p *GetProcessor) Output() interface{} {
-	return map[string]string{"Dir": p.dir}
+	return map[string]string{"Dir": "file://" + p.dir}
 }
 
 func (p *GetProcessor) updateState(state processors.DataChunkState) {
@@ -56,6 +58,43 @@ func (p *GetProcessor) updateState(state processors.DataChunkState) {
 
 func (p *GetProcessor) done() {
 	close(p.state)
+}
+
+type prog struct {
+	Logger *log.Logger
+}
+
+func newProg(l *log.Logger) prog {
+	p := prog{Logger:l}
+	p.Logger.Println("Test")
+	return p
+}
+
+func (p prog) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
+	p.Logger.Println(src, currentSize, totalSize)
+	return stream
+}
+
+func (p *GetProcessor) get(source string) {
+	dir, err := ioutil.TempDir("", "go-get")
+	if err != nil {
+		log.Println(err)
+		p.updateState(processors.DataChunkStateFAILED)
+		return
+	}
+	log.Println("created temp dir", dir)
+
+	progress := newProg(log.New(os.Stdout, "", 0))
+
+	// TODO: expose more options
+	err = gogetter.GetAny(dir, source, gogetter.WithProgress(progress))
+	if err != nil {
+		log.Println(err)
+		p.updateState(processors.DataChunkStateFAILED)
+		return
+	}
+	p.dir = dir
+	return
 }
 
 func (p *GetProcessor) Run(data interface{}) {
@@ -79,24 +118,10 @@ func (p *GetProcessor) Run(data interface{}) {
 		log.Println(err)
 	}
 
-	dir, err := ioutil.TempDir("", "go-get")
-	if err != nil {
-		log.Println(err)
-		p.updateState(processors.DataChunkStateFAILED)
-		return
-	}
-	log.Println("created temp dir", dir)
-
-	// TODO: expose more options
-	err = gogetter.GetAny(dir, opts.Source)
-	if err != nil {
-		log.Println(err)
-		p.updateState(processors.DataChunkStateFAILED)
-		return
-	}
-	p.dir = dir
+	p.get(opts.Source)
 
 	p.updateState(processors.DataChunkStateSUCCEEDED)
+	//p.done()
 }
 
 func (p *GetProcessor) GetError() error {

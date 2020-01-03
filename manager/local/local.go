@@ -9,6 +9,7 @@ import (
 	"github.com/alexkreidler/wiz/utils"
 	"github.com/alexkreidler/wiz/utils/gutils"
 	"github.com/davecgh/go-spew/spew"
+	"strconv"
 
 	jsoniter "github.com/json-iterator/go"
 	"gonum.org/v1/gonum/graph"
@@ -40,6 +41,11 @@ type Options struct {
 	PreserveRunIDs bool
 	// OverwritePipelines allows the manager to overwrite an existing pipleline
 	OverwritePipelines bool
+
+	// UseExistingExecutor allows us to use an already running executor assumed to be running on port
+	UseExistingExecutor bool
+
+	ExecutorPort int
 }
 
 type Manager struct {
@@ -150,7 +156,7 @@ func (l *Manager) maybeStartLocalEnv() error {
 	}
 
 	// If the environment isn't found or the process is not running, we create it
-	if !ok || !running {
+	if !running {
 		config := local.Environment{Port: 8080}
 		log.Println("Starting local environment with config", config)
 
@@ -177,6 +183,20 @@ func (l *Manager) maybeStartLocalEnv() error {
 
 		// Give the executor some time to start up and bind.
 		time.Sleep(500 * time.Millisecond)
+	}
+	if running && !ok {
+		if l.Options.UseExistingExecutor {
+			l.State.Environments["local"] = environment.SerializableEnv{
+				EnvironmentID: "local",
+				Description:   "",
+				Host:          "localhost:" + strconv.Itoa(l.Options.ExecutorPort),
+				Configuration: nil,
+				State:         nil,
+			}
+			l.State.CurrentEnvironment = "local"
+			return nil
+		}
+		return fmt.Errorf("There is an existing Wiz process running that is not registered as an environment")
 	}
 	return nil
 }

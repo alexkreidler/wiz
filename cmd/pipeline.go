@@ -54,7 +54,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart, PreserveRunIDs: debug, OverwritePipelines: debug})
+		m := local.NewManager(local.Options{StorageLocation: file, RestartExecutor: restart, PreserveRunIDs: debug, OverwritePipelines: debug, UseExistingExecutor: debug, ExecutorPort: 8080})
 		err = m.CreatePipeline(*p, "local")
 		if err != nil {
 			log.Fatal(err)
