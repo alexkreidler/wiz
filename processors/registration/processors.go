@@ -5,6 +5,7 @@ import (
 	"github.com/alexkreidler/wiz/processors/git"
 	"github.com/alexkreidler/wiz/processors/ls"
 	"github.com/alexkreidler/wiz/processors/noop"
+	"github.com/alexkreidler/wiz/processors/scrape"
 	"github.com/alexkreidler/wiz/processors/simpleprocessor"
 )
 
@@ -24,5 +25,6 @@ func ConfiguredProcessorRegistry() ProcessorRegistry {
 	p.AddProcessor("git", &git.GitProcessor{})
 	p.AddProcessor("get", &get.GetProcessor{})
 	p.AddProcessor("ls", &ls.LsProcessor{})
+	p.AddProcessor("scrape", &scrape.ScrapeProcessor{})
 	return p
 }
