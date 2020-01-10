@@ -4,15 +4,19 @@ import (
 	jsonscrape "github.com/alexkreidler/jsonscrape/lib"
 	"github.com/alexkreidler/wiz/api/processors"
 	"github.com/alexkreidler/wiz/processors/simpleprocessor"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/imdario/mergo"
 	"github.com/mitchellh/mapstructure"
-	"log"
+	lgr "log"
+	"os"
 )
+
+var log = lgr.New(os.Stdout, "", lgr.LstdFlags)
 
 type ScrapeProcessor struct {
 	state   chan processors.DataChunkState
 	config  jsonscrape.Config // TODO: change this to your config type
-	out     interface{}
+	out     jsonscrape.Results
 	scraper jsonscrape.Scraper
 }
 
@@ -56,14 +60,15 @@ func (p *ScrapeProcessor) Run(data interface{}) {
 	// Remember to decode from the map[string]interface{} data to your config type
 	// First we decode the map into the correct structure
 	var opts jsonscrape.Config
-	log.Printf("got raw data: %#+v \n", data)
+	log.Printf("got raw data:")
+	spew.Dump(data)
 	err := mapstructure.Decode(data, &opts)
 	if err != nil {
 		log.Println(err)
 	}
 
 	// Then we merge the config into the data
-	log.Printf("existing config: %#+v, new data: %#+v \n", p.config, opts)
+	spew.Dump(p.config, opts)
 	err = mergo.Merge(&opts, p.config, func(config *mergo.Config) {
 		config.Overwrite = true
 	})
@@ -73,6 +78,11 @@ func (p *ScrapeProcessor) Run(data interface{}) {
 	// opts now contains the merged options
 
 	// TODO: Add your code here
+
+	opts.GeneralConfig.Logger = log
+
+	log.Printf("got new config:")
+	spew.Dump(opts)
 
 	scraper, err := jsonscrape.NewScraper(opts)
 	if err != nil {
@@ -85,6 +95,9 @@ func (p *ScrapeProcessor) Run(data interface{}) {
 		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}
+
+	log.Println("Finished, got:")
+	spew.Dump(r)
 
 	p.out = r
 
