@@ -26,7 +26,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Processors"
+                            "$ref": "#/definitions/processors.Processors"
                         }
                     }
                 }
@@ -55,7 +55,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Processor"
+                            "$ref": "#/definitions/processors.Processor"
                         }
                     }
                 }
@@ -84,7 +84,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Runs"
+                            "$ref": "#/definitions/processors.Runs"
                         }
                     }
                 }
@@ -120,7 +120,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Run"
+                            "$ref": "#/definitions/processors.Run"
                         }
                     }
                 }
@@ -156,7 +156,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Configuration"
+                            "$ref": "#/definitions/processors.Configuration"
                         }
                     }
                 }
@@ -191,7 +191,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Configuration"
+                            "$ref": "#/definitions/processors.Configuration"
                         }
                     }
                 ],
@@ -235,7 +235,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.DataSpec"
+                            "$ref": "#/definitions/processors.DataSpec"
                         }
                     }
                 }
@@ -270,7 +270,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Data"
+                            "$ref": "#/definitions/processors.Data"
                         }
                     }
                 ],
@@ -286,24 +286,24 @@
         }
     },
     "definitions": {
-        "api.Configuration": {
+        "processors.Configuration": {
             "type": "object",
             "properties": {
                 "ExecutorConfig": {
                     "type": "object",
-                    "$ref": "#/definitions/api.ExecutorConfig"
+                    "$ref": "#/definitions/processors.ExecutorConfig"
                 },
                 "ExpectedData": {
                     "description": "Embeded structs have a weird JSON serialization issue",
                     "type": "object",
-                    "$ref": "#/definitions/api.ExpectedData"
+                    "$ref": "#/definitions/processors.ExpectedData"
                 },
                 "Processor": {
                     "type": "object"
                 }
             }
         },
-        "api.Data": {
+        "processors.Data": {
             "type": "object",
             "properties": {
                 "AssociatedChunkID": {
@@ -315,7 +315,7 @@
                 },
                 "FilesystemReference": {
                     "type": "object",
-                    "$ref": "#/definitions/api.FilesystemReference"
+                    "$ref": "#/definitions/processors.FilesystemReference"
                 },
                 "Format": {
                     "type": "integer"
@@ -331,42 +331,45 @@
                 }
             }
         },
-        "api.DataSpec": {
+        "processors.DataSpec": {
             "type": "object",
             "properties": {
                 "In": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.Data"
+                        "$ref": "#/definitions/processors.Data"
                     }
                 },
                 "Out": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.Data"
+                        "$ref": "#/definitions/processors.Data"
                     }
                 }
             }
         },
-        "api.ExecutorConfig": {
+        "processors.DownstreamDataLocation": {
+            "type": "object",
+            "properties": {
+                "Hostname": {
+                    "type": "string"
+                },
+                "ProcID": {
+                    "type": "string"
+                },
+                "RunID": {
+                    "type": "string"
+                }
+            }
+        },
+        "processors.ExecutorConfig": {
             "type": "object",
             "properties": {
                 "DownstreamLocations": {
                     "description": "TODO: make API URL templating agnostic, refactor into server package\ne.g. Server.GetProc(procID, runID) will return /processors/procID/runs/runID\nthis could be used both for generating endpoints and here, for passing outputs downstream",
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "Hostname": {
-                                "type": "string"
-                            },
-                            "ProcID": {
-                                "type": "string"
-                            },
-                            "RunID": {
-                                "type": "string"
-                            }
-                        }
+                        "$ref": "#/definitions/processors.DownstreamDataLocation"
                     }
                 },
                 "MaxWorkers": {
@@ -377,7 +380,7 @@
                 }
             }
         },
-        "api.ExpectedData": {
+        "processors.ExpectedData": {
             "type": "object",
             "properties": {
                 "NumChunks": {
@@ -386,7 +389,7 @@
                 }
             }
         },
-        "api.FilesystemReference": {
+        "processors.FilesystemReference": {
             "type": "object",
             "properties": {
                 "Driver": {
@@ -399,11 +402,11 @@
                 }
             }
         },
-        "api.Processor": {
+        "processors.Processor": {
             "type": "object",
             "properties": {
                 "Name": {
-                    "description": "Name is the human readable name",
+                    "description": "ID is the human readable name",
                     "type": "string"
                 },
                 "ProcID": {
@@ -415,18 +418,18 @@
                 }
             }
         },
-        "api.Processors": {
+        "processors.Processors": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/api.Processor"
+                "$ref": "#/definitions/processors.Processor"
             }
         },
-        "api.Run": {
+        "processors.Run": {
             "type": "object",
             "properties": {
                 "Configuration": {
                     "type": "object",
-                    "$ref": "#/definitions/api.Configuration"
+                    "$ref": "#/definitions/processors.Configuration"
                 },
                 "CurrentState": {
                     "description": "Note: Embedding structs will automatically promote the child struct's functions,\nand since our State type is an enum that overrides the default Marshal and Unmarshal functions,\nit overwrites it for the parent type as well.\nRemember, the CurrentState must be updated from the RunProcessor state to be fresh. TODO: think about these guarantees",
@@ -437,10 +440,10 @@
                 }
             }
         },
-        "api.Runs": {
+        "processors.Runs": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/api.Run"
+                "$ref": "#/definitions/processors.Run"
             }
         },
         "server.Empty": {
