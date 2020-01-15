@@ -12,17 +12,6 @@ data:
     - https://download.bls.gov/pub/time.series/la/la.period
 spec:
   sequential:
-    # TODO: implement a file record splitter to allow formats like the data above
-    # - name: splitter
-    #   processor:
-    #     name: file_record_splitter
-    #     version: 1.0
-    #     configuration:
-          # $file:
-          #   loop: .files
-
-          # template:
-          #   url: $url/$file
     - name: download
       processor:
         id: noop

@@ -16,3 +16,10 @@ git config --local core.hooksPath .githooks/
 ```
 
 to set git to use the project's provided git hooks.
+
+## Building/Installing
+
+Simply run
+```
+go install -tags=jsoniter
+```

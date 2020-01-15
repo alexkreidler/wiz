@@ -86,12 +86,14 @@ func (p *ScrapeProcessor) Run(data interface{}) {
 
 	scraper, err := jsonscrape.NewScraper(opts)
 	if err != nil {
+		log.Println(err)
 		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}
 
 	r, err := scraper.Scrape()
 	if err != nil {
+		log.Println(err)
 		p.updateState(processors.DataChunkStateFAILED)
 		return
 	}

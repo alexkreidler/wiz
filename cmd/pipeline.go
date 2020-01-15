@@ -62,12 +62,15 @@ var createCmd = &cobra.Command{
 	},
 }
 
+// TODO: add list pipelines command
+// TODO: massive restructuring of API to be more like Kubernetes
+
 var restart bool
 var debug bool
 
 func init() {
 	createCmd.Flags().BoolVarP(&restart, "restart", "r", false, "Determines whether to restart the Wiz Executor each time")
-	
+
 	createCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Enables debug features: don't overwrite RunIDs, allows the manager to overwrite existing pipelines")
 
 	pipelineCmd.AddCommand(createCmd)
