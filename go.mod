@@ -10,6 +10,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
+	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/hashicorp/go-getter v1.4.0
 	github.com/imdario/mergo v0.3.8
 	github.com/joeybloggs/go-download v2.1.0+incompatible
