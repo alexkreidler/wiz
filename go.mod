@@ -8,10 +8,11 @@ require (
 	github.com/alexkreidler/deepcopy v0.0.0-20191229055930-5d6df38e9bd6
 	github.com/alexkreidler/jsonscrape v0.0.0-20200109233942-83dfc73db91b
 	github.com/davecgh/go-spew v1.1.1
+	github.com/emicklei/go-restful/v3 v3.0.0
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/hashicorp/go-getter v1.4.0
+	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/imdario/mergo v0.3.8
 	github.com/joeybloggs/go-download v2.1.0+incompatible
 	github.com/json-iterator/go v1.1.9
